@@ -21,10 +21,19 @@ export interface GroupedCartItems {
 
 export async function createCheckoutSession(
   items: GroupedCartItems[],
-  metadata: Metadata
+  metadata: Metadata,
 ) {
   try {
     // Retrieve existing customer or create a new one
+    console.log("==== STRIPE CHECKOUT DEBUG ====");
+
+    const successUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}&orderNumber=${metadata.orderNumber}`;
+    const cancelUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/cart`;
+
+    console.log("SUCCESS URL:", successUrl);
+    console.log("CANCEL URL:", cancelUrl);
+    console.log("ITEMS:", items);
+    console.log("METADATA:", metadata);
     const customers = await stripe.customers.list({
       email: metadata.customerEmail,
       limit: 1,
@@ -72,7 +81,11 @@ export async function createCheckoutSession(
       sessionPayload.customer_email = metadata.customerEmail;
     }
 
+    console.log("SESSION PAYLOAD READY");
+
     const session = await stripe.checkout.sessions.create(sessionPayload);
+
+    console.log("STRIPE SESSION CREATED:", session.id);
     return session.url;
   } catch (error) {
     console.error("Error creating Checkout Session", error);
