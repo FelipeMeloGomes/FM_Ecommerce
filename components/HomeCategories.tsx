@@ -1,8 +1,9 @@
+import React from "react";
+import Title from "./Title";
 import { Category } from "@/sanity.types";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
-import { Title } from "./Text";
 
 const HomeCategories = ({ categories }: { categories: Category[] }) => {
   return (

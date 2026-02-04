@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import "../globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s - FMShop online store",
-    default: "FM Shop online store",
+    template: "%s - Shopcart online store",
+    default: "Shopcart online store",
   },
-  description: "Loja online",
+  description: "Shopcart online store, Your one stop shop for all your needs",
 };
 
 export default function RootLayout({

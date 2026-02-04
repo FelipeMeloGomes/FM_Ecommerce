@@ -1,14 +1,13 @@
 "use client";
 import { Category, Product } from "@/sanity.types";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { client } from "@/sanity/lib/client";
 import { AnimatePresence, motion } from "motion/react";
 import { Loader2 } from "lucide-react";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
-
 interface Props {
   categories: Category[];
   slug: string;
@@ -18,9 +17,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   const [currentSlug, setCurrentSlug] = useState(slug);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const router = useRouter();
-
   const handleCategoryChange = (newSlug: string) => {
     if (newSlug === currentSlug) return; // Prevent unnecessary updates
     setCurrentSlug(newSlug);
@@ -43,7 +40,6 @@ const CategoryProducts = ({ categories, slug }: Props) => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchProducts(currentSlug);
   }, [router]);

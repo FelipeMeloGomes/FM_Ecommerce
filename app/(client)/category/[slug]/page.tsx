@@ -1,7 +1,8 @@
 import CategoryProducts from "@/components/CategoryProducts";
 import Container from "@/components/Container";
-import { Title } from "@/components/Text";
+import Title from "@/components/Title";
 import { getCategories } from "@/sanity/queries";
+import React from "react";
 
 const CategoryPage = async ({
   params,
@@ -14,7 +15,7 @@ const CategoryPage = async ({
     <div className="py-10">
       <Container>
         <Title>
-          Products by Category{" "}
+          Products by Category:{" "}
           <span className="font-bold text-green-600 capitalize tracking-wide">
             {slug && slug}
           </span>

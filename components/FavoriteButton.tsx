@@ -17,7 +17,7 @@ const FavoriteButton = ({
   const [existingProduct, setExistingProduct] = useState<Product | null>(null);
   useEffect(() => {
     const availableItem = favoriteProduct.find(
-      (item) => item?._id === product?._id,
+      (item) => item?._id === product?._id
     );
     setExistingProduct(availableItem || null);
   }, [product, favoriteProduct]);
@@ -29,7 +29,7 @@ const FavoriteButton = ({
         toast.success(
           existingProduct
             ? "Product removed successfully!"
-            : "Product added successfully!",
+            : "Product added successfully!"
         );
       });
     }

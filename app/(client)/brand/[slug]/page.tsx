@@ -1,5 +1,7 @@
+import React from "react";
+
 const BrandPage = () => {
-  return <div>page</div>;
+  return <div>BrandPage</div>;
 };
 
 export default BrandPage;

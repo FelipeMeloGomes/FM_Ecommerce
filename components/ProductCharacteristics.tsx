@@ -1,7 +1,12 @@
 import { Product } from "@/sanity.types";
 import { getBrand } from "@/sanity/queries";
-import { Accordion, AccordionItem, AccordionTrigger } from "./ui/accordion";
-import { AccordionContent } from "@radix-ui/react-accordion";
+import React from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
 
 const ProductCharacteristics = async ({
   product,
@@ -9,6 +14,7 @@ const ProductCharacteristics = async ({
   product: Product | null | undefined;
 }) => {
   const brand = await getBrand(product?.slug?.current as string);
+  console.log(brand);
 
   return (
     <Accordion type="single" collapsible>
@@ -28,7 +34,7 @@ const ProductCharacteristics = async ({
             <span className="font-semibold tracking-wide">2025</span>
           </p>
           <p className="flex items-center justify-between">
-            Type:
+            Type:{" "}
             <span className="font-semibold tracking-wide">
               {product?.variant}
             </span>
@@ -36,7 +42,7 @@ const ProductCharacteristics = async ({
           <p className="flex items-center justify-between">
             Stock:{" "}
             <span className="font-semibold tracking-wide">
-              {product?.stock ? "Avaliable" : "Out of Stock"}
+              {product?.stock ? "Available" : "Out of Stock"}
             </span>
           </p>
         </AccordionContent>

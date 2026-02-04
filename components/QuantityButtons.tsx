@@ -1,5 +1,6 @@
 import { Product } from "@/sanity.types";
 import useStore from "@/store";
+import React from "react";
 import { Button } from "./ui/button";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,25 +10,24 @@ interface Props {
   product: Product;
   className?: string;
 }
-
 const QuantityButtons = ({ product, className }: Props) => {
   const { addItem, removeItem, getItemCount } = useStore();
-  const itemCount = getItemCount(product?._id as string);
+  const itemCount = getItemCount(product?._id);
   const isOutOfStock = product?.stock === 0;
 
   const handleRemoveProduct = () => {
     removeItem(product?._id);
     if (itemCount > 1) {
-      toast.success("Quantity Descreased");
+      toast.success("Quantity Decreased successfully!");
     } else {
-      toast.error(`${product?.name?.substring(0, 12)}... removed from cart`);
+      toast.success(`${product?.name?.substring(0, 12)} removed successfully!`);
     }
   };
 
   const handleAddToCart = () => {
     if ((product?.stock as number) > itemCount) {
       addItem(product);
-      toast.success("Quantity Increased successfully");
+      toast.success("Quantity Increased successfully!");
     } else {
       toast.error("Can not add more than available stock");
     }

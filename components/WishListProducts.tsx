@@ -12,7 +12,6 @@ import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 import PriceFormatter from "./PriceFormatter";
 import AddToCartButton from "./AddToCartButton";
-import { cn } from "@/lib/utils";
 
 const WishListProducts = () => {
   const [visibleProducts, setVisibleProducts] = useState(7);
@@ -22,42 +21,14 @@ const WishListProducts = () => {
   };
 
   const handleResetWishlist = () => {
-    toast(
-      (t) => (
-        <div className="flex flex-col gap-3">
-          <p className="text-sm font-medium text-center">
-            Tem certeza de que deseja limpar sua lista de desejos?
-          </p>
-
-          <div className="flex justify-center gap-2">
-            <button
-              onClick={() => toast.dismiss(t.id)}
-              className="px-3 py-1 text-sm rounded-md border hover:bg-gray-100"
-            >
-              Cancelar
-            </button>
-
-            <button
-              onClick={() => {
-                resetFavorite();
-                toast.dismiss(t.id);
-                toast.success("Lista de desejos limpa com sucesso!");
-              }}
-              className="px-3 py-1 text-sm rounded-md bg-red-600 text-white hover:bg-red-700"
-            >
-              Confirmar
-            </button>
-          </div>
-        </div>
-      ),
-      {
-        position: "top-center",
-      },
+    const confirmReset = window.confirm(
+      "Are you sure you want to reset your wishlist?"
     );
+    if (confirmReset) {
+      resetFavorite();
+      toast.success("Wishlist reset successfully");
+    }
   };
-
-  const hasPaginationButtons =
-    visibleProducts < favoriteProduct.length || visibleProducts > 10;
 
   return (
     <Container>
@@ -143,7 +114,7 @@ const WishListProducts = () => {
             {visibleProducts < favoriteProduct?.length && (
               <div className="my-5">
                 <Button variant="outline" onClick={loadMore}>
-                  Ver mais
+                  Load More
                 </Button>
               </div>
             )}
@@ -153,7 +124,7 @@ const WishListProducts = () => {
                   onClick={() => setVisibleProducts(10)}
                   variant="outline"
                 >
-                  Ver menos
+                  Load Less
                 </Button>
               </div>
             )}
@@ -161,14 +132,11 @@ const WishListProducts = () => {
           {favoriteProduct?.length > 0 && (
             <Button
               onClick={handleResetWishlist}
-              className={cn(
-                "mb-5 font-semibold",
-                !hasPaginationButtons && "mt-5",
-              )}
+              className="mb-5 font-semibold"
               variant="destructive"
               size="lg"
             >
-              Limpar lista de desejos
+              Reset Wishlist
             </Button>
           )}
         </>
@@ -183,14 +151,14 @@ const WishListProducts = () => {
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold tracking-tight">
-              Sua lista de desejos está vazia.
+              Your wishlist is empty
             </h2>
             <p className="text-sm text-muted-foreground">
-              Os itens adicionados à sua lista de desejos aparecerão aqui.
+              Items added to your wishlist will appear here
             </p>
           </div>
           <Button asChild>
-            <Link href="/shop">Voltar às compras</Link>
+            <Link href="/shop">Continue Shopping</Link>
           </Button>
         </div>
       )}

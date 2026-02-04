@@ -6,11 +6,11 @@ import {
 } from "@/actions/createCheckoutSession";
 import Container from "@/components/Container";
 import EmptyCart from "@/components/EmptyCart";
-import NoAccess from "@/components/NoAcess";
+import NoAccess from "@/components/NoAccess";
 import PriceFormatter from "@/components/PriceFormatter";
 import ProductSideMenu from "@/components/ProductSideMenu";
 import QuantityButtons from "@/components/QuantityButtons";
-import { Title } from "@/components/Text";
+import Title from "@/components/Title";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -66,44 +66,17 @@ const CartPage = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchAddresses();
   }, []);
-
   const handleResetCart = () => {
-    toast(
-      (t) => (
-        <div className="flex flex-col gap-3">
-          <p className="text-sm font-medium text-center">
-            Tem certeza de que deseja limpar o carrinho?
-          </p>
-
-          <div className="flex justify-center gap-2">
-            <button
-              onClick={() => toast.dismiss(t.id)}
-              className="px-3 py-1 text-sm rounded-md border hover:bg-gray-100"
-            >
-              Cancelar
-            </button>
-
-            <button
-              onClick={() => {
-                resetCart();
-                toast.dismiss(t.id);
-                toast.success("Carrinho limpo com sucesso!");
-              }}
-              className="px-3 py-1 text-sm rounded-md bg-red-600 text-white hover:bg-red-700"
-            >
-              Confirmar
-            </button>
-          </div>
-        </div>
-      ),
-      {
-        position: "top-center",
-      },
+    const confirmed = window.confirm(
+      "Are you sure you want to reset your cart?"
     );
+    if (confirmed) {
+      resetCart();
+      toast.success("Cart reset successfully!");
+    }
   };
 
   const handleCheckout = async () => {
@@ -126,7 +99,6 @@ const CartPage = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="bg-gray-50 pb-52 md:pb-10">
       {isSignedIn ? (
@@ -201,7 +173,7 @@ const CartPage = () => {
                                         onClick={() => {
                                           deleteCartProduct(product?._id);
                                           toast.success(
-                                            "Product deleted successfully!",
+                                            "Product deleted successfully!"
                                           );
                                         }}
                                         className="w-4 h-4 md:w-5 md:h-5 mr-1 text-gray-500 hover:text-red-600 hoverEffect"
@@ -226,9 +198,9 @@ const CartPage = () => {
                       );
                     })}
                     <Button
+                      onClick={handleResetCart}
                       className="m-5 font-semibold"
                       variant="destructive"
-                      onClick={handleResetCart}
                     >
                       Reset Cart
                     </Button>
@@ -341,6 +313,7 @@ const CartPage = () => {
                         className="w-full rounded-full font-semibold tracking-wide hoverEffect"
                         size="lg"
                         disabled={loading}
+                        onClick={handleCheckout}
                       >
                         {loading ? "Please wait..." : "Proceed to Checkout"}
                       </Button>

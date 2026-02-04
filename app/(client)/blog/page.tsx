@@ -1,11 +1,12 @@
-import Image from "next/image";
-import Link from "next/link";
-import dayjs from "dayjs";
 import Container from "@/components/Container";
-import { Title } from "@/components/Text";
-import { Calendar } from "lucide-react";
+import Title from "@/components/Title";
 import { urlFor } from "@/sanity/lib/image";
 import { getAllBlogs } from "@/sanity/queries";
+import dayjs from "dayjs";
+import { Calendar } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
 
 const BlogPage = async () => {
   const blogs = await getAllBlogs(6);

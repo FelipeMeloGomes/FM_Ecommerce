@@ -5,12 +5,13 @@ import ImageView from "@/components/ImageView";
 import PriceView from "@/components/PriceView";
 import ProductCharacteristics from "@/components/ProductCharacteristics";
 import { getProductBySlug } from "@/sanity/queries";
+import { CornerDownLeft, StarIcon, Truck } from "lucide-react";
+import { notFound } from "next/navigation";
+import React from "react";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { FiShare2 } from "react-icons/fi";
 import { RxBorderSplit } from "react-icons/rx";
 import { TbTruckDelivery } from "react-icons/tb";
-import { CornerDownLeft, StarIcon, Truck } from "lucide-react";
-import { notFound } from "next/navigation";
 
 const SingleProductPage = async ({
   params,
@@ -19,16 +20,16 @@ const SingleProductPage = async ({
 }) => {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-
-  if (!product) return notFound();
-
+  if (!product) {
+    return notFound();
+  }
   return (
     <Container className="flex flex-col md:flex-row gap-10 py-10">
       {product?.images && (
         <ImageView images={product?.images} isStock={product?.stock} />
       )}
       <div className="w-full md:w-1/2 flex flex-col gap-5">
-        <div className="space-y-1 ">
+        <div className="space-y-1">
           <h2 className="text-2xl font-bold">{product?.name}</h2>
           <p className="text-sm text-gray-600 tracking-wide">
             {product?.description}
@@ -52,7 +53,7 @@ const SingleProductPage = async ({
             className="text-lg font-bold"
           />
           <p
-            className={`px-4 py-1.5 text-sm text-center inline-block font-semibold rounded-lg ${product?.stock === 0 ? "bg-red-100 text-red-600" : "text-green-600 bg-gray-100"}`}
+            className={`px-4 py-1.5 text-sm text-center inline-block font-semibold rounded-lg ${product?.stock === 0 ? "bg-red-100 text-red-600" : "text-green-600 bg-green-100"}`}
           >
             {(product?.stock as number) > 0 ? "In Stock" : "Out of Stock"}
           </p>

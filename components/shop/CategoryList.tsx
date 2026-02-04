@@ -1,5 +1,6 @@
 import { Category } from "@/sanity.types";
-import { Title } from "../Text";
+import React from "react";
+import Title from "../Title";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 
@@ -15,7 +16,7 @@ const CategoryList = ({
   setSelectedCategory,
 }: Props) => {
   return (
-    <div className="w-full bg-bg-white p-5">
+    <div className="w-full bg-white p-5">
       <Title className="text-base font-black">Product Categories</Title>
       <RadioGroup value={selectedCategory || ""} className="mt-2 space-y-1">
         {categories?.map((category) => (
@@ -39,15 +40,15 @@ const CategoryList = ({
             </Label>
           </div>
         ))}
-        {selectedCategory && (
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className="text-sm font-medium mt-2 underline underline-offset-2 decoration=[1px] hover:text-shop_dark_green hoverEffect text-left"
-          >
-            Reset Selection
-          </button>
-        )}
       </RadioGroup>
+      {selectedCategory && (
+        <button
+          onClick={() => setSelectedCategory(null)}
+          className="text-sm font-medium mt-2 underline underline-offset-2 decoration-[1px] hover:text-shop_dark_green hoverEffect text-left"
+        >
+          Reset selection
+        </button>
+      )}
     </div>
   );
 };

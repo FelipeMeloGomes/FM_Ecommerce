@@ -1,8 +1,4 @@
-import Link from "next/link";
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { ClerkLoaded, SignedIn, UserButton } from "@clerk/nextjs";
-import { Logs } from "lucide-react";
-import { getMyOrders } from "@/sanity/queries";
+import React from "react";
 import Container from "./Container";
 import Logo from "./Logo";
 import HeaderMenu from "./HeaderMenu";
@@ -11,11 +7,15 @@ import CartIcon from "./CartIcon";
 import FavoriteButton from "./FavoriteButton";
 import SignIn from "./SignIn";
 import MobileMenu from "./MobileMenu";
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { ClerkLoaded, SignedIn, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
+import { Logs } from "lucide-react";
+import { getMyOrders } from "@/sanity/queries";
 
 const Header = async () => {
   const user = await currentUser();
   const { userId } = await auth();
-
   let orders = null;
   if (userId) {
     orders = await getMyOrders(userId);
