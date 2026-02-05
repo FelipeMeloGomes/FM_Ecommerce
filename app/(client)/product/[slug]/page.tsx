@@ -65,19 +65,19 @@ const SingleProductPage = async ({
         <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-b-gray-200 py-5 -mt-2">
           <div className="flex items-center gap-2 text-sm text-black hover:text-red-600 hoverEffect">
             <RxBorderSplit className="text-lg" />
-            <p>Compare color</p>
+            <p>Comparar cores</p>
           </div>
           <div className="flex items-center gap-2 text-sm text-black hover:text-red-600 hoverEffect">
             <FaRegQuestionCircle className="text-lg" />
-            <p>Ask a question</p>
+            <p>Faça uma pergunta</p>
           </div>
           <div className="flex items-center gap-2 text-sm text-black hover:text-red-600 hoverEffect">
             <TbTruckDelivery className="text-lg" />
-            <p>Delivery & Return</p>
+            <p>Entrega e Devolução</p>
           </div>
           <div className="flex items-center gap-2 text-sm text-black hover:text-red-600 hoverEffect">
             <FiShare2 className="text-lg" />
-            <p>Share</p>
+            <p>Compartilhar</p>
           </div>
         </div>
         <div className="flex flex-col">
@@ -85,10 +85,10 @@ const SingleProductPage = async ({
             <Truck size={30} className="text-shop_orange" />
             <div>
               <p className="text-base font-semibold text-black">
-                Free Delivery
+                Entrega Grátis
               </p>
               <p className="text-sm text-gray-500 underline underline-offset-2">
-                Enter your Postal code for Delivey Availability.
+                Digite seu CEP para ver a disponibilidade de entrega.
               </p>
             </div>
           </div>
@@ -96,11 +96,11 @@ const SingleProductPage = async ({
             <CornerDownLeft size={30} className="text-shop_orange" />
             <div>
               <p className="text-base font-semibold text-black">
-                Return Delivery
+                Devolução do Pedido
               </p>
               <p className="text-sm text-gray-500 ">
-                Free 30days Delivery Returns.{" "}
-                <span className="underline underline-offset-2">Details</span>
+                Devoluções grátis em até 30 dias.{" "}
+                <span className="underline underline-offset-2">Detalhes</span>
               </p>
             </div>
           </div>

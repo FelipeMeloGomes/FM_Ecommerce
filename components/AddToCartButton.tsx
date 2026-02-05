@@ -22,10 +22,10 @@ const AddToCartButton = ({ product, className }: Props) => {
     if ((product?.stock as number) > itemCount) {
       addItem(product);
       toast.success(
-        `${product?.name?.substring(0, 12)}... added successfully!`
+        `${product?.name?.substring(0, 12)}... adicionado ao carrinho com sucesso!`,
       );
     } else {
-      toast.error("Can not add more than available stock");
+      toast.error("Não é possível adicionar mais do que o estoque disponível");
     }
   };
   return (
@@ -33,7 +33,7 @@ const AddToCartButton = ({ product, className }: Props) => {
       {itemCount ? (
         <div className="text-sm w-full">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-darkColor/80">Quantity</span>
+            <span className="text-xs text-darkColor/80">Quantidade</span>
             <QuantityButtons product={product} />
           </div>
           <div className="flex items-center justify-between border-t pt-1">
@@ -49,10 +49,10 @@ const AddToCartButton = ({ product, className }: Props) => {
           disabled={isOutOfStock}
           className={cn(
             "w-full bg-shop_dark_green/80 text-lightBg shadow-none border border-shop_dark_green/80 font-semibold tracking-wide text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect",
-            className
+            className,
           )}
         >
-          <ShoppingBag /> {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+          <ShoppingBag /> {isOutOfStock ? "Esgotado" : "Comprar"}
         </Button>
       )}
     </div>

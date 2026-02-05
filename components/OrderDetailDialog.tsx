@@ -30,17 +30,17 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="!max-w-4xl max-h-[90vh] overflow-y-scroll">
         <DialogHeader>
-          <DialogTitle>Order Details - {order?.orderNumber}</DialogTitle>
+          <DialogTitle>Detalhes do Pedido — {order?.orderNumber}</DialogTitle>
         </DialogHeader>
         <div className="mt-4">
           <p>
-            <strong>Customer:</strong> {order.customerName}
+            <strong>Cliente:</strong> {order.customerName}
           </p>
           <p>
             <strong>Email:</strong> {order.email}
           </p>
           <p>
-            <strong>Date:</strong>{" "}
+            <strong>Data:</strong>{" "}
             {order.orderDate && new Date(order.orderDate).toLocaleDateString()}
           </p>
           <p>
@@ -50,13 +50,13 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
             </span>
           </p>
           <p>
-            <strong>Invoice Number:</strong> {order?.invoice?.number}
+            <strong>Número do pedido:</strong> {order?.invoice?.number}
           </p>
           {order?.invoice && (
             <Button className="bg-transparent border text-darkColor/80 mt-2 hover:text-darkColor hover:border-darkColor hover:bg-darkColor/10 hoverEffect ">
               {order?.invoice?.hosted_invoice_url && (
                 <Link href={order?.invoice?.hosted_invoice_url} target="_blank">
-                  Download Invoice
+                  Baixar nota
                 </Link>
               )}
             </Button>
@@ -65,9 +65,9 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Product</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Price</TableHead>
+              <TableHead>Produto</TableHead>
+              <TableHead>Quantidade</TableHead>
+              <TableHead>Preço</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -101,7 +101,7 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
           <div className="w-44 flex flex-col gap-1">
             {order?.amountDiscount !== 0 && (
               <div className="w-full flex items-center justify-between">
-                <strong>Discount: </strong>
+                <strong>Desconto: </strong>
                 <PriceFormatter
                   amount={order?.amountDiscount}
                   className="text-black font-bold"

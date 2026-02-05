@@ -109,7 +109,7 @@ const CartPage = () => {
             <>
               <div className="flex items-center gap-2 py-5">
                 <ShoppingBag className="text-darkColor" />
-                <Title>Shopping Cart</Title>
+                <Title>Carrinho de compras</Title>
               </div>
               <div className="grid lg:grid-cols-3 md:gap-8">
                 <div className="lg:col-span-2 rounded-lg">
@@ -144,7 +144,7 @@ const CartPage = () => {
                                   {product?.name}
                                 </h2>
                                 <p className="text-sm capitalize">
-                                  Variant:{" "}
+                                  Variante:{" "}
                                   <span className="font-semibold">
                                     {product?.variant}
                                   </span>
@@ -175,14 +175,14 @@ const CartPage = () => {
                                         onClick={() => {
                                           deleteCartProduct(product?._id);
                                           toast.success(
-                                            "Product deleted successfully!",
+                                            "Produto deletado com sucesso!",
                                           );
                                         }}
                                         className="w-4 h-4 md:w-5 md:h-5 mr-1 text-gray-500 hover:text-red-600 hoverEffect"
                                       />
                                     </TooltipTrigger>
                                     <TooltipContent className="font-bold bg-red-600">
-                                      Delete product
+                                      Apagar Produto
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
@@ -204,7 +204,7 @@ const CartPage = () => {
                       className="m-5 font-semibold"
                       variant="destructive"
                     >
-                      Reset Cart
+                      Limpar Carrinho
                     </Button>
                   </div>
                 </div>
@@ -212,7 +212,7 @@ const CartPage = () => {
                   <div className="lg:col-span-1">
                     <div className="hidden md:inline-block w-full bg-white p-6 rounded-lg border">
                       <h2 className="text-xl font-semibold mb-4">
-                        Order Summary
+                        Resumo do Pedido
                       </h2>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -220,7 +220,7 @@ const CartPage = () => {
                           <PriceFormatter amount={getSubTotalPrice()} />
                         </div>
                         <div className="flex items-center justify-between">
-                          <span>Discount</span>
+                          <span>Desconto</span>
                           <PriceFormatter
                             amount={getSubTotalPrice() - getTotalPrice()}
                           />
@@ -239,7 +239,9 @@ const CartPage = () => {
                           disabled={loading}
                           onClick={handleCheckout}
                         >
-                          {loading ? "Please wait..." : "Proceed to Checkout"}
+                          {loading
+                            ? "Por favor, aguarde..."
+                            : "Finalizar Compra"}
                         </Button>
                       </div>
                     </div>
@@ -247,7 +249,7 @@ const CartPage = () => {
                       <div className="bg-white rounded-md mt-5">
                         <Card>
                           <CardHeader>
-                            <CardTitle>Delivery Address</CardTitle>
+                            <CardTitle>Endereço de Entrega</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <RadioGroup
@@ -280,7 +282,7 @@ const CartPage = () => {
                               ))}
                             </RadioGroup>
                             <Button variant="outline" className="w-full mt-4">
-                              Add New Address
+                              Adicionar Novo Endereço
                             </Button>
                           </CardContent>
                         </Card>
@@ -291,14 +293,14 @@ const CartPage = () => {
                 {/* Order summary for mobile view */}
                 <div className="md:hidden fixed bottom-0 left-0 w-full bg-white pt-2">
                   <div className="bg-white p-4 rounded-lg border mx-4">
-                    <h2>Order Summary</h2>
+                    <h2>Resumo do Pedido</h2>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span>SubTotal</span>
                         <PriceFormatter amount={getSubTotalPrice()} />
                       </div>
                       <div className="flex items-center justify-between">
-                        <span>Discount</span>
+                        <span>Desconto</span>
                         <PriceFormatter
                           amount={getSubTotalPrice() - getTotalPrice()}
                         />
@@ -317,7 +319,7 @@ const CartPage = () => {
                         disabled={loading}
                         onClick={handleCheckout}
                       >
-                        {loading ? "Please wait..." : "Proceed to Checkout"}
+                        {loading ? "Por favor, aguarde..." : "Finalizar Compra"}
                       </Button>
                     </div>
                   </div>

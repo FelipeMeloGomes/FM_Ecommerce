@@ -42,14 +42,14 @@ const WishListProducts = () => {
             <table className="w-full border-collapse">
               <thead className="border-b">
                 <tr className="bg-black/5">
-                  <th className="p-2 text-left">Image</th>
+                  <th className="p-2 text-left">Imagem</th>
                   <th className="p-2 text-left hidden md:table-cell">
-                    Category
+                    Categoria
                   </th>
-                  <th className="p-2 text-left hidden md:table-cell">Type</th>
+                  <th className="p-2 text-left hidden md:table-cell">Tipo</th>
                   <th className="p-2 text-left hidden md:table-cell">Status</th>
-                  <th className="p-2 text-left">Price</th>
-                  <th className="p-2 text-center md:text-left">Action</th>
+                  <th className="p-2 text-left">Preço</th>
+                  <th className="p-2 text-center md:text-left">Ação</th>
                 </tr>
               </thead>
               <tbody>
@@ -61,7 +61,9 @@ const WishListProducts = () => {
                         <X
                           onClick={() => {
                             removeFromFavorite(product?._id);
-                            toast.success("Product removed from wishlist");
+                            toast.success(
+                              "Produto removido da lista de favoritos",
+                            );
                           }}
                           size={18}
                           className="hover:text-red-600 hover:cursor-pointer hoverEffect"
@@ -118,7 +120,7 @@ const WishListProducts = () => {
             {visibleProducts < favoriteProduct?.length && (
               <div className="my-5">
                 <Button variant="outline" onClick={loadMore}>
-                  Load More
+                  Carregar mais
                 </Button>
               </div>
             )}
@@ -128,7 +130,7 @@ const WishListProducts = () => {
                   onClick={() => setVisibleProducts(10)}
                   variant="outline"
                 >
-                  Load Less
+                  Carregar menos
                 </Button>
               </div>
             )}
@@ -142,7 +144,7 @@ const WishListProducts = () => {
               variant="destructive"
               size="lg"
             >
-              Reset Wishlist
+              Redefinir lista de favoritos
             </Button>
           )}
         </>
@@ -157,14 +159,14 @@ const WishListProducts = () => {
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold tracking-tight">
-              Your wishlist is empty
+              Sua lista de favoritos está vazia
             </h2>
             <p className="text-sm text-muted-foreground">
-              Items added to your wishlist will appear here
+              Os itens adicionados à sua lista de favoritos aparecerão aqui.
             </p>
           </div>
           <Button asChild>
-            <Link href="/shop">Continue Shopping</Link>
+            <Link href="/shop">Continue Comprando</Link>
           </Button>
         </div>
       )}

@@ -7,23 +7,23 @@ import { GitCompareArrows, Headset, ShieldCheck, Truck } from "lucide-react";
 
 const extraData = [
   {
-    title: "Free Delivery",
-    description: "Free shipping over $100",
+    title: "Entrega Grátis",
+    description: "Frete grátis para compras acima de R$100",
     icon: <Truck size={45} />,
   },
   {
-    title: "Free Return",
-    description: "Free shipping over $100",
+    title: "Devolução Grátis",
+    description: "Frete grátis para devoluções acima de R$100",
     icon: <GitCompareArrows size={45} />,
   },
   {
-    title: "Customer Support",
-    description: "Friendly 27/7 customer support",
+    title: "Suporte ao Cliente",
+    description: "Atendimento amigável 24/7",
     icon: <Headset size={45} />,
   },
   {
-    title: "Money Back guarantee",
-    description: "Quality checked by our team",
+    title: "Garantia de Reembolso",
+    description: "Qualidade verificada pela nossa equipe",
     icon: <ShieldCheck size={45} />,
   },
 ];
@@ -33,12 +33,12 @@ const ShopByBrands = async () => {
   return (
     <div className="mb-10 lg:mb-20 bg-shop_light_bg p-5 lg:p-7 rounded-md">
       <div className="flex items-center gap-5 justify-between mb-10">
-        <Title>Shop By Brands</Title>
+        <Title>Comprar por Marcas</Title>
         <Link
           href={"/shop"}
           className="text-sm font-semibold tracking-wide hover:text-shop_btn_dark_green hoverEffect"
         >
-          View all
+          Ver tudo
         </Link>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2.5">

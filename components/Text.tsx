@@ -41,7 +41,7 @@ const SubText = ({
   children: ReactNode;
   className?: string;
 }) => {
-  return <p className={cn("text-gray-600 text-sm, className")}>{children}</p>;
+  return <p className={cn("text-gray-600 text-sm", className)}>{children}</p>;
 };
 
 export { Title, SubTitle, SubText };

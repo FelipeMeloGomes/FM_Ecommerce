@@ -13,15 +13,14 @@ const ProductCharacteristics = async ({
   product: Product | null | undefined;
 }) => {
   const brand = await getBrand(product?.slug?.current as string);
-  console.log(brand);
 
   return (
     <Accordion type="single" collapsible>
       <AccordionItem value="item-1">
-        <AccordionTrigger>{product?.name}: Characteristics</AccordionTrigger>
+        <AccordionTrigger>{product?.name}: Características</AccordionTrigger>
         <AccordionContent>
           <p className="flex items-center justify-between">
-            Brand:{" "}
+            Marca:{" "}
             {brand && (
               <span className="font-semibold tracking-wide">
                 {brand[0]?.brandName}
@@ -30,18 +29,20 @@ const ProductCharacteristics = async ({
           </p>
           <p className="flex items-center justify-between">
             Collection:{" "}
-            <span className="font-semibold tracking-wide">2025</span>
+            <span className="font-semibold tracking-wide">
+              {new Date().getFullYear()}
+            </span>
           </p>
           <p className="flex items-center justify-between">
-            Type:{" "}
+            Tipo:{" "}
             <span className="font-semibold tracking-wide">
               {product?.variant}
             </span>
           </p>
           <p className="flex items-center justify-between">
-            Stock:{" "}
+            Estoque:{" "}
             <span className="font-semibold tracking-wide">
-              {product?.stock ? "Available" : "Out of Stock"}
+              {product?.stock ? "Disponível" : "Esgotado"}
             </span>
           </p>
         </AccordionContent>

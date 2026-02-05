@@ -17,7 +17,7 @@ const ProductSideMenu = ({
   const [existingProduct, setExistingProduct] = useState<Product | null>(null);
   useEffect(() => {
     const availableProduct = favoriteProduct?.find(
-      (item) => item?._id === product?._id
+      (item) => item?._id === product?._id,
     );
     setExistingProduct(availableProduct || null);
   }, [product, favoriteProduct]);
@@ -27,8 +27,8 @@ const ProductSideMenu = ({
       addToFavorite(product).then(() => {
         toast.success(
           existingProduct
-            ? "Product removed successfully!"
-            : "Product added successfully!"
+            ? "Produto removido com sucesso!"
+            : "Produto adicionado com sucesso!",
         );
       });
     }

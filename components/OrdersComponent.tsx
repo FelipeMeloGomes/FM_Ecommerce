@@ -20,7 +20,7 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
     MY_ORDERS_QUERY_RESULT[number] | null
   >(null);
   const handleDelete = () => {
-    toast.error("Delete method applied for Admin");
+    toast.error("Exclusão habilitada para o administrador");
   };
   return (
     <>
@@ -87,7 +87,7 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
                 </TableRow>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Click to see order details</p>
+                <p>Ver detalhes do pedido</p>
               </TooltipContent>
             </Tooltip>
           ))}

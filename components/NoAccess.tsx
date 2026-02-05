@@ -20,24 +20,24 @@ const NoAccess = ({
         <CardHeader className="flex items-center flex-col">
           <Logo />
           <CardTitle className="text-2xl font-bold text-center">
-            Welcome Back!
+            Bem-vindo de volta!
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-center font-medium text-darkColor/80">{details}</p>
           <SignInButton mode="modal">
             <Button className="w-full" size="lg">
-              Sign in
+              Entrar
             </Button>
           </SignInButton>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-muted-foreground text-center">
-            Don&rsquo;t have an account?
+            Não tem uma conta?
           </div>
           <SignUpButton mode="modal">
             <Button variant="outline" className="w-full" size="lg">
-              Create an account
+              Criar conta
             </Button>
           </SignUpButton>
         </CardFooter>
