@@ -1,6 +1,5 @@
 import Logo from "@/components/Logo";
 import Link from "next/link";
-import React from "react";
 
 const NotFoundPage = () => {
   return (

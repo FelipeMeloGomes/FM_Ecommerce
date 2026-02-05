@@ -1,4 +1,3 @@
-import React from "react";
 import Title from "./Title";
 import { Category } from "@/sanity.types";
 import Image from "next/image";

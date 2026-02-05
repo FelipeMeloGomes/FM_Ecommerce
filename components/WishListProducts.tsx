@@ -20,14 +20,40 @@ const WishListProducts = () => {
     setVisibleProducts((prev) => Math.min(prev + 5, favoriteProduct.length));
   };
 
+  const showLoadMore = visibleProducts < favoriteProduct?.length;
+  const showLoadLess = visibleProducts > 10;
+
   const handleResetWishlist = () => {
-    const confirmReset = window.confirm(
-      "Are you sure you want to reset your wishlist?"
+    toast(
+      (t) => (
+        <div className="flex flex-col gap-3 text-center">
+          <p>Tem certeza que deseja limpar sua lista de favoritos?</p>
+
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1 rounded bg-gray-200"
+            >
+              Cancelar
+            </button>
+
+            <button
+              onClick={() => {
+                resetFavorite();
+                toast.dismiss(t.id);
+                toast.success("Lista de favoritos limpa com sucesso!");
+              }}
+              className="px-3 py-1 rounded bg-red-500 text-white"
+            >
+              Confirmar
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        position: "top-center",
+      },
     );
-    if (confirmReset) {
-      resetFavorite();
-      toast.success("Wishlist reset successfully");
-    }
   };
 
   return (
@@ -132,7 +158,9 @@ const WishListProducts = () => {
           {favoriteProduct?.length > 0 && (
             <Button
               onClick={handleResetWishlist}
-              className="mb-5 font-semibold"
+              className={`mb-5 font-semibold ${
+                !showLoadMore && !showLoadLess ? "mt-5" : ""
+              }`}
               variant="destructive"
               size="lg"
             >

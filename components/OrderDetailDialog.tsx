@@ -1,5 +1,4 @@
-import { MY_ORDERS_QUERYResult } from "@/sanity.types";
-import React from "react";
+import { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import Link from "next/link";
@@ -16,7 +15,7 @@ import { urlFor } from "@/sanity/lib/image";
 import PriceFormatter from "./PriceFormatter";
 
 interface OrderDetailsDialogProps {
-  order: MY_ORDERS_QUERYResult[number] | null;
+  order: MY_ORDERS_QUERY_RESULT[number] | null;
   isOpen: boolean;
   onClose: () => void;
 }

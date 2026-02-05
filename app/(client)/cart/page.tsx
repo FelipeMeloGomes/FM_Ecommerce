@@ -69,14 +69,38 @@ const CartPage = () => {
   useEffect(() => {
     fetchAddresses();
   }, []);
+
   const handleResetCart = () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to reset your cart?"
+    toast.custom(
+      (t) => (
+        <div className="flex flex-col gap-3 text-center bg-white shadow-lg rounded-lg p-4">
+          <p>Tem certeza que deseja limpar seu carrinho?</p>
+
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1 rounded bg-gray-200"
+            >
+              Cancelar
+            </button>
+
+            <button
+              onClick={() => {
+                resetCart();
+                toast.dismiss(t.id);
+                toast.success("Carrinho limpo com sucesso!");
+              }}
+              className="px-3 py-1 rounded bg-red-500 text-white"
+            >
+              Confirmar
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        position: "top-center",
+      },
     );
-    if (confirmed) {
-      resetCart();
-      toast.success("Cart reset successfully!");
-    }
   };
 
   const handleCheckout = async () => {
@@ -173,7 +197,7 @@ const CartPage = () => {
                                         onClick={() => {
                                           deleteCartProduct(product?._id);
                                           toast.success(
-                                            "Product deleted successfully!"
+                                            "Product deleted successfully!",
                                           );
                                         }}
                                         className="w-4 h-4 md:w-5 md:h-5 mr-1 text-gray-500 hover:text-red-600 hoverEffect"

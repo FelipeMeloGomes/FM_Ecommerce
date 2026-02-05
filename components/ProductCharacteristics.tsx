@@ -1,6 +1,5 @@
 import { Product } from "@/sanity.types";
 import { getBrand } from "@/sanity/queries";
-import React from "react";
 import {
   Accordion,
   AccordionContent,

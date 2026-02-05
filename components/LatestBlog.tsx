@@ -1,4 +1,3 @@
-import React from "react";
 import Title from "./Title";
 import { getLatestBlogs } from "@/sanity/queries";
 import Image from "next/image";

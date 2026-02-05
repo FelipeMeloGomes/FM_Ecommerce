@@ -7,7 +7,7 @@ import {
 import { urlFor } from "@/sanity/lib/image";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
-import React, { useState } from "react";
+import { useState } from "react";
 
 interface Props {
   images?: Array<{

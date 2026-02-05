@@ -1,5 +1,4 @@
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
-import React from "react";
 
 interface ContactItemData {
   title: string;

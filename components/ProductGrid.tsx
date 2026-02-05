@@ -37,7 +37,7 @@ const ProductGrid = () => {
 
   return (
     <Container className="flex flex-col lg:px-0 my-10">
-      <HomeTabBar selectedTab={selectedTab} onTabSelected={setSelectedTab} />
+      <HomeTabBar selectedTab={selectedTab} onTabSelect={setSelectedTab} />
       {loading ? (
         <div className="flex flex-col items-center justify-center py-10 min-h-80 space-y-4 text-center bg-gray-100 rounded-lg w-full mt-10">
           <motion.div className="flex items-center space-x-2 text-blue-600">

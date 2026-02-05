@@ -9,7 +9,6 @@ import { auth } from "@clerk/nextjs/server";
 import { FileX } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import React from "react";
 
 const OrdersPage = async () => {
   const { userId } = await auth();

@@ -1,6 +1,6 @@
 "use client";
 import { AlignLeft } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
 import SideMenu from "./SideMenu";
 
 const MobileMenu = () => {

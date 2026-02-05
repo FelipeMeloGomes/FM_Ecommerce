@@ -1,6 +1,6 @@
 import Container from "@/components/Container";
 import Title from "@/components/Title";
-import { SINGLE_BLOG_QUERYResult } from "@/sanity.types";
+import { Blog, SINGLE_BLOG_QUERY_RESULT } from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
 import {
   getBlogCategories,
@@ -13,7 +13,6 @@ import { PortableText } from "next-sanity";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import React from "react";
 
 const SingleBlogPage = async ({
   params,
@@ -21,7 +20,7 @@ const SingleBlogPage = async ({
   params: Promise<{ slug: string }>;
 }) => {
   const { slug } = await params;
-  const blog: SINGLE_BLOG_QUERYResult = await getSingleBlog(slug);
+  const blog: SINGLE_BLOG_QUERY_RESULT = await getSingleBlog(slug);
   if (!blog) return notFound();
 
   return (
@@ -48,7 +47,7 @@ const SingleBlogPage = async ({
                     >
                       {item?.title}
                     </p>
-                  )
+                  ),
                 )}
                 <span className="absolute left-0 -bottom-1.5 bg-lightColor/30 inline-block w-full h-[2px] group-hover:bg-shop_dark_green hover:cursor-pointer hoverEffect" />
               </div>

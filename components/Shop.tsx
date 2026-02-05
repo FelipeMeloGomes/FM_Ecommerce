@@ -1,6 +1,6 @@
 "use client";
-import { BRANDS_QUERYResult, Category, Product } from "@/sanity.types";
-import React, { useEffect, useState } from "react";
+import { BRANDS_QUERY_RESULT, Category, Product } from "@/sanity.types";
+import { useEffect, useState } from "react";
 import Container from "./Container";
 import Title from "./Title";
 import CategoryList from "./shop/CategoryList";
@@ -14,7 +14,7 @@ import ProductCard from "./ProductCard";
 
 interface Props {
   categories: Category[];
-  brands: BRANDS_QUERYResult;
+  brands: BRANDS_QUERY_RESULT;
 }
 const Shop = ({ categories, brands }: Props) => {
   const searchParams = useSearchParams();
@@ -23,10 +23,10 @@ const Shop = ({ categories, brands }: Props) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    categoryParams || null
+    categoryParams || null,
   );
   const [selectedBrand, setSelectedBrand] = useState<string | null>(
-    brandParams || null
+    brandParams || null,
   );
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
   const fetchProducts = async () => {
@@ -52,7 +52,7 @@ const Shop = ({ categories, brands }: Props) => {
       const data = await client.fetch(
         query,
         { selectedCategory, selectedBrand, minPrice, maxPrice },
-        { next: { revalidate: 0 } }
+        { next: { revalidate: 0 } },
       );
       setProducts(data);
     } catch (error) {

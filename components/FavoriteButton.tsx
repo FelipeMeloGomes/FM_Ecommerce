@@ -3,7 +3,7 @@ import { Product } from "@/sanity.types";
 import useStore from "@/store";
 import { Heart } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const FavoriteButton = ({
@@ -17,7 +17,7 @@ const FavoriteButton = ({
   const [existingProduct, setExistingProduct] = useState<Product | null>(null);
   useEffect(() => {
     const availableItem = favoriteProduct.find(
-      (item) => item?._id === product?._id
+      (item) => item?._id === product?._id,
     );
     setExistingProduct(availableItem || null);
   }, [product, favoriteProduct]);
@@ -29,7 +29,7 @@ const FavoriteButton = ({
         toast.success(
           existingProduct
             ? "Product removed successfully!"
-            : "Product added successfully!"
+            : "Product added successfully!",
         );
       });
     }

@@ -1,5 +1,4 @@
 import { Facebook, Github, Linkedin, Slack, Youtube } from "lucide-react";
-import React from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -55,7 +54,7 @@ const SocialMedia = ({ className, iconClassName, tooltipClassName }: Props) => {
                 href={item?.href}
                 className={cn(
                   "p-2 border rounded-full hover:text-white hover:border-shop_light_green hoverEffect",
-                  iconClassName
+                  iconClassName,
                 )}
               >
                 {item?.icon}
@@ -64,7 +63,7 @@ const SocialMedia = ({ className, iconClassName, tooltipClassName }: Props) => {
             <TooltipContent
               className={cn(
                 "bg-white text-darkColor font-semibold",
-                tooltipClassName
+                tooltipClassName,
               )}
             >
               {item?.title}
