@@ -12,6 +12,7 @@ import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 import PriceFormatter from "./PriceFormatter";
 import AddToCartButton from "./AddToCartButton";
+import { confirmToast } from "@/helpers/confirmToast";
 
 const WishListProducts = () => {
   const [visibleProducts, setVisibleProducts] = useState(7);
@@ -24,36 +25,13 @@ const WishListProducts = () => {
   const showLoadLess = visibleProducts > 10;
 
   const handleResetWishlist = () => {
-    toast(
-      (t) => (
-        <div className="flex flex-col gap-3 text-center">
-          <p>Tem certeza que deseja limpar sua lista de favoritos?</p>
-
-          <div className="flex gap-2 justify-center">
-            <button
-              onClick={() => toast.dismiss(t.id)}
-              className="px-3 py-1 rounded bg-gray-200"
-            >
-              Cancelar
-            </button>
-
-            <button
-              onClick={() => {
-                resetFavorite();
-                toast.dismiss(t.id);
-                toast.success("Lista de favoritos limpa com sucesso!");
-              }}
-              className="px-3 py-1 rounded bg-red-500 text-white"
-            >
-              Confirmar
-            </button>
-          </div>
-        </div>
-      ),
-      {
-        position: "top-center",
+    confirmToast({
+      message: "Tem certeza que deseja limpar sua lista de favoritos?",
+      onConfirm: () => {
+        resetFavorite();
+        toast.success("Lista de favoritos limpa com sucesso!");
       },
-    );
+    });
   };
 
   return (

@@ -22,6 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { confirmToast } from "@/helpers/confirmToast";
 import { Address } from "@/sanity.types";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
@@ -71,36 +72,13 @@ const CartPage = () => {
   }, []);
 
   const handleResetCart = () => {
-    toast.custom(
-      (t) => (
-        <div className="flex flex-col gap-3 text-center bg-white shadow-lg rounded-lg p-4">
-          <p>Tem certeza que deseja limpar seu carrinho?</p>
-
-          <div className="flex gap-2 justify-center">
-            <button
-              onClick={() => toast.dismiss(t.id)}
-              className="px-3 py-1 rounded bg-gray-200"
-            >
-              Cancelar
-            </button>
-
-            <button
-              onClick={() => {
-                resetCart();
-                toast.dismiss(t.id);
-                toast.success("Carrinho limpo com sucesso!");
-              }}
-              className="px-3 py-1 rounded bg-red-500 text-white"
-            >
-              Confirmar
-            </button>
-          </div>
-        </div>
-      ),
-      {
-        position: "top-center",
+    confirmToast({
+      message: "Tem certeza que deseja limpar seu carrinho?",
+      onConfirm: () => {
+        resetCart();
+        toast.success("Carrinho limpo com sucesso!");
       },
-    );
+    });
   };
 
   const handleCheckout = async () => {
