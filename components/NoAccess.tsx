@@ -10,7 +10,7 @@ import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
 
 const NoAccess = ({
-  details = "Log in to view your cart items and checkout. Don't miss out on your favorite products!",
+  details = "Faça login para visualizar os itens do seu carrinho e finalizar a compra. Não perca seus produtos favoritos!",
 }: {
   details?: string;
 }) => {
