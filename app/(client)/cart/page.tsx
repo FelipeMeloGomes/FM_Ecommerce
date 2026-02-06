@@ -281,9 +281,6 @@ const CartPage = () => {
                                 </div>
                               ))}
                             </RadioGroup>
-                            <Button variant="outline" className="w-full mt-4">
-                              Adicionar Novo Endereço
-                            </Button>
                           </CardContent>
                         </Card>
                       </div>
