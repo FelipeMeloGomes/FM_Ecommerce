@@ -6,6 +6,13 @@ O projeto simula um ambiente real de mercado, incluindo autenticação de usuár
 
 ---
 
+## 🌐 Aplicação em Produção
+
+👉 Acesse o projeto online:  
+**https://fm-ecommerce-jade.vercel.app/**
+
+---
+
 ## 🚀 Tecnologias
 
 - **Next.js**
