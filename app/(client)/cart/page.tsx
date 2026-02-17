@@ -10,6 +10,7 @@ import NoAccess from "@/components/NoAccess";
 import PriceFormatter from "@/components/PriceFormatter";
 import ProductSideMenu from "@/components/ProductSideMenu";
 import QuantityButtons from "@/components/QuantityButtons";
+import { ShippingCalculator } from "@/components/ShippingCalculator";
 import Title from "@/components/Title";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +49,7 @@ const CartPage = () => {
   const { user } = useUser();
   const [addresses, setAddresses] = useState<Address[] | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const { shipping, setShipping } = useStore();
 
   const fetchAddresses = async () => {
     setLoading(true);
@@ -82,6 +84,15 @@ const CartPage = () => {
   };
 
   const handleCheckout = async () => {
+    if (!selectedAddress) {
+      toast.error("Selecione um endereço de entrega");
+      return;
+    }
+
+    if (!shipping) {
+      toast.error("Selecione uma opção de frete");
+      return;
+    }
     setLoading(true);
     try {
       const metadata: Metadata = {
@@ -91,7 +102,10 @@ const CartPage = () => {
         clerkUserId: user?.id,
         address: selectedAddress,
       };
-      const checkoutUrl = await createCheckoutSession(groupedItems, metadata);
+      const checkoutUrl = await createCheckoutSession(groupedItems, metadata, {
+        service: shipping.service,
+        price: shipping.price,
+      });
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       }
@@ -285,6 +299,18 @@ const CartPage = () => {
                         </Card>
                       </div>
                     )}
+                    <div className="bg-white rounded-md mt-5">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Calcular Frete</CardTitle>
+                        </CardHeader>
+                        <ShippingCalculator
+                          cartItems={groupedItems}
+                          selectedShipping={shipping}
+                          onSelectShipping={setShipping}
+                        />
+                      </Card>
+                    </div>
                   </div>
                 </div>
                 {/* Order summary for mobile view */}

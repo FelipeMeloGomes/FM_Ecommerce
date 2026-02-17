@@ -10,6 +10,11 @@ export interface GroupedCartItems {
   quantity: number;
 }
 
+export interface ShippingItem {
+  service: string;
+  price: number;
+}
+
 export interface Metadata {
   orderNumber: string;
   customerName: string;
@@ -21,6 +26,7 @@ export interface Metadata {
 export async function createCheckoutSession(
   items: GroupedCartItems[],
   metadata: Metadata,
+  shipping: ShippingItem,
 ) {
   const mappedItems = items.map((item) => {
     if (!item.product.name) {
@@ -45,6 +51,15 @@ export async function createCheckoutSession(
       price: item.product.price,
       quantity: item.quantity,
     };
+  });
+
+  mappedItems.push({
+    productId: `shipping:${shipping.service}`,
+    name: `Frete - ${shipping.service}`,
+    description: "Serviço de entrega",
+    image: undefined,
+    price: shipping.price,
+    quantity: 1,
   });
 
   return checkoutGateway.createSession(mappedItems, metadata);

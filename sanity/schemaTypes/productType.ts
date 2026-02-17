@@ -59,6 +59,30 @@ export const productType = defineType({
       validation: (Rule) => Rule.min(0),
     }),
     defineField({
+      name: "weight",
+      title: "Weight (kg)",
+      type: "number",
+      validation: (Rule) => Rule.required().positive(),
+    }),
+    defineField({
+      name: "width",
+      title: "Width (cm)",
+      type: "number",
+      validation: (Rule) => Rule.required().positive(),
+    }),
+    defineField({
+      name: "height",
+      title: "Height (cm)",
+      type: "number",
+      validation: (Rule) => Rule.required().positive(),
+    }),
+    defineField({
+      name: "length",
+      title: "Length (cm)",
+      type: "number",
+      validation: (Rule) => Rule.required().positive(),
+    }),
+    defineField({
       name: "brand",
       title: "Brand",
       type: "reference",

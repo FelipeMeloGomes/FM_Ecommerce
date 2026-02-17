@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Product } from "./sanity.types";
+import { ShippingQuote } from "./core/shipping/ShippingQuote";
 
 export interface CartItem {
   product: Product;
@@ -9,6 +10,8 @@ export interface CartItem {
 
 interface StoreState {
   items: CartItem[];
+  shipping: ShippingQuote | null;
+  setShipping: (shipping: ShippingQuote | null) => void;
   addItem: (product: Product) => void;
   removeItem: (productId: string) => void;
   deleteCartProduct: (productId: string) => void;
@@ -28,6 +31,8 @@ const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
       items: [],
+      shipping: null,
+      setShipping: (shipping) => set({ shipping }),
       favoriteProduct: [],
       addItem: (product) =>
         set((state) => {
@@ -67,10 +72,14 @@ const useStore = create<StoreState>()(
         })),
       resetCart: () => set({ items: [] }),
       getTotalPrice: () => {
-        return get().items.reduce(
+        const itemsTotal = get().items.reduce(
           (total, item) => total + (item.product.price ?? 0) * item.quantity,
           0,
         );
+
+        const shippingPrice = get().shipping?.price ?? 0;
+
+        return itemsTotal + shippingPrice;
       },
       getSubTotalPrice: () => {
         return get().items.reduce((total, item) => {
