@@ -24,6 +24,20 @@ O projeto simula um ambiente real de mercado, incluindo autenticação de usuár
 
 ---
 
+---
+
+## ✅ Features Implementadas
+
+- Autenticação de usuários (login, cadastro e rotas protegidas)
+- Catálogo de produtos via CMS
+- Carrinho com controle de quantidade e persistência
+- Cálculo de frete por CEP e dimensões do produto
+- Checkout e pagamentos integrados
+- Geração e registro de pedidos
+- Interface responsiva com feedback de estados
+
+---
+
 ## ▶️ Getting Started
 
 Para iniciar o servidor de desenvolvimento, execute:
