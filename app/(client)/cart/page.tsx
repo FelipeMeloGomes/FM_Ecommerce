@@ -1,8 +1,14 @@
 "use client";
 
+import { useAuth, useUser } from "@clerk/nextjs";
+import { ShoppingBag, Trash } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import {
   createCheckoutSession,
-  Metadata,
+  type Metadata,
 } from "@/actions/createCheckoutSession";
 import Container from "@/components/Container";
 import EmptyCart from "@/components/EmptyCart";
@@ -24,16 +30,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { confirmToast } from "@/helpers/confirmToast";
-import { Address } from "@/sanity.types";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
+import type { Address } from "@/sanity.types";
 import useStore from "@/store";
-import { useAuth, useUser } from "@clerk/nextjs";
-import { ShoppingBag, Trash } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
 const CartPage = () => {
   const {
@@ -51,7 +51,7 @@ const CartPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const { shipping, setShipping } = useStore();
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     setLoading(true);
     try {
       const query = `*[_type=="address"] | order(publishedAt desc)`;
@@ -61,17 +61,18 @@ const CartPage = () => {
       if (defaultAddress) {
         setSelectedAddress(defaultAddress);
       } else if (data.length > 0) {
-        setSelectedAddress(data[0]); // Optional: select first address if no default
+        setSelectedAddress(data[0]);
       }
     } catch (error) {
       console.log("Addresses fetching error:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
   useEffect(() => {
     fetchAddresses();
-  }, []);
+  }, [fetchAddresses]);
 
   const handleResetCart = () => {
     confirmToast({
@@ -267,25 +268,34 @@ const CartPage = () => {
                           </CardHeader>
                           <CardContent>
                             <RadioGroup
-                              defaultValue={addresses
-                                ?.find((addr) => addr.default)
-                                ?._id.toString()}
+                              value={selectedAddress?._id?.toString()} // 🔹 ALTERADO
+                              onValueChange={(value) => {
+                                // 🔹 ADICIONADO
+                                const address = addresses?.find(
+                                  (addr) => addr._id.toString() === value,
+                                );
+                                if (address) setSelectedAddress(address);
+                              }}
                             >
                               {addresses?.map((address) => (
                                 <div
-                                  key={address?._id}
-                                  onClick={() => setSelectedAddress(address)}
-                                  className={`flex items-center space-x-2 mb-4 cursor-pointer ${selectedAddress?._id === address?._id && "text-shop_dark_green"}`}
+                                  key={address._id} // 🔹 REMOVIDO optional chaining
+                                  className={`flex items-center space-x-2 mb-4 ${
+                                    selectedAddress?._id === address._id
+                                      ? "text-shop_dark_green"
+                                      : ""
+                                  }`}
                                 >
                                   <RadioGroupItem
-                                    value={address?._id.toString()}
+                                    value={address._id.toString()}
+                                    id={`address-${address._id}`} // 🔹 ADICIONADO id
                                   />
                                   <Label
-                                    htmlFor={`address-${address?._id}`}
-                                    className="grid gap-1.5 flex-1"
+                                    htmlFor={`address-${address._id}`}
+                                    className="grid gap-1.5 flex-1 cursor-pointer" // 🔹 ADICIONADO cursor-pointer
                                   >
                                     <span className="font-semibold">
-                                      {address?.name}
+                                      {address.name}
                                     </span>
                                     <span className="text-sm text-black/60">
                                       {address.address}, {address.city},{" "}

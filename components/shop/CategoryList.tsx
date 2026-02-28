@@ -1,7 +1,7 @@
-import { Category } from "@/sanity.types";
+import type { Category } from "@/sanity.types";
 import Title from "../Title";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 interface Props {
   categories: Category[];
@@ -17,15 +17,14 @@ const CategoryList = ({
   return (
     <div className="w-full bg-white p-5">
       <Title className="text-base font-black">Product Categories</Title>
-      <RadioGroup value={selectedCategory || ""} className="mt-2 space-y-1">
+
+      <RadioGroup
+        value={selectedCategory || ""}
+        onValueChange={(value) => setSelectedCategory(value || null)}
+        className="mt-2 space-y-1"
+      >
         {categories?.map((category) => (
-          <div
-            onClick={() => {
-              setSelectedCategory(category?.slug?.current as string);
-            }}
-            key={category?._id}
-            className="flex items-center space-x-2 hover:cursor-pointer"
-          >
+          <div key={category._id} className="flex items-center space-x-2">
             <RadioGroupItem
               value={category?.slug?.current as string}
               id={category?.slug?.current}
@@ -33,7 +32,11 @@ const CategoryList = ({
             />
             <Label
               htmlFor={category?.slug?.current}
-              className={`${selectedCategory === category?.slug?.current ? "font-semibold text-shop_dark_green" : "font-normal"}`}
+              className={
+                selectedCategory === category?.slug?.current
+                  ? "font-semibold text-shop_dark_green"
+                  : "font-normal"
+              }
             >
               {category?.title}
             </Label>
@@ -42,6 +45,7 @@ const CategoryList = ({
       </RadioGroup>
       {selectedCategory && (
         <button
+          type="button"
           onClick={() => setSelectedCategory(null)}
           className="text-sm font-medium mt-2 underline underline-offset-2 decoration-[1px] hover:text-shop_dark_green hoverEffect text-left"
         >

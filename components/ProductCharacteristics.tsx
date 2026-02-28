@@ -1,5 +1,5 @@
-import { Product } from "@/sanity.types";
 import { getBrand } from "@/sanity/queries";
+import type { Product } from "@/sanity.types";
 import {
   Accordion,
   AccordionContent,

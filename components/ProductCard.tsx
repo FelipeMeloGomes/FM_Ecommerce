@@ -1,13 +1,13 @@
-import { Product } from "@/sanity.types";
-import { urlFor } from "@/sanity/lib/image";
+import { Flame } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { StarIcon } from "@sanity/icons";
-import { Flame } from "lucide-react";
-import PriceView from "./PriceView";
-import Title from "./Title";
-import ProductSideMenu from "./ProductSideMenu";
+import { urlFor } from "@/sanity/lib/image";
+import type { Product } from "@/sanity.types";
 import AddToCartButton from "./AddToCartButton";
+import PriceView from "./PriceView";
+import ProductSideMenu from "./ProductSideMenu";
+import StarRating from "./StarRating";
+import Title from "./Title";
 
 const ProductCard = ({ product }: { product: Product }) => {
   return (
@@ -53,15 +53,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         <Title className="text-sm line-clamp-1">{product?.name}</Title>
         <div className="flex items-center gap-2">
           <div className="flex items-center">
-            {[...Array(5)].map((_, index) => (
-              <StarIcon
-                key={index}
-                className={
-                  index < 4 ? "text-shop_light_green" : " text-lightText"
-                }
-                fill={index < 4 ? "#93D991" : "#ababab"}
-              />
-            ))}
+            <StarRating rating={4} />
           </div>
           <p className="text-lightText text-xs tracking-wide">5 Avaliações</p>
         </div>

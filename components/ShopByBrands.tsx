@@ -1,9 +1,9 @@
-import Title from "./Title";
-import Link from "next/link";
-import { getAllBrands } from "@/sanity/queries";
-import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
 import { GitCompareArrows, Headset, ShieldCheck, Truck } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { urlFor } from "@/sanity/lib/image";
+import { getAllBrands } from "@/sanity/queries";
+import Title from "./Title";
 
 const extraData = [
   {
@@ -61,9 +61,9 @@ const ShopByBrands = async () => {
         ))}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-16 p-2 shadow-sm hover:shadow-shop_light_green/20 py-5">
-        {extraData?.map((item, index) => (
+        {extraData?.map((item) => (
           <div
-            key={index}
+            key={item.title}
             className="flex items-center gap-3 group text-lightColor hover:text-shop_light_green"
           >
             <span className="inline-flex scale-100 group-hover:scale-90 hoverEffect">

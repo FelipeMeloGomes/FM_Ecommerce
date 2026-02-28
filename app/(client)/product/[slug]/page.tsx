@@ -1,16 +1,17 @@
+import { CornerDownLeft, Truck } from "lucide-react";
+import { notFound } from "next/navigation";
+import { FaRegQuestionCircle } from "react-icons/fa";
+import { FiShare2 } from "react-icons/fi";
+import { RxBorderSplit } from "react-icons/rx";
+import { TbTruckDelivery } from "react-icons/tb";
 import AddToCartButton from "@/components/AddToCartButton";
 import Container from "@/components/Container";
 import FavoriteButton from "@/components/FavoriteButton";
 import ImageView from "@/components/ImageView";
 import PriceView from "@/components/PriceView";
 import ProductCharacteristics from "@/components/ProductCharacteristics";
+import StarRating from "@/components/StarRating";
 import { getProductBySlug } from "@/sanity/queries";
-import { CornerDownLeft, StarIcon, Truck } from "lucide-react";
-import { notFound } from "next/navigation";
-import { FaRegQuestionCircle } from "react-icons/fa";
-import { FiShare2 } from "react-icons/fi";
-import { RxBorderSplit } from "react-icons/rx";
-import { TbTruckDelivery } from "react-icons/tb";
 
 const SingleProductPage = async ({
   params,
@@ -34,14 +35,7 @@ const SingleProductPage = async ({
             {product?.description}
           </p>
           <div className="flex items-center gap-0.5 text-xs">
-            {[...Array(5)].map((_, index) => (
-              <StarIcon
-                key={index}
-                size={12}
-                className="text-shop_light_green"
-                fill={"#3b9c3c"}
-              />
-            ))}
+            <StarRating />
             <p className="font-semibold">{`(120)`}</p>
           </div>
         </div>

@@ -1,11 +1,11 @@
-import Container from "@/components/Container";
-import Title from "@/components/Title";
-import { urlFor } from "@/sanity/lib/image";
-import { getAllBlogs } from "@/sanity/queries";
 import dayjs from "dayjs";
 import { Calendar } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import Container from "@/components/Container";
+import Title from "@/components/Title";
+import { urlFor } from "@/sanity/lib/image";
+import { getAllBlogs } from "@/sanity/queries";
 
 const BlogPage = async () => {
   const blogs = await getAllBlogs(6);
@@ -29,9 +29,9 @@ const BlogPage = async () => {
               <div className="bg-gray-100 p-5">
                 <div className="text-xs flex items-center gap-5">
                   <div className="flex items-center relative group cursor-pointer">
-                    {blog?.blogcategories?.map((item, index) => (
+                    {blog?.blogcategories?.map((item) => (
                       <p
-                        key={index}
+                        key={item.title}
                         className="font-semibold text-shop_dark_green tracking-wider"
                       >
                         {item?.title}

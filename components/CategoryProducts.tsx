@@ -1,13 +1,14 @@
 "use client";
-import { Category, Product } from "@/sanity.types";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
-import { client } from "@/sanity/lib/client";
-import { AnimatePresence, motion } from "motion/react";
 import { Loader2 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { client } from "@/sanity/lib/client";
+import type { Category, Product } from "@/sanity.types";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
+import { Button } from "./ui/button";
+
 interface Props {
   categories: Category[];
   slug: string;
@@ -24,7 +25,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
     router.push(`/category/${newSlug}`, { scroll: false }); // Update URL without
   };
 
-  const fetchProducts = async (categorySlug: string) => {
+  const fetchProducts = useCallback(async (categorySlug: string) => {
     setLoading(true);
     try {
       const query = `
@@ -39,10 +40,13 @@ const CategoryProducts = ({ categories, slug }: Props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
   useEffect(() => {
-    fetchProducts(currentSlug);
-  }, [router]);
+    if (currentSlug) {
+      fetchProducts(currentSlug);
+    }
+  }, [currentSlug, fetchProducts]);
 
   return (
     <div className="py-5 flex flex-col md:flex-row items-start gap-5">

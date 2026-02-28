@@ -1,12 +1,13 @@
 import { Github, Linkedin } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
+
 interface Props {
   className?: string;
   iconClassName?: string;

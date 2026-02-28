@@ -1,7 +1,7 @@
-import { Title } from "./ui/text";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { banner_1 } from "@/images";
+import { Title } from "./ui/text";
 
 const HomeBanner = () => {
   return (

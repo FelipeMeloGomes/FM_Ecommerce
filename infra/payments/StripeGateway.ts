@@ -1,21 +1,26 @@
 import Stripe from "stripe";
-import { PaymentGateway } from "@/core/payments/PaymentGateway";
-import { PaymentSession } from "@/core/payments/PaymentSession";
+import { getEnv } from "@/config/env";
+import type { PaymentGateway } from "@/core/payments/PaymentGateway";
+import type { PaymentSession } from "@/core/payments/PaymentSession";
 
 export class StripeGateway implements PaymentGateway {
-  private stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  private stripe = new Stripe(getEnv("STRIPE_SECRET_KEY"));
 
   async verifyWebhook(
     body: string,
     signature: string,
   ): Promise<PaymentSession | null> {
-    const secret = process.env.STRIPE_WEBHOOK_SECRET!;
+    const secret = getEnv("STRIPE_WEBHOOK_SECRET");
 
     const event = this.stripe.webhooks.constructEvent(body, signature, secret);
 
     if (event.type !== "checkout.session.completed") return null;
 
     const session = event.data.object as Stripe.Checkout.Session;
+
+    if (!session.amount_total || !session.currency) {
+      throw new Error("Invalid Stripe session data.");
+    }
 
     const invoice = session.invoice
       ? await this.stripe.invoices.retrieve(session.invoice as string)
@@ -28,8 +33,8 @@ export class StripeGateway implements PaymentGateway {
 
     return {
       id: session.id,
-      total: session.amount_total! / 100,
-      currency: session.currency!,
+      total: session.amount_total / 100,
+      currency: session.currency,
       metadata: session.metadata as Record<string, string>,
 
       products: items.data.map((i) => ({

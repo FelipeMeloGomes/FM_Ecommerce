@@ -1,18 +1,18 @@
 "use client";
 
-import useStore from "@/store";
-import { useState } from "react";
-import Container from "./Container";
 import { Heart, X } from "lucide-react";
-import { Button } from "./ui/button";
-import Link from "next/link";
-import { Product } from "@/sanity.types";
-import toast from "react-hot-toast";
 import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
-import PriceFormatter from "./PriceFormatter";
-import AddToCartButton from "./AddToCartButton";
+import Link from "next/link";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import { confirmToast } from "@/helpers/confirmToast";
+import { urlFor } from "@/sanity/lib/image";
+import type { Product } from "@/sanity.types";
+import useStore from "@/store";
+import AddToCartButton from "./AddToCartButton";
+import Container from "./Container";
+import PriceFormatter from "./PriceFormatter";
+import { Button } from "./ui/button";
 
 const WishListProducts = () => {
   const [visibleProducts, setVisibleProducts] = useState(7);
@@ -95,15 +95,11 @@ const WishListProducts = () => {
                         {product?.variant}
                       </td>
                       <td
-                        className={`p-2 w-24 ${
-                          (product?.stock as number) > 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        } font-medium text-sm hidden md:table-cell`}
+                        className={`p-2 w-24 ${(product?.stock as number) > 0 ? "text-green-600" : "text-red-600"} font-medium text-sm hidden md:table-cell`}
                       >
                         {(product?.stock as number) > 0
-                          ? "In Stock"
-                          : "Out of Stock"}
+                          ? "Em Estoque"
+                          : "Fora de Estoque"}
                       </td>
                       <td className="p-2">
                         <PriceFormatter amount={product?.price} />
@@ -138,9 +134,7 @@ const WishListProducts = () => {
           {favoriteProduct?.length > 0 && (
             <Button
               onClick={handleResetWishlist}
-              className={`mb-5 font-semibold ${
-                !showLoadMore && !showLoadLess ? "mt-5" : ""
-              }`}
+              className={`mb-5 font-semibold ${!showLoadMore && !showLoadLess ? "mt-5" : ""}`}
               variant="destructive"
               size="lg"
             >

@@ -1,4 +1,4 @@
-import { ShippingQuote } from "./ShippingQuote";
+import type { ShippingQuote } from "./ShippingQuote";
 
 export interface ShippingGateway {
   calculate(

@@ -21,8 +21,22 @@ O projeto simula um ambiente real de mercado, incluindo autenticação de usuár
 - **Sanity CMS**
 - **Stripe**
 - **Clerk** (autenticação e registro de usuários)
+- **Biome** (linting e formatação)
 
 ---
+
+## 🧹 Code Quality
+
+Este projeto utiliza **Biome** para padronização de código, linting e formatação automática.
+
+O **Biome** é responsável por:
+
+- Formatação de código
+- Lint com regras recomendadas
+- Organização automática de imports
+- Padronização de estilo
+
+A configuração está definida no arquivo `biome.json`.
 
 ---
 

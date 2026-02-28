@@ -1,4 +1,4 @@
-import { PaymentSession } from "./PaymentSession";
+import type { PaymentSession } from "./PaymentSession";
 
 export interface PaymentGateway {
   verifyWebhook(

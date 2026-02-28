@@ -13,14 +13,13 @@ export const confirmToast = ({ message, onConfirm }: ConfirmToastOptions) => {
   activeToastId = toast.custom(
     (t) => (
       <div
-        className={`flex flex-col gap-3 text-center bg-white shadow-lg rounded-lg p-4 transition-all duration-200 ${
-          t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-        }`}
+        className={`flex flex-col gap-3 text-center bg-white shadow-lg rounded-lg p-4 transition-all duration-200 ${t.visible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}
       >
         <p className="text-sm font-medium">{message}</p>
 
         <div className="flex gap-2 justify-center">
           <button
+            type="button"
             onClick={() => {
               toast.dismiss(t.id);
               activeToastId = null;
@@ -31,6 +30,7 @@ export const confirmToast = ({ message, onConfirm }: ConfirmToastOptions) => {
           </button>
 
           <button
+            type="button"
             onClick={() => {
               toast.dismiss(t.id);
               activeToastId = null;

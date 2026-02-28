@@ -1,16 +1,16 @@
 "use client";
-import { BRANDS_QUERY_RESULT, Category, Product } from "@/sanity.types";
-import { useEffect, useState } from "react";
-import Container from "./Container";
-import Title from "./Title";
-import CategoryList from "./shop/CategoryList";
-import { useSearchParams } from "next/navigation";
-import BrandList from "./shop/BrandList";
-import PriceList from "./shop/PriceList";
-import { client } from "@/sanity/lib/client";
 import { Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { client } from "@/sanity/lib/client";
+import type { BRANDS_QUERY_RESULT, Category, Product } from "@/sanity.types";
+import Container from "./Container";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
+import BrandList from "./shop/BrandList";
+import CategoryList from "./shop/CategoryList";
+import PriceList from "./shop/PriceList";
+import Title from "./Title";
 
 interface Props {
   categories: Category[];
@@ -29,7 +29,8 @@ const Shop = ({ categories, brands }: Props) => {
     brandParams || null,
   );
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
-  const fetchProducts = async () => {
+
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       let minPrice = 0;
@@ -60,11 +61,11 @@ const Shop = ({ categories, brands }: Props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory, selectedBrand, selectedPrice]);
 
   useEffect(() => {
     fetchProducts();
-  }, [selectedCategory, selectedBrand, selectedPrice]);
+  }, [fetchProducts]);
   return (
     <div className="border-t">
       <Container className="mt-5">
@@ -77,6 +78,7 @@ const Shop = ({ categories, brands }: Props) => {
               selectedBrand !== null ||
               selectedPrice !== null) && (
               <button
+                type="button"
                 onClick={() => {
                   setSelectedCategory(null);
                   setSelectedBrand(null);

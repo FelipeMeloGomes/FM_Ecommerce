@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Product } from "./sanity.types";
-import { ShippingQuote } from "./core/shipping/ShippingQuote";
+import type { ShippingQuote } from "./core/shipping/ShippingQuote";
+import type { Product } from "./sanity.types";
 
 export interface CartItem {
   product: Product;

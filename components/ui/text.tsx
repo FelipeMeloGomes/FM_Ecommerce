@@ -11,7 +11,7 @@ const Title = ({
     <h2
       className={cn(
         "text-3xl font-bold text-shop_dark_green capitalize tracking-wide font-sans",
-        className
+        className,
       )}
     >
       {children}

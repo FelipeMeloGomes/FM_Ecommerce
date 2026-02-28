@@ -1,5 +1,5 @@
-import { ShippingGateway } from "@/core/shipping/ShippingGateway";
-import { ShippingQuote } from "@/core/shipping/ShippingQuote";
+import type { ShippingGateway } from "@/core/shipping/ShippingGateway";
+import type { ShippingQuote } from "@/core/shipping/ShippingQuote";
 
 interface MelhorEnvioServiceResponse {
   name: string;

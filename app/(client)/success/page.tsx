@@ -1,11 +1,11 @@
 "use client";
 
-import useStore from "@/store";
+import { Check, Home, Package, ShoppingBag } from "lucide-react";
+import { motion } from "motion/react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
-import { motion } from "motion/react";
-import { Check, Home, Package, ShoppingBag } from "lucide-react";
-import Link from "next/link";
+import useStore from "@/store";
 
 const SuccessPageContent = () => {
   const { resetCart } = useStore();

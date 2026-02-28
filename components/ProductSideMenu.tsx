@@ -1,10 +1,10 @@
 "use client";
-import { cn } from "@/lib/utils";
-import { Product } from "@/sanity.types";
-import useStore from "@/store";
 import { Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
+import type { Product } from "@/sanity.types";
+import useStore from "@/store";
 
 const ProductSideMenu = ({
   product,
@@ -37,12 +37,18 @@ const ProductSideMenu = ({
     <div
       className={cn("absolute top-2 right-2 hover:cursor-pointer", className)}
     >
-      <div
+      <button
+        type="button"
         onClick={handleFavorite}
-        className={`p-2.5 rounded-full hover:bg-shop_dark_green/80 hover:text-white hoverEffect  ${existingProduct ? "bg-shop_dark_green/80 text-white" : "bg-lightColor/10"}`}
+        aria-pressed={!!existingProduct}
+        className={`p-2.5 rounded-full transition hover:bg-shop_dark_green/80 hover:text-white ${
+          existingProduct
+            ? "bg-shop_dark_green/80 text-white"
+            : "bg-lightColor/10"
+        }`}
       >
         <Heart size={15} />
-      </div>
+      </button>
     </div>
   );
 };

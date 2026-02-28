@@ -1,7 +1,10 @@
-import { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Button } from "./ui/button";
+import Image from "next/image";
 import Link from "next/link";
+import { urlFor } from "@/sanity/lib/image";
+import type { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
+import PriceFormatter from "./PriceFormatter";
+import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import {
   Table,
   TableBody,
@@ -10,9 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
-import PriceFormatter from "./PriceFormatter";
 
 interface OrderDetailsDialogProps {
   order: MY_ORDERS_QUERY_RESULT[number] | null;
@@ -71,8 +71,8 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {order.products?.map((product, index) => (
-              <TableRow key={index}>
+            {order.products?.map((product) => (
+              <TableRow key={product._key}>
                 <TableCell className="flex items-center gap-2">
                   {product?.product?.images && (
                     <Image
@@ -84,7 +84,7 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
                     />
                   )}
 
-                  {product?.product && product?.product?.name}
+                  {product?.product?.name}
                 </TableCell>
                 <TableCell>{product?.quantity}</TableCell>
                 <TableCell>

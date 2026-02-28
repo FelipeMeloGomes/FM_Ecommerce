@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { calculateShipping } from "@/actions/calculateShipping";
-import { CartItem } from "@/store";
-import { ShippingQuote } from "@/core/shipping/ShippingQuote";
+import type { ShippingQuote } from "@/core/shipping/ShippingQuote";
+import type { CartItem } from "@/store";
 
 export function ShippingCalculator({
   cartItems,
@@ -59,7 +59,7 @@ export function ShippingCalculator({
   useEffect(() => {
     onSelectShipping(null);
     setQuotes([]);
-  }, [cartItems]);
+  }, [onSelectShipping]);
 
   return (
     <div className="space-y-4 p-4 rounded-xl">
@@ -71,6 +71,7 @@ export function ShippingCalculator({
           className="border px-3 py-2 rounded w-full"
         />
         <button
+          type="button"
           onClick={handleCalculate}
           disabled={loading}
           className="bg-black text-white px-4 rounded"
@@ -83,12 +84,13 @@ export function ShippingCalculator({
 
       {quotes.length > 0 && (
         <div className="space-y-2">
-          {quotes.map((q, i) => {
+          {quotes.map((q) => {
             const active = selectedShipping?.service === q.service;
 
             return (
               <button
-                key={i}
+                type="button"
+                key={q.service}
                 onClick={() => onSelectShipping(q)}
                 className={`w-full flex justify-between p-3 rounded border
                   ${active ? "border-black bg-gray-100" : "hover:bg-gray-50"}`}

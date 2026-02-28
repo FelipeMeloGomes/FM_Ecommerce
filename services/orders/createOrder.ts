@@ -1,4 +1,4 @@
-import { PaymentSession } from "@/core/payments/PaymentSession";
+import type { PaymentSession } from "@/core/payments/PaymentSession";
 import { backendClient } from "@/sanity/lib/backendClient";
 import { updateStock } from "./updateStock";
 

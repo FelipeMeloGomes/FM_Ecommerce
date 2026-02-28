@@ -1,6 +1,12 @@
 "use client";
 
-import { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
+import { format } from "date-fns";
+import { X } from "lucide-react";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import type { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
+import OrderDetailDialog from "./OrderDetailDialog";
+import PriceFormatter from "./PriceFormatter";
 import { TableBody, TableCell, TableRow } from "./ui/table";
 import {
   Tooltip,
@@ -8,12 +14,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import PriceFormatter from "./PriceFormatter";
-import { format } from "date-fns";
-import { X } from "lucide-react";
-import { useState } from "react";
-import OrderDetailDialog from "./OrderDetailDialog";
-import toast from "react-hot-toast";
 
 const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
   const [selectedOrder, setSelectedOrder] = useState<
@@ -53,11 +53,7 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
                   <TableCell>
                     {order?.status && (
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          order.status === "paid"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${order.status === "paid" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}
                       >
                         {order?.status.charAt(0).toUpperCase() +
                           order?.status.slice(1)}

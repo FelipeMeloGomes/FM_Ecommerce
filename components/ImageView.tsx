@@ -1,13 +1,13 @@
 "use client";
-import {
-  internalGroqTypeReferenceTo,
-  SanityImageCrop,
-  SanityImageHotspot,
-} from "@/sanity.types";
-import { urlFor } from "@/sanity/lib/image";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { useState } from "react";
+import { urlFor } from "@/sanity/lib/image";
+import {
+  internalGroqTypeReferenceTo,
+  type SanityImageCrop,
+  type SanityImageHotspot,
+} from "@/sanity.types";
 
 interface Props {
   images?: Array<{
@@ -46,15 +46,14 @@ const ImageView = ({ images = [], isStock }: Props) => {
             width={700}
             height={700}
             priority
-            className={`w-full h-96 max-h-[550px] min-h-[500px] object-contain group-hover:scale-110 hoverEffect rounded-md ${
-              isStock === 0 ? "opacity-50" : ""
-            }`}
+            className={`w-full h-96 max-h-[550px] min-h-[500px] object-contain group-hover:scale-110 hoverEffect rounded-md ${isStock === 0 ? "opacity-50" : ""}`}
           />
         </motion.div>
       </AnimatePresence>
       <div className="grid grid-cols-6 gap-2 h-20 md:h-24">
         {images?.map((image) => (
           <button
+            type="button"
             key={image?._key}
             onClick={() => setActive(image)}
             className={`border rounded-md overflow-hidden ${active?._key === image?._key ? "border-darkColor opacity-100" : "opacity-80"}`}

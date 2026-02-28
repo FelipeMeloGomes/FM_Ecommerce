@@ -1,9 +1,9 @@
 "use server";
 
 import { checkoutGateway } from "@/config/checkoutGateway";
-import { Address } from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
-import { CartItem } from "@/store";
+import type { Address } from "@/sanity.types";
+import type { CartItem } from "@/store";
 
 export interface GroupedCartItems {
   product: CartItem["product"];

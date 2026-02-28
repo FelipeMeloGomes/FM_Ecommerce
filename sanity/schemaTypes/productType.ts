@@ -130,7 +130,7 @@ export const productType = defineType({
     },
     prepare(selection) {
       const { title, subtitle, media } = selection;
-      const image = media && media[0];
+      const image = media?.[0];
       return {
         title: title,
         subtitle: `$${subtitle}`,

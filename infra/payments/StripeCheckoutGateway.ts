@@ -1,17 +1,20 @@
 import Stripe from "stripe";
-import { CheckoutGateway } from "@/core/payments/CheckoutGateway";
-import {
+import { getEnv } from "@/config/env";
+import type {
+  CheckoutGateway,
   CheckoutItem,
   CheckoutMetadata,
 } from "@/core/payments/CheckoutGateway";
 
 export class StripeCheckoutGateway implements CheckoutGateway {
-  private stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  private stripe = new Stripe(getEnv("STRIPE_SECRET_KEY"));
 
   async createSession(
     items: CheckoutItem[],
     metadata: CheckoutMetadata,
   ): Promise<string> {
+    const baseUrl = getEnv("NEXT_PUBLIC_BASE_URL");
+
     const customers = await this.stripe.customers.list({
       email: metadata.customerEmail,
       limit: 1,
@@ -28,8 +31,8 @@ export class StripeCheckoutGateway implements CheckoutGateway {
       allow_promotion_codes: true,
       invoice_creation: { enabled: true },
 
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}&orderNumber=${metadata.orderNumber}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cart`,
+      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}&orderNumber=${metadata.orderNumber}`,
+      cancel_url: `${baseUrl}/cart`,
 
       line_items: items.map((item) => ({
         price_data: {
@@ -49,6 +52,10 @@ export class StripeCheckoutGateway implements CheckoutGateway {
       customer_email: customerId ? undefined : metadata.customerEmail,
     });
 
-    return session.url!;
+    if (!session.url) {
+      throw new Error("Stripe session URL not generated.");
+    }
+
+    return session.url;
   }
 }

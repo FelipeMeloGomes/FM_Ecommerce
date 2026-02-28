@@ -1,3 +1,6 @@
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import Logo from "./Logo";
+import { Button } from "./ui/button";
 import {
   Card,
   CardContent,
@@ -5,9 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import Logo from "./Logo";
-import { SignInButton, SignUpButton } from "@clerk/nextjs";
-import { Button } from "./ui/button";
 
 const NoAccess = ({
   details = "Faça login para visualizar os itens do seu carrinho e finalizar a compra. Não perca seus produtos favoritos!",

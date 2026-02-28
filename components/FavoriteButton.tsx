@@ -1,10 +1,10 @@
 "use client";
-import { Product } from "@/sanity.types";
-import useStore from "@/store";
 import { Heart } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import type { Product } from "@/sanity.types";
+import useStore from "@/store";
 
 const FavoriteButton = ({
   showProduct = false,
@@ -45,6 +45,7 @@ const FavoriteButton = ({
         </Link>
       ) : (
         <button
+          type="button"
           onClick={handleFavorite}
           className="group relative hover:text-shop_light_green hoverEffect border border-shop_light_green/80 hover:border-shop_light_green p-1.5 rounded-sm"
         >
