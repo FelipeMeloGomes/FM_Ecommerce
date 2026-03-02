@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { calculateShipping } from "@/actions/calculateShipping";
 import type { ShippingQuote } from "@/core/shipping/ShippingQuote";
+import { formatCep, isValidCep } from "@/helpers/validateCep";
 import type { CartItem } from "@/store";
 
 export function ShippingCalculator({
@@ -19,17 +20,12 @@ export function ShippingCalculator({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // CEP BR
-  const CEP_REGEX = /^[0-9]{5}-?[0-9]{3}$/;
-
   const handleChange = (value: string) => {
-    // hifen até 9 caracteres
-    const sanitized = value.replace(/[^\d-]/g, "").slice(0, 9);
-    setCep(sanitized);
+    setCep(formatCep(value));
   };
 
   const handleCalculate = async () => {
-    if (!CEP_REGEX.test(cep)) {
+    if (!isValidCep(cep)) {
       setError("CEP inválido. Use 12345678 ou 12345-678.");
       return;
     }
