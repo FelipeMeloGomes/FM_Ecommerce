@@ -69,6 +69,15 @@ export const addressType = defineType({
     }),
 
     defineField({
+      name: "clerkUserId",
+      title: "Clerk User ID",
+      type: "string",
+      hidden: true,
+      readOnly: true,
+      validation: (Rule) => Rule.required(),
+    }),
+
+    defineField({
       name: "createdAt",
       title: "Created At",
       type: "datetime",
