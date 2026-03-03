@@ -1,14 +1,10 @@
-name: CI
+name: Continuous Integration
 
 on:
   push:
-    branches:
-      - main
-      - beta
+    branches: [main, beta]
   pull_request:
-    branches:
-      - main
-      - beta
+    branches: [main, beta]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -16,53 +12,40 @@ concurrency:
 
 jobs:
   build-and-test:
-    name: Build, Lint and Test
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
+
     env:
       CI: true
+      NEXT_TELEMETRY_DISABLED: 1
 
     steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Instalar pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 10.30.0
-          run_install: false
 
-      - name: Setup Node.js (LTS mais recente)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 20
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Verificar pnpm
-        run: |
-          pnpm -v
-          which pnpm
-
-      - name: Cache dependências (node_modules)
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-pnpm-deps-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-deps-
-
-      - name: Instalar dependências
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Rodar lint
+      - name: Lint
         run: pnpm run lint
 
-      - name: Rodar testes unitários
+      - name: Type Check
+        run: pnpm run typecheck
+
+      - name: Test
         run: pnpm run test
 
-      - name: Rodar build
+      - name: Build
         run: pnpm run build
