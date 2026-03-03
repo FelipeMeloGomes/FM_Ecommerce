@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-
+import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -111,10 +111,10 @@ export default function NewProductPage() {
         setImages([]);
       });
 
-      alert("Produto criado com sucesso!");
+      toast.success("Produto criado com sucesso!");
     } catch (error) {
       console.error(error);
-      alert("Erro ao criar produto");
+      toast.error("Erro ao criar produto");
     } finally {
       setLoading(false);
     }

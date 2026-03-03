@@ -1,5 +1,3 @@
-// app/admin/layout.tsx
-
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/requireAdmin";
 

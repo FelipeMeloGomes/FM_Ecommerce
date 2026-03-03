@@ -35,16 +35,39 @@ export async function POST(request: Request) {
       imageFiles,
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (error: unknown) {
-    if (error instanceof Error && error.message === "Slug já existe") {
-      return NextResponse.json({ message: error.message }, { status: 400 });
+    // 🔎 LOG COMPLETO PARA PRODUÇÃO
+    console.error("==================================");
+    console.error("CREATE PRODUCT ERROR:");
+    console.error("Time:", new Date().toISOString());
+    console.error("Error object:", error);
+    console.error("==================================");
+
+    // 🔹 Erros de domínio (regra de negócio)
+    if (error instanceof Error) {
+      if (error.message === "Slug já existe") {
+        return NextResponse.json(
+          { success: false, error: error.message },
+          { status: 400 },
+        );
+      }
+
+      // Retorna mensagem real apenas em ambiente de desenvolvimento
+      if (process.env.NODE_ENV === "development") {
+        return NextResponse.json(
+          { success: false, error: error.message },
+          { status: 500 },
+        );
+      }
     }
 
-    console.error(error);
-
+    // 🔒 Em produção não expõe detalhes internos
     return NextResponse.json(
-      { message: "Erro interno do servidor" },
+      {
+        success: false,
+        error: "Erro interno do servidor",
+      },
       { status: 500 },
     );
   }
