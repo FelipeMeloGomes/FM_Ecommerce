@@ -29,18 +29,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.30.0
+          run_install: false
+
       - name: Setup Node.js (LTS mais recente)
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-      
-      - name: Instalar pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 10.30.0
-          run_install: false
 
       - name: Verificar pnpm
         run: |
