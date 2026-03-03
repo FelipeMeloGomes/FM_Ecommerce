@@ -34,11 +34,12 @@ jobs:
         with:
           node-version: lts/*
           cache: pnpm
-
-      - name: Habilitar Corepack e preparar pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@10.30.0 --activate
+      
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.30.0
+          run_install: false
 
       - name: Cache dependências (node_modules)
         uses: actions/cache@v4
