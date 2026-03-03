@@ -20,6 +20,8 @@ jobs:
     env:
       CI: true
       NEXT_TELEMETRY_DISABLED: 1
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      NEXT_PUBLIC_SANITY_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_DATASET }}
 
     steps:
       - uses: actions/checkout@v4
