@@ -30,7 +30,16 @@ describe("createCheckoutSession", () => {
       _rev: "",
       name: "Produto X",
       price: 100,
-      images: [{} as any],
+      images: [
+        {
+          _key: "image-1",
+          _type: "image",
+          asset: {
+            _type: "reference",
+            _ref: "image-test-123",
+          },
+        },
+      ],
     };
 
     const items = [{ product, quantity: 2 }];

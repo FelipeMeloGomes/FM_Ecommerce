@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Address, Product } from "../../sanity.types";
@@ -17,10 +18,10 @@ vi.mock("@clerk/nextjs", () => {
 });
 
 vi.mock("@/components/Container", () => ({
-  default: ({ children }: any) => children,
+  default: ({ children }: { children: ReactNode }) => children,
 }));
 vi.mock("@/components/Title", () => ({
-  default: ({ children }: any) => children,
+  default: ({ children }: { children: ReactNode }) => children,
 }));
 vi.mock("@/components/cart/CartItemsList", () => ({ default: () => null }));
 vi.mock("@/components/cart/AddressSection", () => ({ default: () => null }));
@@ -102,7 +103,7 @@ beforeEach(() => {
 describe("CartClient - tratamento de erro no checkout", () => {
   it("exibe toast de erro e não redireciona quando createCheckoutSession falha", async () => {
     const toastMod = await import("react-hot-toast");
-    const toast = (toastMod as any).default;
+    const toast = toastMod.default;
     const { default: CartClient } = await import(
       "@/app/(client)/cart/CartClient"
     );
