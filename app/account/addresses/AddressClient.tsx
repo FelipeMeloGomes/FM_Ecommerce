@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { deleteAddress } from "@/actions/deleteAddress";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Address } from "@/sanity.types";
 import AddressForm from "./AddressForm";
 
@@ -22,47 +24,58 @@ export default function AddressesClient({
     <div className="flex flex-col items-center">
       <AddressForm key={editingAddress?._id} address={editingAddress} />
 
-      <div className="mt-10 space-y-4 max-w-md w-full mx-auto">
-        {addresses.length === 0 && (
-          <p className="text-gray-500 text-center">
-            Nenhum endereço cadastrado.
-          </p>
-        )}
+      <div className="mt-8 max-w-md w-full mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>Endereços cadastrados</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {addresses.length === 0 && (
+              <p className="text-muted-foreground text-sm text-center">
+                Nenhum endereço cadastrado.
+              </p>
+            )}
 
-        {addresses.map((address: Address) => (
-          <div
-            key={address._id}
-            className="border p-4 rounded-md bg-white shadow-sm"
-          >
-            <p className="font-semibold">
-              {address.name} {address.default && "(Padrão)"}
-            </p>
-
-            <p className="text-sm text-gray-600">
-              {address.address}, {address.city} - {address.state}
-            </p>
-
-            <p className="text-sm text-gray-600">{address.zip}</p>
-
-            <div className="flex gap-4 mt-3">
-              <button
-                type="button"
-                onClick={() => setEditingAddress(address)}
-                className="text-blue-600 text-sm"
+            {addresses.map((address: Address) => (
+              <div
+                key={address._id}
+                className="flex items-center justify-between rounded-md border p-3 hover:bg-muted/30"
               >
-                Editar
-              </button>
+                <div className="grid gap-1">
+                  <span className="font-medium">
+                    {address.name} {address.default && "(Padrão)"}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {address.address}, {address.city} - {address.state}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {address.zip}
+                  </span>
+                </div>
 
-              <button
-                type="button"
-                onClick={() => deleteAddress(address._id)}
-                className="text-red-600 text-sm"
-              >
-                Excluir
-              </button>
-            </div>
-          </div>
-        ))}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingAddress(address)}
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                    onClick={() => deleteAddress(address._id)}
+                  >
+                    Excluir
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

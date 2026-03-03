@@ -5,6 +5,10 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { createAddress } from "@/actions/createAddress";
 import { updateAddress } from "@/actions/updateAddress";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatCep, isValidCep } from "@/helpers/validateCep";
 import type { Address } from "@/sanity.types";
 
@@ -61,66 +65,84 @@ export default function AddressForm({ address }: AddressFormProps) {
   };
 
   return (
-    <form action={handleSubmit} className="space-y-4 max-w-md mx-auto">
-      <input
-        name="name"
-        defaultValue={address?.name}
-        placeholder="Nome (Casa, Trabalho)"
-        required
-        className="border p-2 w-full"
-      />
-      <input
-        name="address"
-        defaultValue={address?.address}
-        placeholder="Rua e número"
-        required
-        className="border p-2 w-full"
-      />
-      <input
-        name="city"
-        defaultValue={address?.city}
-        placeholder="Cidade"
-        required
-        className="border p-2 w-full"
-      />
-      <input
-        name="state"
-        defaultValue={address?.state}
-        maxLength={2}
-        placeholder="Estado (GO)"
-        required
-        className="border p-2 w-full "
-      />
-      <input
-        name="zip"
-        value={cep}
-        onChange={(e) => handleCepChange(e.target.value)}
-        defaultValue={address?.zip}
-        placeholder="CEP"
-        required
-        className="border p-2 w-full"
-      />
+    <form
+      action={handleSubmit}
+      className="space-y-6 max-w-md mx-auto bg-white border rounded-md p-6"
+    >
+      <div className="space-y-2">
+        <Label htmlFor="name">Nome</Label>
+        <Input
+          id="name"
+          name="name"
+          defaultValue={address?.name}
+          placeholder="Casa, Trabalho"
+          required
+        />
+      </div>
 
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
+      <div className="space-y-2">
+        <Label htmlFor="address">Endereço</Label>
+        <Input
+          id="address"
+          name="address"
+          defaultValue={address?.address}
+          placeholder="Rua e número"
+          required
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="city">Cidade</Label>
+          <Input
+            id="city"
+            name="city"
+            defaultValue={address?.city}
+            placeholder="Cidade"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="state">Estado</Label>
+          <Input
+            id="state"
+            name="state"
+            defaultValue={address?.state}
+            maxLength={2}
+            placeholder="GO"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="zip">CEP</Label>
+        <Input
+          id="zip"
+          name="zip"
+          value={cep}
+          onChange={(e) => handleCepChange(e.target.value)}
+          placeholder="00000-000"
+          required
+        />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="default"
           name="default"
           defaultChecked={address?.default}
         />
-        Definir como padrão
-      </label>
+        <Label htmlFor="default">Definir como padrão</Label>
+      </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-black text-white px-4 py-2 rounded"
-      >
+      <Button type="submit" disabled={loading} className="w-full">
         {loading
           ? "Salvando..."
           : address
             ? "Atualizar Endereço"
             : "Salvar Endereço"}
-      </button>
+      </Button>
     </form>
   );
 }

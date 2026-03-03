@@ -37,65 +37,69 @@ const AddressSection = ({
   }
 
   return (
-    <div className="bg-white rounded-md mt-5">
+    <div className="mt-5">
       <Card>
         <CardHeader>
           <CardTitle>Endereço de Entrega</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
           <RadioGroup
             value={selectedAddressId ?? ""}
             onValueChange={(value) => onSelectAddress(value)}
+            className="space-y-3"
           >
             {addresses.map((address) => (
               <div
                 key={address._id}
-                className="flex flex-col items-start justify-between mb-4"
+                className="flex items-center justify-between rounded-md border p-3 hover:bg-muted/30"
               >
-                <div className="flex items-start space-x-2 flex-1">
+                <div className="flex items-start gap-2 flex-1">
                   <RadioGroupItem
                     value={address._id}
                     id={`address-${address._id}`}
                   />
-
                   <Label
                     htmlFor={`address-${address._id}`}
-                    className="grid gap-1.5 cursor-pointer"
+                    className="grid gap-1 cursor-pointer"
                   >
-                    <span className="font-semibold">
+                    <span className="font-medium">
                       {address.name} {address.default && "(Padrão)"}
                     </span>
-                    <span className="text-sm text-black/60">
+                    <span className="text-sm text-muted-foreground">
                       {address.address}, {address.city}, {address.state}{" "}
                       {address.zip}
                     </span>
                   </Label>
                 </div>
 
-                <div className="flex flex-wrap gap-3 mt-4">
-                  <button
+                <div className="flex flex-wrap gap-2">
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={() => router.push("/account/addresses")}
-                    className="px-3 py-1.5 text-sm border rounded-md bg-white hover:bg-gray-100 transition"
                   >
-                    Novo endereço
-                  </button>
-                  <button
+                    Novo
+                  </Button>
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={() =>
                       router.push(`/account/addresses?edit=${address._id}`)
                     }
-                    className="px-3 py-1.5 text-sm border rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
                   >
-                    Editar endereço
-                  </button>
-                  <button
+                    Editar
+                  </Button>
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
                     onClick={() => onDeleteAddress(address._id)}
-                    className="px-3 py-1.5 text-sm border border-red-600 text-red-600 rounded-md hover:bg-red-600 hover:text-white transition"
                   >
-                    Apagar endereço
-                  </button>
+                    Apagar
+                  </Button>
                 </div>
               </div>
             ))}
