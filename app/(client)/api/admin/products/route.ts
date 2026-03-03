@@ -4,21 +4,16 @@ import { requireAdmin } from "@/lib/requireAdmin";
 import { SanityImageGateway } from "@/services/products/SanityImageGateway";
 import { SanityProductRepository } from "@/services/products/SanityProductRepository";
 import { SlugService } from "@/services/products/SlugService";
-
 export async function POST(request: Request) {
   try {
     await requireAdmin();
-
     const formData = await request.formData();
-
     const imageFiles = formData.getAll("images") as File[];
-
     const useCase = new CreateProduct(
       new SanityProductRepository(),
       new SlugService(),
       new SanityImageGateway(),
     );
-
     await useCase.execute({
       name: String(formData.get("name")),
       description: String(formData.get("description") ?? ""),
@@ -34,40 +29,14 @@ export async function POST(request: Request) {
       isFeatured: formData.get("isFeatured") === "true",
       imageFiles,
     });
-
-    return NextResponse.json({ success: true }, { status: 201 });
+    return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    // 🔎 LOG COMPLETO PARA PRODUÇÃO
-    console.error("==================================");
-    console.error("CREATE PRODUCT ERROR:");
-    console.error("Time:", new Date().toISOString());
-    console.error("Error object:", error);
-    console.error("==================================");
-
-    // 🔹 Erros de domínio (regra de negócio)
-    if (error instanceof Error) {
-      if (error.message === "Slug já existe") {
-        return NextResponse.json(
-          { success: false, error: error.message },
-          { status: 400 },
-        );
-      }
-
-      // Retorna mensagem real apenas em ambiente de desenvolvimento
-      if (process.env.NODE_ENV === "development") {
-        return NextResponse.json(
-          { success: false, error: error.message },
-          { status: 500 },
-        );
-      }
+    if (error instanceof Error && error.message === "Slug já existe") {
+      return NextResponse.json({ message: error.message }, { status: 400 });
     }
-
-    // 🔒 Em produção não expõe detalhes internos
+    console.error(error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Erro interno do servidor",
-      },
+      { message: "Erro interno do servidor" },
       { status: 500 },
     );
   }
