@@ -4,10 +4,7 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import { ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import {
-  createCheckoutSession,
-  type Metadata,
-} from "@/actions/createCheckoutSession";
+import { createCheckoutSession } from "@/actions/createCheckoutSession";
 import { deleteAddress } from "@/actions/deleteAddress";
 import Container from "@/components/Container";
 import AddressSection from "@/components/cart/AddressSection";
@@ -23,6 +20,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { confirmToast } from "@/helpers/confirmToast";
 import type { Address } from "@/sanity.types";
 import useStore from "@/store";
+import { performCheckout } from "./checkoutLogic";
 
 interface CartClientProps {
   addresses: Address[];
@@ -54,33 +52,24 @@ const CartClient = ({ addresses }: CartClientProps) => {
   };
 
   const handleCheckout = async () => {
-    if (!selectedAddress) {
-      toast.error("Selecione um endereço de entrega");
-      return;
-    }
-
-    if (!shipping) {
-      toast.error("Selecione uma opção de frete");
-      return;
-    }
     setLoading(true);
     try {
-      const metadata: Metadata = {
-        orderNumber: crypto.randomUUID(),
-        customerName: user?.fullName ?? "Unknown",
-        customerEmail: user?.emailAddresses[0]?.emailAddress ?? "Unknown",
-        clerkUserId: user?.id,
-        address: selectedAddress,
-      };
-      const checkoutUrl = await createCheckoutSession(groupedItems, metadata, {
-        service: shipping.service,
-        price: shipping.price,
-      });
+      const checkoutUrl = await performCheckout(
+        groupedItems,
+        user,
+        selectedAddress,
+        shipping,
+        { createCheckoutSession },
+      );
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       }
     } catch (error) {
-      console.error("Error creating checkout session:", error);
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        console.error("Error creating checkout session:", error);
+      }
     } finally {
       setLoading(false);
     }
