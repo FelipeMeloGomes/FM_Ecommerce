@@ -48,7 +48,7 @@ const Header = async () => {
           )}
           {isAdmin && (
             <Link
-              href="/admin/add"
+              href="/admin/products"
               className="group relative hover:text-shop_light_green hoverEffect"
             >
               <Plus />

@@ -1,4 +1,5 @@
 export interface Product {
+  _id?: string;
   name: string;
   slug: string;
   description: string;
@@ -12,6 +13,17 @@ export interface Product {
   status?: string;
   variant?: string;
   isFeatured: boolean;
+  brand?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+  };
+  categories?: {
+    _type: "reference";
+    _ref: string;
+    _key?: string;
+    _weak?: boolean;
+  }[];
   images: ProductImage[];
 }
 

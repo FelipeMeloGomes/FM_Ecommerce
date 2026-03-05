@@ -16,6 +16,14 @@ export interface CreateProductInput {
   status?: string;
   variant?: string;
   isFeatured: boolean;
+  categories: {
+    _type: "reference";
+    _ref: string;
+  }[];
+  brand?: {
+    _type: "reference";
+    _ref: string;
+  };
   imageFiles?: File[];
 }
 
@@ -39,6 +47,8 @@ export class CreateProduct {
 
     const product: Product = {
       name: input.name,
+      slug,
+      images,
       description: input.description,
       price: input.price,
       discount: input.discount,
@@ -50,8 +60,8 @@ export class CreateProduct {
       status: input.status,
       variant: input.variant,
       isFeatured: input.isFeatured,
-      slug,
-      images,
+      brand: input.brand,
+      categories: input.categories,
     };
 
     await this.repository.create(product);

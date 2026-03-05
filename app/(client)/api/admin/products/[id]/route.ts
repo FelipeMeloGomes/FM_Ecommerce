@@ -1,20 +1,31 @@
 import { NextResponse } from "next/server";
-import { CreateProduct } from "@/core/products/CreateProduct";
+import { DeleteProduct } from "@/core/products/DeleteProduct";
+import { UpdateProduct } from "@/core/products/UpdateProduct";
+import { extractImagesFromFormData } from "@/lib/extractImagesFromFormData";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { SanityImageGateway } from "@/services/products/SanityImageGateway";
 import { SanityProductRepository } from "@/services/products/SanityProductRepository";
 import { SlugService } from "@/services/products/SlugService";
-export async function POST(request: Request) {
+
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     await requireAdmin();
+    const { id } = await params;
     const formData = await request.formData();
-    const imageFiles = formData.getAll("images") as File[];
-    const useCase = new CreateProduct(
+
+    const { existingImages, newImageFiles } =
+      extractImagesFromFormData(formData);
+
+    const useCase = new UpdateProduct(
       new SanityProductRepository(),
-      new SlugService(),
       new SanityImageGateway(),
     );
+
     await useCase.execute({
+      id,
       name: String(formData.get("name")),
       description: String(formData.get("description") ?? ""),
       price: Number(formData.get("price")),
@@ -26,6 +37,7 @@ export async function POST(request: Request) {
       length: Number(formData.get("length")),
       status: formData.get("status")?.toString(),
       variant: formData.get("variant")?.toString(),
+      isFeatured: formData.get("isFeatured") === "true",
       categories: formData.getAll("categories").map((id) => ({
         _type: "reference",
         _ref: String(id),
@@ -37,14 +49,37 @@ export async function POST(request: Request) {
             _ref: String(formData.get("brand")),
           }
         : undefined,
-      isFeatured: formData.get("isFeatured") === "true",
-      imageFiles,
+      existingImages,
+      newImageFiles,
+      slugService: new SlugService(),
     });
+
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "Slug já existe") {
       return NextResponse.json({ message: error.message }, { status: 400 });
     }
+    console.error(error);
+    return NextResponse.json(
+      { message: "Erro interno do servidor" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    await requireAdmin();
+    const { id } = await params;
+
+    const useCase = new DeleteProduct(new SanityProductRepository());
+    await useCase.execute(id);
+
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
     console.error(error);
     return NextResponse.json(
       { message: "Erro interno do servidor" },
