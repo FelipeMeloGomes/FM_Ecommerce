@@ -22,6 +22,8 @@ O projeto simula um ambiente real de mercado, incluindo autenticação de usuár
 - **Stripe**
 - **Clerk** (autenticação e registro de usuários)
 - **Biome** (linting e formatação)
+- **Vitest** (testes unitários)
+- **GitHub Actions** (CI/CD)
 
 ---
 
@@ -40,6 +42,49 @@ A configuração está definida no arquivo `biome.json`.
 
 ---
 
+## 🧪 Testes
+
+O projeto possui **testes unitários** para os casos de uso de produtos, garantindo:
+
+- Criação de produtos
+- Atualização de produtos
+- Exclusão de produtos
+- Validação de regras de negócio
+- Tratamento de erros (produto inexistente, slug duplicado, etc.)
+
+Os testes foram implementados utilizando **Vitest**, com mocks para:
+
+- Repositório de produtos
+- Geração de slug
+- Upload de imagens
+
+Para rodar os testes:
+
+```bash
+pnpm test
+```
+
+---
+
+## 🔀 Estratégia de Branches
+
+Este projeto utiliza uma organização de branches para manter estabilidade e qualidade no código.
+
+### 🌿 `beta`
+
+- Branch utilizada para desenvolvimento.
+- Onde novas funcionalidades são integradas.
+- Ambiente de validação.
+- Pode executar testes e lint automaticamente.
+
+### 🚀 `main`
+
+- Representa a versão estável do projeto.
+- Código em produção.
+- Deve receber alterações apenas após validação na `beta`.
+
+---
+
 ## ✅ Features Implementadas
 
 - Autenticação de usuários (login, cadastro e rotas protegidas)
@@ -49,6 +94,7 @@ A configuração está definida no arquivo `biome.json`.
 - Checkout e pagamentos integrados
 - Geração e registro de pedidos
 - Interface responsiva com feedback de estados
+- Cadastrado e gerenciamento de produtos via dashboard administrativo
 
 ---
 
