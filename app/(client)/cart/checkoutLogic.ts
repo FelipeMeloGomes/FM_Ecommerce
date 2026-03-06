@@ -18,7 +18,6 @@ export interface CheckoutDeps {
   createCheckoutSession: (
     items: { product: CartItem["product"]; quantity: number }[],
     metadata: Metadata,
-    shipping: { service: string; price: number },
   ) => Promise<string>;
 }
 
@@ -42,12 +41,14 @@ export async function performCheckout(
     customerEmail: user?.emailAddresses?.[0]?.emailAddress ?? "Unknown",
     clerkUserId: user?.id,
     address: selectedAddress,
+    shipping: {
+      method: shipping.service,
+      price: shipping.price,
+      estimatedDays: shipping.deliveryDays,
+    },
   };
 
-  const url = await deps.createCheckoutSession(items, metadata, {
-    service: shipping.service,
-    price: shipping.price,
-  });
+  const url = await deps.createCheckoutSession(items, metadata);
 
   return url;
 }

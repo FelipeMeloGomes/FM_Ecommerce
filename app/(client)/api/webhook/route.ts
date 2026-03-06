@@ -2,8 +2,6 @@ import { paymentGateway } from "@/config/paymentGateway";
 import { createOrder } from "@/services/orders/createOrder";
 
 export async function POST(req: Request) {
-  console.log("🚀 Webhook received");
-
   const body = await req.text();
   console.log("📦 Raw body received");
 

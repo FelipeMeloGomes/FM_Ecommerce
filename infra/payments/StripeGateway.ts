@@ -10,6 +10,7 @@ export class StripeGateway implements PaymentGateway {
     body: string,
     signature: string,
   ): Promise<PaymentSession | null> {
+    console.log("🧪 Starting webhook verification...");
     const secret = getEnv("STRIPE_WEBHOOK_SECRET");
 
     const event = this.stripe.webhooks.constructEvent(body, signature, secret);
@@ -17,6 +18,9 @@ export class StripeGateway implements PaymentGateway {
     if (event.type !== "checkout.session.completed") return null;
 
     const session = event.data.object as Stripe.Checkout.Session;
+    console.log("🎯 Stripe session id:", session.id);
+    console.log("💰 Payment status:", session.payment_status);
+    console.log("📦 Metadata raw:", session.metadata);
 
     if (!session.amount_total || !session.currency) {
       throw new Error("Invalid Stripe session data.");
