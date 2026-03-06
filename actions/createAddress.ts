@@ -23,7 +23,6 @@ export async function createAddress(data: CreateAddressInput) {
   await writeClient.create({
     _type: "address",
     ...data,
-    clerkUserId: userId,
   });
 
   revalidatePath("/account/addresses");
