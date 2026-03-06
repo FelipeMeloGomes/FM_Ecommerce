@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { getEnv } from "@/config/env";
 import type {
+import { *asAccordionPrimitive } from '@radix-ui/react-accordion';
   CheckoutGateway,
   CheckoutItem,
   CheckoutMetadata,
@@ -26,6 +27,7 @@ export class StripeCheckoutGateway implements CheckoutGateway {
       metadata: {
         ...metadata,
         address: JSON.stringify(metadata.address),
+        shipping: JSON.stringify(metadata.shipping),
       },
       mode: "payment",
       allow_promotion_codes: true,
