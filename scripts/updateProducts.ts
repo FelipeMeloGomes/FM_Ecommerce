@@ -21,7 +21,6 @@ async function updateProducts() {
         length: product.length ?? 20,
       })
       .commit();
-    console.log(`Produto atualizado: ${product.name}`);
   }
 
   console.log("Todos os produtos foram atualizados!");

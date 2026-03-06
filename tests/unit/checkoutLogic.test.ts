@@ -62,6 +62,7 @@ describe("checkoutLogic.performCheckout", () => {
     const deps = {
       createCheckoutSession: vi.fn(async () => "https://checkout.example/ok"),
     };
+
     const url = await performCheckout(
       [{ product: product(), quantity: 2 }],
       {
@@ -73,11 +74,19 @@ describe("checkoutLogic.performCheckout", () => {
       { service: "SEDEX", price: 29.9 },
       deps,
     );
+
     expect(url).toBe("https://checkout.example/ok");
     expect(deps.createCheckoutSession).toHaveBeenCalledTimes(1);
-    const args = deps.createCheckoutSession.mock.calls[0];
-    expect(args[0]).toHaveLength(1);
-    expect(args[2]).toEqual({ service: "SEDEX", price: 29.9 });
+
+    const [itemsArg, metadataArg] = deps.createCheckoutSession.mock.calls[0];
+
+    expect(itemsArg).toHaveLength(1);
+
+    expect(metadataArg.shipping).toEqual({
+      method: "SEDEX",
+      price: 29.9,
+      estimatedDays: undefined,
+    });
   });
 
   it("falha quando createCheckoutSession lança erro e não retorna URL", async () => {

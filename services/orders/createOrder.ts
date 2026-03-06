@@ -3,23 +3,14 @@ import { backendClient } from "@/sanity/lib/backendClient";
 import { updateStock } from "./updateStock";
 
 export async function createOrder(session: PaymentSession) {
-  const {
-    orderNumber,
-    customerName,
-    customerEmail,
-    clerkUserId,
-    address,
-    shipping,
-  } = session.metadata;
+  const { orderNumber, customerName, customerEmail, address, shipping } =
+    session.metadata;
 
   const products = session.products.map((p) => ({
     _key: crypto.randomUUID(),
     product: { _type: "reference", _ref: p.productId },
     quantity: p.quantity,
   }));
-
-  console.log("ADDRESS:", address);
-  console.log("SHIPPING:", shipping);
 
   await backendClient.create({
     _type: "order",
@@ -29,7 +20,6 @@ export async function createOrder(session: PaymentSession) {
     stripeCustomerId: session.stripeCustomerId,
     customerName,
     email: customerEmail,
-    clerkUserId,
     currency: session.currency,
     totalPrice: session.total,
     products,

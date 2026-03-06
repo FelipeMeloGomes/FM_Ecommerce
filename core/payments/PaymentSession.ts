@@ -6,7 +6,7 @@ export interface PaymentProduct {
 export interface PaymentInvoice {
   id: string;
   number: string | null;
-  url: string | null;
+  hosted_invoice_url: string | null;
 }
 
 export interface PaymentAddress {
@@ -28,7 +28,6 @@ export interface PaymentMetadata {
   orderNumber: string;
   customerName: string;
   customerEmail: string;
-  clerkUserId: string;
   address?: PaymentAddress;
   shipping?: PaymentShipping;
 }

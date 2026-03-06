@@ -39,7 +39,6 @@ export async function performCheckout(
     orderNumber: crypto.randomUUID(),
     customerName: user?.fullName ?? "Unknown",
     customerEmail: user?.emailAddresses?.[0]?.emailAddress ?? "Unknown",
-    clerkUserId: user?.id,
     address: selectedAddress,
     shipping: {
       method: shipping.service,

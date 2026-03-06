@@ -5,7 +5,7 @@ import type { Product } from "../../sanity.types";
 vi.mock("../../config/checkoutGateway", () => {
   return {
     checkoutGateway: {
-      createSession: vi.fn(async (items: unknown[], _metadata: unknown) => {
+      createSession: vi.fn(async (items: unknown[]) => {
         return JSON.stringify(items);
       }),
     },
@@ -21,7 +21,7 @@ vi.mock("../../sanity/lib/image", () => {
 });
 
 describe("createCheckoutSession", () => {
-  it("mapeia itens e inclui linha de frete corretamente", async () => {
+  it("mapeia itens corretamente", async () => {
     const product: Product = {
       _id: "prod-1",
       _type: "product",
@@ -30,16 +30,7 @@ describe("createCheckoutSession", () => {
       _rev: "",
       name: "Produto X",
       price: 100,
-      images: [
-        {
-          _key: "image-1",
-          _type: "image",
-          asset: {
-            _type: "reference",
-            _ref: "image-test-123",
-          },
-        },
-      ],
+      images: [],
     };
 
     const items = [{ product, quantity: 2 }];
@@ -50,27 +41,15 @@ describe("createCheckoutSession", () => {
       customerEmail: "john@example.com",
     };
 
-    const shipping = { service: "SEDEX", price: 29.9 };
+    const result = await createCheckoutSession(items, metadata);
 
-    const result = await createCheckoutSession(items, metadata, shipping);
+    const parsed = JSON.parse(result);
 
-    const parsed = JSON.parse(result) as Array<{
-      productId: string;
-      name: string;
-      price: number;
-      quantity: number;
-    }>;
-
-    expect(parsed.length).toBe(2);
+    expect(parsed.length).toBe(1);
 
     expect(parsed[0].productId).toBe("prod-1");
     expect(parsed[0].name).toBe("Produto X");
     expect(parsed[0].price).toBe(100);
     expect(parsed[0].quantity).toBe(2);
-
-    expect(parsed[1].productId).toBe("shipping:SEDEX");
-    expect(parsed[1].name).toBe("Frete - SEDEX");
-    expect(parsed[1].price).toBe(29.9);
-    expect(parsed[1].quantity).toBe(1);
   });
 });

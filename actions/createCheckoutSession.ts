@@ -20,7 +20,6 @@ export interface Metadata {
   orderNumber: string;
   customerName: string;
   customerEmail: string;
-  clerkUserId?: string;
   address: Address;
   shipping: ShippingMetadata;
 }

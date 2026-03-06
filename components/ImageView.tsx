@@ -27,7 +27,6 @@ interface Props {
 
 const ImageView = ({ images = [], isStock }: Props) => {
   const [active, setActive] = useState(images[0]);
-  console.log(active);
 
   return (
     <div className="w-full md:w-1/2 space-y-2 md:space-y-4">

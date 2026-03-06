@@ -21,7 +21,6 @@ export class MelhorEnvioGateway implements ShippingGateway {
       quantity: number;
     }[],
   ): Promise<ShippingQuote[]> {
-    console.log(items);
     const response = await fetch(API_URL, {
       method: "POST",
       headers: {
