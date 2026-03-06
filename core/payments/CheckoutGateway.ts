@@ -6,13 +6,28 @@ export interface CheckoutItem {
   price: number;
   quantity: number;
 }
+export interface CheckoutAddress {
+  state?: string;
+  zip?: string;
+  city?: string;
+  address?: string;
+  name?: string;
+}
+
+export interface CheckoutShipping {
+  method?: string;
+  carrier?: string;
+  price?: number;
+  estimatedDays?: number;
+}
 
 export interface CheckoutMetadata {
   orderNumber: string;
   customerName: string;
   customerEmail: string;
   clerkUserId?: string;
-  address?: unknown;
+  address?: CheckoutAddress;
+  shipping?: CheckoutShipping;
 }
 export interface CheckoutGateway {
   createSession(
