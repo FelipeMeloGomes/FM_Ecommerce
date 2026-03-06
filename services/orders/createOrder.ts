@@ -18,6 +18,9 @@ export async function createOrder(session: PaymentSession) {
     quantity: p.quantity,
   }));
 
+  console.log("ADDRESS:", address);
+  console.log("SHIPPING:", shipping);
+
   await backendClient.create({
     _type: "order",
     orderNumber,
