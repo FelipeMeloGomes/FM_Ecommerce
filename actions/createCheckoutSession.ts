@@ -29,7 +29,6 @@ export async function createCheckoutSession(
   items: GroupedCartItems[],
   metadata: Metadata,
 ) {
-  const { shipping } = metadata;
   const mappedItems = items.map((item) => {
     if (!item.product.name) {
       throw new Error(
@@ -53,15 +52,6 @@ export async function createCheckoutSession(
       price: item.product.price,
       quantity: item.quantity,
     };
-  });
-
-  mappedItems.push({
-    productId: `shipping:${shipping.method}`,
-    name: `Frete - ${shipping.method}`,
-    description: "Serviço de entrega",
-    image: undefined,
-    price: shipping.price,
-    quantity: 1,
   });
 
   return checkoutGateway.createSession(mappedItems, metadata);
