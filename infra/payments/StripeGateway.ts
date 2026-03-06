@@ -31,11 +31,22 @@ export class StripeGateway implements PaymentGateway {
       { expand: ["data.price.product"] },
     );
 
+    const raw = session.metadata as Record<string, string>;
+
     return {
       id: session.id,
+      stripePaymentIntentId: session.payment_intent as string,
+      stripeCustomerId: session.customer as string,
       total: session.amount_total / 100,
       currency: session.currency,
-      metadata: session.metadata as Record<string, string>,
+      metadata: {
+        orderNumber: raw.orderNumber,
+        customerName: raw.customerName,
+        customerEmail: raw.customerEmail,
+        clerkUserId: raw.clerkUserId,
+        address: raw.address ? JSON.parse(raw.address) : undefined,
+        shipping: raw.shipping ? JSON.parse(raw.shipping) : undefined,
+      },
 
       products: items.data.map((i) => ({
         productId: (i.price?.product as Stripe.Product).metadata.id,

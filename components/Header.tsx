@@ -9,7 +9,6 @@ import FavoriteButton from "./FavoriteButton";
 import HeaderMenu from "./HeaderMenu";
 import Logo from "./Logo";
 import MobileMenu from "./MobileMenu";
-import SearchBar from "./SearchBar";
 import SignIn from "./SignIn";
 
 const Header = async () => {
@@ -31,7 +30,6 @@ const Header = async () => {
         </div>
         <HeaderMenu />
         <div className="w-auto md:w-1/3 flex items-center justify-end gap-5">
-          <SearchBar />
           <CartIcon />
           <FavoriteButton />
 

@@ -127,6 +127,33 @@ export const orderType = defineType({
       ],
     }),
     defineField({
+      name: "shipping",
+      title: "Shipping",
+      type: "object",
+      fields: [
+        defineField({
+          name: "method",
+          title: "Shipping Method",
+          type: "string",
+        }),
+        defineField({
+          name: "carrier",
+          title: "Carrier",
+          type: "string",
+        }),
+        defineField({
+          name: "price",
+          title: "Shipping Price",
+          type: "number",
+        }),
+        defineField({
+          name: "estimatedDays",
+          title: "Estimated Delivery Days",
+          type: "number",
+        }),
+      ],
+    }),
+    defineField({
       name: "status",
       title: "Order Status",
       type: "string",
