@@ -16,9 +16,10 @@ const Header = async () => {
   const { userId } = await auth();
   const isAdmin = user?.publicMetadata?.role === "admin";
 
-  let orders = null;
+  let ordersData = null;
+
   if (userId) {
-    orders = await getMyOrders(userId);
+    ordersData = await getMyOrders(userId, 0, 1);
   }
 
   return (
@@ -40,7 +41,7 @@ const Header = async () => {
             >
               <Logs />
               <span className="absolute -top-1 -right-1 bg-shop_btn_dark_green text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
-                {orders?.length ? orders?.length : 0}
+                {ordersData?.total ?? 0}
               </span>
             </Link>
           )}

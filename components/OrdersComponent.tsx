@@ -2,8 +2,11 @@
 
 import { format } from "date-fns";
 import { X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { confirmToast } from "@/helpers/confirmToast";
+import { apiRequest } from "@/lib/api/apiRequest";
 import type { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
 import OrderDetailDialog from "./OrderDetailDialog";
 import PriceFormatter from "./PriceFormatter";
@@ -15,18 +18,55 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 
-const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
+const OrdersComponent = ({
+  orders,
+  isAdmin,
+}: {
+  orders: MY_ORDERS_QUERY_RESULT;
+  isAdmin: boolean;
+}) => {
+  const router = useRouter();
+
+  const [localOrders, setLocalOrders] =
+    useState<MY_ORDERS_QUERY_RESULT>(orders);
+
   const [selectedOrder, setSelectedOrder] = useState<
     MY_ORDERS_QUERY_RESULT[number] | null
   >(null);
-  const handleDelete = () => {
-    toast.error("Exclusão habilitada para o administrador");
+
+  const handleDelete = async (orderId: string) => {
+    confirmToast({
+      message: "Tem certeza que deseja deletar este pedido?",
+      onConfirm: async () => {
+        try {
+          await apiRequest<{ success: boolean }>(
+            `/api/admin/orders/${orderId}`,
+            {
+              method: "DELETE",
+            },
+          );
+
+          toast.success("Pedido deletado com sucesso");
+
+          setLocalOrders((prev) =>
+            prev.filter((order) => order._id !== orderId),
+          );
+
+          router.refresh();
+        } catch (error) {
+          toast.error(
+            error instanceof Error ? error.message : "Erro ao deletar pedido",
+          );
+        }
+      },
+    });
   };
+
   return (
     <>
       <TableBody>
         <TooltipProvider>
-          {orders.map((order) => (
+          {localOrders.map((order) => (
             <Tooltip key={order?.orderNumber}>
               <TooltipTrigger asChild>
                 <TableRow
@@ -68,18 +108,20 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
                       </p>
                     )}
                   </TableCell>
-                  <TableCell
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleDelete();
-                    }}
-                    className="flex items-center justify-center group"
-                  >
-                    <X
-                      size={20}
-                      className="group-hover:text-shop_dark_green hoverEffect"
-                    />
-                  </TableCell>
+                  {isAdmin && (
+                    <TableCell
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDelete(order._id);
+                      }}
+                      className="flex items-center justify-center group"
+                    >
+                      <X
+                        size={20}
+                        className="group-hover:text-shop_dark_green hoverEffect"
+                      />
+                    </TableCell>
+                  )}
                 </TableRow>
               </TooltipTrigger>
               <TooltipContent>

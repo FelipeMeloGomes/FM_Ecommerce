@@ -1,5 +1,7 @@
-import { auth } from "@clerk/nextjs/server";
-import { FileX } from "lucide-react";
+export const dynamic = "force-dynamic";
+
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { ChevronLeft, ChevronRight, FileX } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Container from "@/components/Container";
@@ -10,13 +12,28 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getMyOrders } from "@/sanity/queries";
 
-const OrdersPage = async () => {
+const OrdersPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) => {
   const { userId } = await auth();
-  if (!userId) {
-    return redirect("/");
-  }
+  if (!userId) return redirect("/");
 
-  const orders = await getMyOrders(userId);
+  const user = await currentUser();
+  const isAdmin = user?.publicMetadata?.role === "admin";
+
+  const params = await searchParams;
+
+  const LIMIT = 10;
+  const currentPage = Number(params?.page ?? "1");
+
+  const start = (currentPage - 1) * LIMIT;
+  const end = start + LIMIT;
+
+  const { orders, total } = await getMyOrders(userId, start, end);
+
+  const totalPages = Math.ceil(total / LIMIT);
 
   return (
     <div>
@@ -31,7 +48,7 @@ const OrdersPage = async () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px] md:w-auto">
+                      <TableHead className="w-25 md:w-auto">
                         Número do Pedido
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
@@ -49,10 +66,36 @@ const OrdersPage = async () => {
                       <TableHead className="text-center">Ação</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <OrdersComponent orders={orders} />
+                  <OrdersComponent orders={orders} isAdmin={isAdmin} />
                 </Table>
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
+
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-4 gap-2">
+                  <Button
+                    asChild
+                    disabled={currentPage <= 1}
+                    className="flex items-center gap-1"
+                  >
+                    <Link href={`/orders?page=${currentPage - 1}`}>
+                      <ChevronLeft size={16} /> Anterior
+                    </Link>
+                  </Button>
+                  <span className="flex items-center px-2">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <Button
+                    asChild
+                    disabled={currentPage >= totalPages}
+                    className="flex items-center gap-1"
+                  >
+                    <Link href={`/orders?page=${currentPage + 1}`}>
+                      Próximo <ChevronRight size={16} />
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ) : (

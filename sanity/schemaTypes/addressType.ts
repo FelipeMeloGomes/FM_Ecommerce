@@ -60,22 +60,6 @@ export const addressType = defineType({
             return true;
           }),
     }),
-    defineField({
-      name: "default",
-      title: "Default Address",
-      type: "boolean",
-      description: "Is this the default shipping address?",
-      initialValue: false,
-    }),
-
-    defineField({
-      name: "clerkUserId",
-      title: "Clerk User ID",
-      type: "string",
-      hidden: true,
-      readOnly: true,
-      validation: (Rule) => Rule.required(),
-    }),
 
     defineField({
       name: "createdAt",

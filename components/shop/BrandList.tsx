@@ -42,7 +42,7 @@ const BrandList = ({ brands, selectedBrand, setSelectedBrand }: Props) => {
           <button
             type="button"
             onClick={() => setSelectedBrand(null)}
-            className="text-sm font-medium mt-2 underline underline-offset-2 decoration-[1px] hover:text-shop_dark_green transition text-left"
+            className="text-sm font-medium mt-2 underline underline-offset-2 decoration-1 hover:text-shop_dark_green transition text-left"
           >
             Redefinir seleção
           </button>

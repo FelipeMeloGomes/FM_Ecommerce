@@ -47,7 +47,7 @@ const PriceList = ({ selectedPrice, setSelectedPrice }: Props) => {
         <button
           type="button"
           onClick={() => setSelectedPrice(null)}
-          className="text-sm font-medium mt-2 underline underline-offset-2 decoration-[1px] hover:text-shop_dark_green hoverEffect"
+          className="text-sm font-medium mt-2 underline underline-offset-2 decoration-1 hover:text-shop_dark_green hoverEffect"
         >
           Redefinir seleção
         </button>

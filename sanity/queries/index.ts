@@ -86,16 +86,21 @@ const getBrand = async (slug: string) => {
     return null;
   }
 };
-const getMyOrders = async (userId: string) => {
+
+const getMyOrders = async (userId: string, start = 0, end = 10) => {
   try {
-    const orders = await sanityFetch({
+    const result = await sanityFetch({
       query: MY_ORDERS_QUERY,
-      params: { userId },
+      params: { userId, start, end },
     });
-    return orders?.data || null;
+
+    return {
+      orders: result?.data?.orders ?? [],
+      total: result?.data?.total ?? 0,
+    };
   } catch (error) {
-    console.error("Error fetching product by ID:", error);
-    return null;
+    console.error("Error fetching orders:", error);
+    return { orders: [], total: 0 };
   }
 };
 
