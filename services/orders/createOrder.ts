@@ -12,7 +12,7 @@ export async function createOrder(session: PaymentSession) {
     quantity: p.quantity,
   }));
 
-  await backendClient.create({
+  const orderPayload = {
     _type: "order",
     orderNumber,
     stripeCheckoutSessionId: session.id,
@@ -29,7 +29,9 @@ export async function createOrder(session: PaymentSession) {
     shipping,
     orderDate: new Date().toISOString(),
     amountDiscount: 0,
-  });
+  };
+
+  await backendClient.create(orderPayload);
 
   await updateStock(session.products);
 }

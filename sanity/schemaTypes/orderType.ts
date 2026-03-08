@@ -113,11 +113,23 @@ export const orderType = defineType({
       title: "Shipping Address",
       type: "object",
       fields: [
+        defineField({ name: "name", title: "Name", type: "string" }),
+        defineField({ name: "email", title: "Email", type: "string" }),
+        defineField({ name: "address", title: "Address", type: "string" }),
+        defineField({ name: "city", title: "City", type: "string" }),
         defineField({ name: "state", title: "State", type: "string" }),
         defineField({ name: "zip", title: "Zip Code", type: "string" }),
-        defineField({ name: "city", title: "City", type: "string" }),
-        defineField({ name: "address", title: "Address", type: "string" }),
-        defineField({ name: "name", title: "Name", type: "string" }),
+        defineField({
+          name: "clerkUserId",
+          title: "Clerk User ID",
+          type: "string",
+        }),
+        defineField({ name: "default", title: "Default", type: "boolean" }),
+        defineField({
+          name: "createdAt",
+          title: "Created At",
+          type: "datetime",
+        }),
       ],
     }),
     defineField({
