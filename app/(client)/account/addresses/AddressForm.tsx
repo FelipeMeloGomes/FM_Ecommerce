@@ -56,6 +56,7 @@ export default function AddressForm({ address }: AddressFormProps) {
       }
 
       router.push("/cart");
+      router.refresh();
     } catch (error) {
       console.error(error);
       toast.error("Erro ao salvar endereço");

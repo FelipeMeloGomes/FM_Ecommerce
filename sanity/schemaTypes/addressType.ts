@@ -8,6 +8,12 @@ export const addressType = defineType({
   icon: HomeIcon,
   fields: [
     defineField({
+      name: "clerkUserId",
+      title: "Clerk User ID",
+      type: "string",
+      readOnly: true,
+    }),
+    defineField({
       name: "name",
       title: "Address Name",
       type: "string",
@@ -37,30 +43,27 @@ export const addressType = defineType({
       title: "State",
       type: "string",
       description: "Two letter state code (e.g. NY, CA)",
-      validation: (Rule) => Rule.required().length(2).uppercase(),
+      validation: (Rule) => Rule.required().length(2),
     }),
     defineField({
       name: "zip",
-      title: "ZIP Code",
+      title: "CEP",
       type: "string",
-      description: "Format: 12345 or 12345-6789",
+      description: "Formato: 12345-678",
       validation: (Rule) =>
         Rule.required()
-          .regex(/^\d{5}(-\d{4})?$/, {
-            name: "zipCode",
+          .regex(/^\d{5}-\d{3}$/, {
+            name: "cep",
             invert: false,
           })
-          .custom((zip: string | undefined) => {
-            if (!zip) {
-              return "ZIP code is required";
-            }
-            if (!zip.match(/^\d{5}(-\d{4})?$/)) {
-              return "Please enter a valid ZIP code (e.g. 12345 or 12345-6789)";
-            }
-            return true;
-          }),
+          .error("Digite um CEP válido no formato 12345-678"),
     }),
-
+    defineField({
+      name: "default",
+      title: "Default Address",
+      type: "boolean",
+      initialValue: false,
+    }),
     defineField({
       name: "createdAt",
       title: "Created At",
