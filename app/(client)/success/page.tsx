@@ -3,20 +3,38 @@
 import { Check, Home, Package, ShoppingBag } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import useStore from "@/store";
+
+const REDIRECT_SECONDS = 5;
 
 const SuccessPageContent = () => {
   const { resetCart } = useStore();
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("orderNumber");
+  const router = useRouter();
+  const [countdown, setCountdown] = useState(REDIRECT_SECONDS);
 
   useEffect(() => {
-    if (orderNumber) {
-      resetCart();
-    }
+    if (!orderNumber) return;
+    resetCart();
   }, [orderNumber, resetCart]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (countdown <= 0) {
+      router.push("/orders");
+    }
+  }, [countdown, router]);
+
   return (
     <div className="py-5 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center mx-4">
       <motion.div
@@ -37,6 +55,20 @@ const SuccessPageContent = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
           Pedido confirmado!
         </h1>
+        <div className="flex flex-col items-center gap-1">
+          <p className="text-sm text-gray-500">
+            Redirecionando para seus pedidos em
+          </p>
+          <span className="text-3xl font-bold text-black">{countdown}s</span>
+          <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+            <motion.div
+              className="bg-black h-1.5 rounded-full"
+              initial={{ width: "100%" }}
+              animate={{ width: "0%" }}
+              transition={{ duration: REDIRECT_SECONDS, ease: "linear" }}
+            />
+          </div>
+        </div>
         <div className="space-y-4 mb-4 text-left">
           <p className="text-gray-700">
             Obrigado pela sua compra. Estamos processando seu pedido e ele será
