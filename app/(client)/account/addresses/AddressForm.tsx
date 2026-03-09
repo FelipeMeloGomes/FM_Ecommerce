@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { createAddress } from "@/actions/createAddress";
 import { updateAddress } from "@/actions/updateAddress";
@@ -16,42 +16,63 @@ interface AddressFormProps {
   address?: Address;
 }
 
-export default function AddressForm({ address }: AddressFormProps) {
-  const [loading, setLoading] = useState(false);
-  const [cep, setCep] = useState(address?.zip ?? "");
-  const router = useRouter();
+interface AddressFormState {
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  default: boolean;
+}
 
-  const handleCepChange = (value: string) => {
-    setCep(formatCep(value));
+export default function AddressForm({ address }: AddressFormProps) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const [form, setForm] = useState<AddressFormState>({
+    name: address?.name ?? "",
+    address: address?.address ?? "",
+    city: address?.city ?? "",
+    state: address?.state ?? "",
+    zip: address?.zip ?? "",
+    default: address?.default ?? false,
+  });
+
+  useEffect(() => {
+    setForm({
+      name: address?.name ?? "",
+      address: address?.address ?? "",
+      city: address?.city ?? "",
+      state: address?.state ?? "",
+      zip: address?.zip ?? "",
+      default: address?.default ?? false,
+    });
+  }, [address]);
+
+  const handleChange = (
+    field: keyof AddressFormState,
+    value: string | boolean,
+  ) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
-  const handleSubmit = async (formData: FormData) => {
-    if (!isValidCep(cep)) {
+  const handleSubmit = async () => {
+    if (!isValidCep(form.zip)) {
       toast.error("CEP inválido. Use 12345678 ou 12345-678");
-      setLoading(false);
       return;
     }
-    setLoading(true);
 
-    const data = {
-      name: formData.get("name") as string,
-      address: formData.get("address") as string,
-      city: formData.get("city") as string,
-      state: formData.get("state") as string,
-      zip: cep,
-      default: formData.get("default") === "on",
-    };
+    setLoading(true);
 
     try {
       if (address?._id) {
-        await updateAddress({
-          id: address._id,
-          ...data,
-        });
-
+        await updateAddress({ id: address._id, ...form });
         toast.success("Endereço atualizado!");
       } else {
-        await createAddress(data);
+        await createAddress(form);
         toast.success("Endereço criado!");
       }
 
@@ -74,8 +95,8 @@ export default function AddressForm({ address }: AddressFormProps) {
         <Label htmlFor="name">Nome</Label>
         <Input
           id="name"
-          name="name"
-          defaultValue={address?.name}
+          value={form.name}
+          onChange={(e) => handleChange("name", e.target.value)}
           placeholder="Casa, Trabalho"
           required
         />
@@ -85,8 +106,8 @@ export default function AddressForm({ address }: AddressFormProps) {
         <Label htmlFor="address">Endereço</Label>
         <Input
           id="address"
-          name="address"
-          defaultValue={address?.address}
+          value={form.address}
+          onChange={(e) => handleChange("address", e.target.value)}
           placeholder="Rua e número"
           required
         />
@@ -97,18 +118,19 @@ export default function AddressForm({ address }: AddressFormProps) {
           <Label htmlFor="city">Cidade</Label>
           <Input
             id="city"
-            name="city"
-            defaultValue={address?.city}
+            value={form.city}
+            onChange={(e) => handleChange("city", e.target.value)}
             placeholder="Cidade"
             required
           />
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="state">Estado</Label>
           <Input
             id="state"
-            name="state"
-            defaultValue={address?.state}
+            value={form.state}
+            onChange={(e) => handleChange("state", e.target.value)}
             maxLength={2}
             placeholder="GO"
             required
@@ -120,9 +142,8 @@ export default function AddressForm({ address }: AddressFormProps) {
         <Label htmlFor="zip">CEP</Label>
         <Input
           id="zip"
-          name="zip"
-          value={cep}
-          onChange={(e) => handleCepChange(e.target.value)}
+          value={form.zip}
+          onChange={(e) => handleChange("zip", formatCep(e.target.value))}
           placeholder="00000-000"
           required
         />
@@ -131,8 +152,10 @@ export default function AddressForm({ address }: AddressFormProps) {
       <div className="flex items-center gap-2">
         <Checkbox
           id="default"
-          name="default"
-          defaultChecked={address?.default}
+          checked={form.default}
+          onCheckedChange={(checked) =>
+            handleChange("default", checked === true)
+          }
         />
         <Label htmlFor="default">Definir como padrão</Label>
       </div>

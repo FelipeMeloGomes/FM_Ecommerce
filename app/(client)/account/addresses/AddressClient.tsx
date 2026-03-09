@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { deleteAddress } from "@/actions/deleteAddress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,26 +9,42 @@ import AddressForm from "./AddressForm";
 
 interface AddressClientProps {
   addresses: Address[];
-  initialEditingAddress?: Address;
 }
 
-export default function AddressesClient({
-  addresses,
-  initialEditingAddress,
-}: AddressClientProps) {
-  const [editingAddress, setEditingAddress] = useState<Address | undefined>(
-    initialEditingAddress,
-  );
+export default function AddressesClient({ addresses }: AddressClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
+
+  const editingAddress = addresses.find((address) => address._id === editId);
+
+  const handleEdit = (id: string) => {
+    router.push(`/account/addresses?edit=${id}`);
+  };
+
+  const handleNew = () => {
+    router.push(`/account/addresses`);
+  };
 
   return (
     <div className="flex flex-col items-center">
-      <AddressForm key={editingAddress?._id} address={editingAddress} />
+      <AddressForm
+        key={editingAddress?._id ?? "new"}
+        address={editingAddress}
+      />
+
+      <div className="mt-4">
+        <Button variant="outline" size="sm" onClick={handleNew}>
+          Novo Endereço
+        </Button>
+      </div>
 
       <div className="mt-8 max-w-md w-full mx-auto">
         <Card>
           <CardHeader>
             <CardTitle>Endereços cadastrados</CardTitle>
           </CardHeader>
+
           <CardContent className="space-y-3">
             {addresses.length === 0 && (
               <p className="text-muted-foreground text-sm text-center">
@@ -45,9 +61,11 @@ export default function AddressesClient({
                   <span className="font-medium">
                     {address.name} {address.default && "(Padrão)"}
                   </span>
+
                   <span className="text-sm text-muted-foreground">
                     {address.address}, {address.city} - {address.state}
                   </span>
+
                   <span className="text-sm text-muted-foreground">
                     {address.zip}
                   </span>
@@ -58,10 +76,11 @@ export default function AddressesClient({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setEditingAddress(address)}
+                    onClick={() => handleEdit(address._id)}
                   >
                     Editar
                   </Button>
+
                   <Button
                     type="button"
                     variant="outline"
