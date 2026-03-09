@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { client } from "@/sanity/lib/client";
+import { PRODUCTS_BY_CATEGORY_QUERY } from "@/sanity/queries/query";
 import type { Category, Product } from "@/sanity.types";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
@@ -20,19 +21,17 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const handleCategoryChange = (newSlug: string) => {
-    if (newSlug === currentSlug) return; // Prevent unnecessary updates
+    if (newSlug === currentSlug) return;
     setCurrentSlug(newSlug);
-    router.push(`/category/${newSlug}`, { scroll: false }); // Update URL without
+    router.push(`/category/${newSlug}`, { scroll: false });
   };
 
   const fetchProducts = useCallback(async (categorySlug: string) => {
     setLoading(true);
     try {
-      const query = `
-        *[_type == 'product' && references(*[_type == "category" && slug.current == $categorySlug]._id)] | order(name asc){
-        ...,"categories": categories[]->title}
-      `;
-      const data = await client.fetch(query, { categorySlug });
+      const data = await client.fetch(PRODUCTS_BY_CATEGORY_QUERY, {
+        categorySlug,
+      });
       setProducts(data);
     } catch (error) {
       console.error("Error fetching products:", error);

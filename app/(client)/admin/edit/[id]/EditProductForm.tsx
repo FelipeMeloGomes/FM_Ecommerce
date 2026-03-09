@@ -1,8 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { FormError } from "@/components/FormError";
 import { type ImagePreview, ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +24,10 @@ import type { Product, ProductImage } from "@/core/products/Product";
 import { apiRequest } from "@/lib/api/apiRequest";
 import { urlFor } from "@/sanity/lib/image";
 import type { Brand, Category } from "@/sanity.types";
+import {
+  type ProductFormInput,
+  productSchema,
+} from "@/schemas/productFormInput";
 
 interface Props {
   product: Product;
@@ -30,17 +37,44 @@ interface Props {
 
 export function EditProductForm({ product, categories, brands }: Props) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+
   const [images, setImages] = useState<ImagePreview[]>([]);
-  const [isFeatured, setIsFeatured] = useState<boolean>(product.isFeatured);
-  const [status, setStatus] = useState<string>(product.status || "");
-  const [variant, setVariant] = useState<string>(product.variant || "");
-  const [categoriesSelected, setCategoriesSelected] = useState<string[]>(
-    product.categories?.map((c) => c._ref) || [],
-  );
-  const [brand, setBrand] = useState<string>(
-    product.brand?._ref || brands[0]?._id || "",
-  );
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<ProductFormInput>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: product.name,
+      description: product.description ?? "",
+
+      price: product.price,
+      discount: product.discount,
+      stock: product.stock ?? undefined,
+
+      weight: product.weight,
+      width: product.width,
+      height: product.height,
+      length: product.length,
+
+      variant: product.variant ?? "",
+      brand: product.brand?._ref ?? brands[0]?._id ?? "",
+      categories: product.categories?.map((c) => c._ref) ?? [],
+
+      status: product.status ?? "",
+      isFeatured: product.isFeatured ?? false,
+    },
+  });
+
+  const categoriesSelected = watch("categories");
+  const isFeatured = watch("isFeatured");
+  const variant = watch("variant");
+  const brand = watch("brand");
+  const status = watch("status");
 
   useEffect(() => {
     if (product.images?.length) {
@@ -59,18 +93,15 @@ export function EditProductForm({ product, categories, brands }: Props) {
   useEffect(() => {
     return () => {
       images.forEach((img) => {
-        if (img.file) URL.revokeObjectURL(img.previewUrl);
+        if (img.file) {
+          URL.revokeObjectURL(img.previewUrl);
+        }
       });
     };
   }, [images]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
-
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-
+  const onSubmit = async (data: ProductFormInput) => {
+    const formData = new FormData();
     const retainedImages: ProductImage[] = [];
 
     images.forEach((image) => {
@@ -82,25 +113,25 @@ export function EditProductForm({ product, categories, brands }: Props) {
     });
 
     formData.append("retainedImages", JSON.stringify(retainedImages));
-    formData.set("isFeatured", String(isFeatured));
-    formData.set("status", status);
-    formData.set("variant", variant);
-    formData.delete("categories");
-    categoriesSelected.forEach((cat) => {
-      formData.append("categories", cat);
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => {
+          formData.append(key, v);
+        });
+      } else {
+        formData.append(key, String(value ?? ""));
+      }
     });
-    formData.set("brand", brand);
 
     try {
-      await apiRequest<{ success: true }>(
-        `/api/admin/products/${product._id}`,
-        {
-          method: "PUT",
-          body: formData,
-        },
-      );
+      await apiRequest(`/api/admin/products/${product._id}`, {
+        method: "PUT",
+        body: formData,
+      });
 
-      toast.success("Produto atualizado com sucesso!");
+      toast.success("Produto atualizado com sucesso");
+
       router.push("/admin/products");
       router.refresh();
     } catch (error) {
@@ -109,119 +140,96 @@ export function EditProductForm({ product, categories, brands }: Props) {
           ? error.message
           : "Erro inesperado ao atualizar produto",
       );
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-muted/40 p-6">
       <div className="max-w-5xl mx-auto space-y-6">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Editar Produto
-        </h1>
+        <h1 className="text-3xl font-semibold">Editar Produto</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Informações Básicas</CardTitle>
             </CardHeader>
+
             <CardContent className="grid md:grid-cols-2 gap-4">
-              <Input
-                name="name"
-                placeholder="Nome do produto"
-                defaultValue={product.name}
-                required
-              />
-              <Textarea
-                name="description"
-                placeholder="Descrição"
-                className="md:col-span-2"
-                defaultValue={product.description}
-              />
+              <div>
+                <Input {...register("name")} placeholder="Nome do produto" />
+                <FormError message={errors.name?.message} />
+              </div>
+
+              <div className="md:col-span-2">
+                <Textarea
+                  {...register("description")}
+                  placeholder="Descrição"
+                />
+                <FormError message={errors.description?.message} />
+              </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Imagens</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+
+            <CardContent>
               <ImageUploader value={images} onChange={setImages} />
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Preço & Estoque</CardTitle>
             </CardHeader>
+
             <CardContent className="grid md:grid-cols-3 gap-4">
-              <Input
-                name="price"
-                type="number"
-                step="0.01"
-                placeholder="Preço"
-                defaultValue={product.price}
-                required
-              />
-              <Input
-                name="discount"
-                type="number"
-                placeholder="Desconto %"
-                defaultValue={product.discount}
-                required
-              />
-              <Input
-                name="stock"
-                type="number"
-                placeholder="Estoque"
-                defaultValue={product.stock}
-              />
+              <div>
+                <Input type="number" {...register("price")} />
+                <FormError message={errors.price?.message} />
+              </div>
+
+              <div>
+                <Input type="number" {...register("discount")} />
+                <FormError message={errors.discount?.message} />
+              </div>
+
+              <div>
+                <Input type="number" {...register("stock")} />
+                <FormError message={errors.stock?.message} />
+              </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Dimensões</CardTitle>
             </CardHeader>
+
             <CardContent className="grid md:grid-cols-4 gap-4">
-              <Input
-                name="weight"
-                type="number"
-                step="0.01"
-                placeholder="Peso (kg)"
-                defaultValue={product.weight}
-                required
-              />
-              <Input
-                name="width"
-                type="number"
-                placeholder="Largura (cm)"
-                defaultValue={product.width}
-                required
-              />
-              <Input
-                name="height"
-                type="number"
-                placeholder="Altura (cm)"
-                defaultValue={product.height}
-                required
-              />
-              <Input
-                name="length"
-                type="number"
-                placeholder="Comprimento (cm)"
-                defaultValue={product.length}
-                required
-              />
+              <Input type="number" {...register("weight")} />
+              <Input type="number" {...register("width")} />
+              <Input type="number" {...register("height")} />
+              <Input type="number" {...register("length")} />
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Organização</CardTitle>
             </CardHeader>
+
             <CardContent className="grid md:grid-cols-2 gap-6">
-              <Select value={status} onValueChange={setStatus}>
+              <Select
+                value={status}
+                onValueChange={(v) => setValue("status", v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="new">New</SelectItem>
                   <SelectItem value="hot">Hot</SelectItem>
@@ -229,10 +237,14 @@ export function EditProductForm({ product, categories, brands }: Props) {
                 </SelectContent>
               </Select>
 
-              <Select value={variant} onValueChange={setVariant}>
+              <Select
+                value={variant}
+                onValueChange={(v) => setValue("variant", v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="gadget">Gadget</SelectItem>
                   <SelectItem value="appliances">Appliances</SelectItem>
@@ -244,14 +256,15 @@ export function EditProductForm({ product, categories, brands }: Props) {
               <MultiSelect
                 options={categories}
                 value={categoriesSelected}
-                onChange={setCategoriesSelected}
+                onChange={(v) => setValue("categories", v)}
                 placeholder="Categorias"
               />
 
-              <Select value={brand} onValueChange={setBrand}>
+              <Select value={brand} onValueChange={(v) => setValue("brand", v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Marca" />
                 </SelectTrigger>
+
                 <SelectContent>
                   {brands.map((b) => (
                     <SelectItem key={b._id} value={b._id ?? ""}>
@@ -265,8 +278,9 @@ export function EditProductForm({ product, categories, brands }: Props) {
                 <Checkbox
                   id="isFeatured"
                   checked={isFeatured}
-                  onCheckedChange={(checked) => setIsFeatured(Boolean(checked))}
+                  onCheckedChange={(v) => setValue("isFeatured", Boolean(v))}
                 />
+
                 <label htmlFor="isFeatured" className="text-sm">
                   Produto em destaque
                 </label>
@@ -276,10 +290,10 @@ export function EditProductForm({ product, categories, brands }: Props) {
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting}
             className="w-full h-12 text-base"
           >
-            {loading ? "Salvando..." : "Salvar Alterações"}
+            {isSubmitting ? "Salvando..." : "Salvar Alterações"}
           </Button>
         </form>
       </div>

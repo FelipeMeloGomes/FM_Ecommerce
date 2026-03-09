@@ -45,6 +45,34 @@ const GET_OTHER_ADDRESSES_QUERY = `
   *[_type == "address" && clerkUserId == $userId && _id != $id]
 `;
 
+const SHOP_PRODUCTS_QUERY = `
+  *[_type == 'product' 
+    && (!defined($selectedCategory) || references(*[_type == "category" && slug.current == $selectedCategory]._id))
+    && (!defined($selectedBrand) || references(*[_type == "brand" && slug.current == $selectedBrand]._id))
+    && price >= $minPrice && price <= $maxPrice
+  ] 
+  | order(name asc) {
+    ...,
+    "categories": categories[]->title
+  }
+`;
+
+const PRODUCTS_BY_CATEGORY_QUERY = `
+  *[_type == "product" && references(*[_type == "category" && slug.current == $categorySlug]._id)]
+  | order(name asc){
+    ...,
+    "categories": categories[]->title
+  }
+`;
+
+const PRODUCTS_BY_VARIANT_QUERY = `
+  *[_type == "product" && variant == $variant] 
+  | order(name asc){
+    ...,
+    "categories": categories[]->title
+  }
+`;
+
 export {
   BRANDS_QUERY,
   DEAL_PRODUCTS,
@@ -53,4 +81,7 @@ export {
   MY_ORDERS_QUERY,
   GET_ADDRESSES_QUERY,
   GET_OTHER_ADDRESSES_QUERY,
+  SHOP_PRODUCTS_QUERY,
+  PRODUCTS_BY_VARIANT_QUERY,
+  PRODUCTS_BY_CATEGORY_QUERY,
 };

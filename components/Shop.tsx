@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { client } from "@/sanity/lib/client";
+import { SHOP_PRODUCTS_QUERY } from "@/sanity/queries/query";
 import type { BRANDS_QUERY_RESULT, Category, Product } from "@/sanity.types";
 import Container from "./Container";
 import NoProductAvailable from "./NoProductAvailable";
@@ -40,18 +41,9 @@ const Shop = ({ categories, brands }: Props) => {
         minPrice = min;
         maxPrice = max;
       }
-      const query = `
-      *[_type == 'product' 
-        && (!defined($selectedCategory) || references(*[_type == "category" && slug.current == $selectedCategory]._id))
-        && (!defined($selectedBrand) || references(*[_type == "brand" && slug.current == $selectedBrand]._id))
-        && price >= $minPrice && price <= $maxPrice
-      ] 
-      | order(name asc) {
-        ...,"categories": categories[]->title
-      }
-    `;
+
       const data = await client.fetch(
-        query,
+        SHOP_PRODUCTS_QUERY,
         { selectedCategory, selectedBrand, minPrice, maxPrice },
         { next: { revalidate: 0 } },
       );

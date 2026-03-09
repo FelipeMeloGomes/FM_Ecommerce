@@ -5,15 +5,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { productType } from "@/constants/data";
 import { client } from "@/sanity/lib/client";
+import { PRODUCTS_BY_VARIANT_QUERY } from "@/sanity/queries/query";
 import type { Product } from "@/sanity.types";
 import Container from "./Container";
 import HomeTabBar from "./HomeTabBar";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
-
-const query = `*[_type == "product" && variant == $variant] | order(name asc){
-  ...,"categories": categories[]->title
-}`;
 
 const ProductGrid = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,7 +21,7 @@ const ProductGrid = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await client.fetch(query, {
+        const response = await client.fetch(PRODUCTS_BY_VARIANT_QUERY, {
           variant: selectedTab.toLowerCase(),
         });
         setProducts(await response);

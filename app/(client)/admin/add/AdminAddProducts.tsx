@@ -1,7 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import { FormError } from "@/components/FormError";
 import { type ImagePreview, ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +21,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { apiRequest } from "@/lib/api/apiRequest";
 import type { Brand, Category } from "@/sanity.types";
+import {
+  type CreateProductInput,
+  createProductSchema,
+} from "@/schemas/createProductSchema";
 
 interface Props {
   categories: Category[];
@@ -25,13 +32,28 @@ interface Props {
 }
 
 export default function AdminAddProducts({ categories, brands }: Props) {
-  const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<ImagePreview[]>([]);
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [status, setStatus] = useState("");
-  const [categoriesSelected, setCategoriesSelected] = useState<string[]>([]);
-  const [productType, setProductType] = useState("");
-  const [brand, setBrand] = useState(brands[0]?._id ?? "");
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateProductInput>({
+    resolver: zodResolver(createProductSchema),
+    defaultValues: {
+      categories: [],
+      brand: brands[0]?._id ?? "",
+      variant: "",
+      status: "",
+      isFeatured: false,
+    },
+  });
+
+  const categoriesSelected = watch("categories");
+  const isFeatured = watch("isFeatured");
 
   useEffect(() => {
     return () => {
@@ -41,22 +63,18 @@ export default function AdminAddProducts({ categories, brands }: Props) {
     };
   }, [images]);
 
-  const resetForm = (form: HTMLFormElement, clearImages: () => void) => {
-    form.reset();
-    clearImages();
-    setIsFeatured(false);
-    setStatus("");
-    setProductType("");
-    setBrand("");
-    setCategoriesSelected([]);
-  };
+  const onSubmit = async (data: CreateProductInput) => {
+    const formData = new FormData();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
-
-    const form = event.currentTarget;
-    const formData = new FormData(form);
+    Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => {
+          formData.append(key, v);
+        });
+      } else {
+        formData.append(key, String(value ?? ""));
+      }
+    });
 
     images.forEach((image) => {
       if (image.file) {
@@ -64,128 +82,148 @@ export default function AdminAddProducts({ categories, brands }: Props) {
       }
     });
 
-    formData.set("isFeatured", String(isFeatured));
-    formData.set("status", status);
-    formData.set("variant", productType);
-    formData.delete("categories");
-
-    categoriesSelected.forEach((cat) => {
-      formData.append("categories", cat);
-    });
-    formData.set("brand", brand);
-
     try {
       await apiRequest<{ success: true }>("/api/admin/products", {
         method: "POST",
         body: formData,
       });
 
-      resetForm(form, () => {
-        images.forEach((img) => {
-          URL.revokeObjectURL(img.previewUrl);
-        });
+      toast.success("Produto criado com sucesso");
 
-        setImages([]);
-      });
-
-      toast.success("Produto criado com sucesso!");
-    } catch (error) {
-      console.error(error);
+      reset();
+      setImages([]);
+    } catch {
       toast.error("Erro ao criar produto");
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-muted/40 p-6">
       <div className="max-w-5xl mx-auto space-y-6">
-        <h1 className="text-3xl font-semibold tracking-tight">Novo Produto</h1>
+        <h1 className="text-3xl font-semibold">Novo Produto</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Informações Básicas</CardTitle>
             </CardHeader>
+
             <CardContent className="grid md:grid-cols-2 gap-4">
-              <Input name="name" placeholder="Nome do produto" required />
-              <Textarea
-                name="description"
-                placeholder="Descrição"
-                className="md:col-span-2"
-              />
+              <div>
+                <Input placeholder="Nome do produto" {...register("name")} />
+                <FormError message={errors.name?.message} />
+              </div>
+
+              <div className="md:col-span-2">
+                <Textarea
+                  placeholder="Descrição"
+                  {...register("description")}
+                />
+                <FormError message={errors.description?.message} />
+              </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Imagens</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+
+            <CardContent>
               <ImageUploader value={images} onChange={setImages} />
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Preço & Estoque</CardTitle>
             </CardHeader>
+
             <CardContent className="grid md:grid-cols-3 gap-4">
-              <Input
-                name="price"
-                type="number"
-                step="0.01"
-                placeholder="Preço"
-                required
-              />
-              <Input
-                name="discount"
-                type="number"
-                placeholder="Desconto %"
-                required
-              />
-              <Input name="stock" type="number" placeholder="Estoque" />
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Preço"
+                  {...register("price")}
+                />
+                <FormError message={errors.price?.message} />
+              </div>
+
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Desconto"
+                  {...register("discount")}
+                />
+                <FormError message={errors.discount?.message} />
+              </div>
+
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Estoque"
+                  {...register("stock")}
+                />
+                <FormError message={errors.stock?.message} />
+              </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Dimensões</CardTitle>
             </CardHeader>
+
             <CardContent className="grid md:grid-cols-4 gap-4">
-              <Input
-                name="weight"
-                type="number"
-                step="0.01"
-                placeholder="Peso (kg)"
-                required
-              />
-              <Input
-                name="width"
-                type="number"
-                placeholder="Largura (cm)"
-                required
-              />
-              <Input
-                name="height"
-                type="number"
-                placeholder="Altura (cm)"
-                required
-              />
-              <Input
-                name="length"
-                type="number"
-                placeholder="Comprimento (cm)"
-                required
-              />
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Peso"
+                  {...register("weight")}
+                />
+                <FormError message={errors.weight?.message} />
+              </div>
+
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Largura"
+                  {...register("width")}
+                />
+                <FormError message={errors.width?.message} />
+              </div>
+
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Altura"
+                  {...register("height")}
+                />
+                <FormError message={errors.height?.message} />
+              </div>
+
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Comprimento"
+                  {...register("length")}
+                />
+                <FormError message={errors.length?.message} />
+              </div>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Organização</CardTitle>
             </CardHeader>
+
             <CardContent className="grid md:grid-cols-2 gap-6">
-              <Select onValueChange={setStatus}>
+              <Select onValueChange={(v) => setValue("status", v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="new">New</SelectItem>
                   <SelectItem value="hot">Hot</SelectItem>
@@ -193,10 +231,11 @@ export default function AdminAddProducts({ categories, brands }: Props) {
                 </SelectContent>
               </Select>
 
-              <Select value={productType} onValueChange={setProductType}>
+              <Select onValueChange={(v) => setValue("variant", v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Tipo do Produto" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="gadget">Gadget</SelectItem>
                   <SelectItem value="appliances">Appliances</SelectItem>
@@ -208,14 +247,18 @@ export default function AdminAddProducts({ categories, brands }: Props) {
               <MultiSelect
                 options={categories}
                 value={categoriesSelected}
-                onChange={setCategoriesSelected}
+                onChange={(v) => setValue("categories", v)}
                 placeholder="Categorias"
               />
 
-              <Select value={brand} onValueChange={setBrand}>
+              <Select
+                defaultValue={brands[0]?._id}
+                onValueChange={(v) => setValue("brand", v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Marca" />
                 </SelectTrigger>
+
                 <SelectContent>
                   {brands.map((brand) => (
                     <SelectItem key={brand._id} value={brand._id ?? ""}>
@@ -229,21 +272,20 @@ export default function AdminAddProducts({ categories, brands }: Props) {
                 <Checkbox
                   id="isFeatured"
                   checked={isFeatured}
-                  onCheckedChange={(checked) => setIsFeatured(Boolean(checked))}
+                  onCheckedChange={(v) => setValue("isFeatured", Boolean(v))}
                 />
+
                 <label htmlFor="isFeatured" className="text-sm">
                   Produto em destaque
                 </label>
               </div>
+
+              <FormError message={errors.categories?.message} />
             </CardContent>
           </Card>
 
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full h-12 text-base"
-          >
-            {loading ? "Criando..." : "Criar Produto"}
+          <Button type="submit" disabled={isSubmitting} className="w-full h-12">
+            {isSubmitting ? "Criando..." : "Criar Produto"}
           </Button>
         </form>
       </div>
