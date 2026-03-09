@@ -28,6 +28,7 @@ export interface PaymentMetadata {
   orderNumber: string;
   customerName: string;
   customerEmail: string;
+  clerkUserId: string;
   address?: PaymentAddress;
   shipping?: PaymentShipping;
 }

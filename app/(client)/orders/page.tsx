@@ -1,11 +1,10 @@
-export const dynamic = "force-dynamic";
-
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { ChevronLeft, ChevronRight, FileX } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Container from "@/components/Container";
 import OrdersComponent from "@/components/OrdersComponent";
+import OrdersRefresher from "@/components/OrdersRefresher";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -21,22 +20,21 @@ const OrdersPage = async ({
   if (!userId) return redirect("/");
 
   const user = await currentUser();
-  const isAdmin = user?.publicMetadata?.role === "admin";
+  const role = user?.publicMetadata?.role;
+  const isAdmin = role === "admin";
 
   const params = await searchParams;
-
   const LIMIT = 10;
   const currentPage = Number(params?.page ?? "1");
-
   const start = (currentPage - 1) * LIMIT;
   const end = start + LIMIT;
 
-  const { orders, total } = await getMyOrders(userId, start, end);
-
+  const { orders, total } = await getMyOrders(userId, isAdmin, start, end);
   const totalPages = Math.ceil(total / LIMIT);
 
   return (
     <div>
+      <OrdersRefresher intervalSeconds={10} />
       <Container className="py-10">
         {orders?.length ? (
           <Card className="w-full">
@@ -73,27 +71,33 @@ const OrdersPage = async ({
 
               {totalPages > 1 && (
                 <div className="flex justify-center mt-4 gap-2">
-                  <Button
-                    asChild
-                    disabled={currentPage <= 1}
-                    className="flex items-center gap-1"
-                  >
-                    <Link href={`/orders?page=${currentPage - 1}`}>
+                  {currentPage > 1 ? (
+                    <Button asChild className="flex items-center gap-1">
+                      <Link href={`/orders?page=${currentPage - 1}`}>
+                        <ChevronLeft size={16} /> Anterior
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button disabled className="flex items-center gap-1">
                       <ChevronLeft size={16} /> Anterior
-                    </Link>
-                  </Button>
+                    </Button>
+                  )}
+
                   <span className="flex items-center px-2">
                     {currentPage} / {totalPages}
                   </span>
-                  <Button
-                    asChild
-                    disabled={currentPage >= totalPages}
-                    className="flex items-center gap-1"
-                  >
-                    <Link href={`/orders?page=${currentPage + 1}`}>
+
+                  {currentPage < totalPages ? (
+                    <Button asChild className="flex items-center gap-1">
+                      <Link href={`/orders?page=${currentPage + 1}`}>
+                        Próximo <ChevronRight size={16} />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button disabled className="flex items-center gap-1">
                       Próximo <ChevronRight size={16} />
-                    </Link>
-                  </Button>
+                    </Button>
+                  )}
                 </div>
               )}
             </CardContent>

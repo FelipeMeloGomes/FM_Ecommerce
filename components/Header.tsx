@@ -19,7 +19,7 @@ const Header = async () => {
   let ordersData = null;
 
   if (userId) {
-    ordersData = await getMyOrders(userId, 0, 1);
+    ordersData = await getMyOrders(userId, isAdmin, 0, 1);
   }
 
   return (

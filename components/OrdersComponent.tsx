@@ -67,7 +67,7 @@ const OrdersComponent = ({
       <TableBody>
         <TooltipProvider>
           {localOrders.map((order) => (
-            <Tooltip key={order?.orderNumber}>
+            <Tooltip key={order?._id}>
               <TooltipTrigger asChild>
                 <TableRow
                   className="cursor-pointer hover:bg-gray-100 h-12"

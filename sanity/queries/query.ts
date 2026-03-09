@@ -29,18 +29,18 @@ const MY_ORDERS_QUERY = defineQuery(`
 {
   "orders": *[
     _type == "order" &&
-    clerkUserId == $userId
+    ($isAdmin == true || clerkUserId == $userId)
   ] | order(orderDate desc) [$start...$end]{
     ...,
-    products[] {
+    products[]{
       ...,
-      product->   
+      product->
     }
   },
 
   "total": count(*[
     _type == "order" &&
-    clerkUserId == $userId
+    ($isAdmin == true || clerkUserId == $userId)
   ])
 }
 `);

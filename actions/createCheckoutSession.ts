@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
 import { checkoutGateway } from "@/config/checkoutGateway";
 import { urlFor } from "@/sanity/lib/image";
 import type { Address } from "@/sanity.types";
@@ -28,18 +29,15 @@ export async function createCheckoutSession(
   items: GroupedCartItems[],
   metadata: Metadata,
 ) {
-  const mappedItems = items.map((item) => {
-    if (!item.product.name) {
-      throw new Error(
-        `Product name is missing for product ${item.product._id}`,
-      );
-    }
+  const { userId } = await auth();
 
-    if (item.product.price == null) {
-      throw new Error(
-        `Product price is missing for product ${item.product._id}`,
-      );
-    }
+  if (!userId) throw new Error("Usuário não autenticado.");
+  const mappedItems = items.map((item) => {
+    if (!item.product.name)
+      throw new Error(`Product name is missing for product`);
+
+    if (item.product.price == null)
+      throw new Error(`Product price is missing for product `);
 
     return {
       productId: item.product._id,
@@ -53,5 +51,8 @@ export async function createCheckoutSession(
     };
   });
 
-  return checkoutGateway.createSession(mappedItems, metadata);
+  return checkoutGateway.createSession(mappedItems, {
+    ...metadata,
+    clerkUserId: userId,
+  });
 }

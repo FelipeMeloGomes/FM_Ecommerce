@@ -41,6 +41,7 @@ export class StripeGateway implements PaymentGateway {
       currency: session.currency,
       metadata: {
         orderNumber: raw.orderNumber,
+        clerkUserId: raw.clerkUserId,
         customerName: raw.customerName,
         customerEmail: raw.customerEmail,
         address: raw.address ? JSON.parse(raw.address) : undefined,
