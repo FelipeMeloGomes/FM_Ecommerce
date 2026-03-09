@@ -20,6 +20,7 @@ export async function createOrder(session: PaymentSession) {
 
   const orderPayload = {
     _type: "order",
+    _id: `order-${orderNumber}`,
     clerkUserId,
     orderNumber,
     stripeCheckoutSessionId: session.id,
@@ -38,6 +39,6 @@ export async function createOrder(session: PaymentSession) {
     amountDiscount: 0,
   };
 
-  await backendClient.create(orderPayload);
+  await backendClient.createOrReplace(orderPayload);
   await updateStock(session.products);
 }
