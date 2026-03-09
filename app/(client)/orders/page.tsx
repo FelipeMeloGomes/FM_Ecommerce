@@ -83,9 +83,9 @@ async function OrdersList({
                 <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="hidden sm:table-cell">
-                  ID Stripe {/* ← corrigido */}
+                  ID Stripe
                 </TableHead>
-                <TableHead className="text-center">Ação</TableHead>
+                {isAdmin && <TableHead className="text-center">Ação</TableHead>}
               </TableRow>
             </TableHeader>
             <OrdersComponent orders={orders} isAdmin={isAdmin} />

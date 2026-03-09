@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { DeleteOrder } from "@/core/orders/DeleteOrder";
 import { requireAdmin } from "@/lib/requireAdmin";
-import { SanityOrderRepository } from "@/services/orders/SanityOrderRepository";
+import { backendClient } from "@/sanity/lib/backendClient";
 
 export async function DELETE(
   _request: Request,
@@ -12,8 +11,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const useCase = new DeleteOrder(new SanityOrderRepository());
-    await useCase.execute(id);
+    await backendClient.delete(id);
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
