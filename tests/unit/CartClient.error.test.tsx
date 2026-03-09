@@ -17,6 +17,15 @@ vi.mock("@clerk/nextjs", () => {
   };
 });
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    refresh: vi.fn(),
+  }),
+  usePathname: vi.fn(() => "/cart"),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+}));
+
 vi.mock("@/components/Container", () => ({
   default: ({ children }: { children: ReactNode }) => children,
 }));

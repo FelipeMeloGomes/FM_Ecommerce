@@ -16,5 +16,5 @@ export async function getAddresses(): Promise<Address[]> {
     | order(createdAt desc)
   `;
 
-  return await client.fetch(query, { userId });
+  return await client.fetch(query, { userId }, { cache: "no-store" });
 }

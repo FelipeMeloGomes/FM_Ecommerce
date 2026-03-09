@@ -2,6 +2,7 @@
 
 import { useAuth, useUser } from "@clerk/nextjs";
 import { ShoppingBag } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { createCheckoutSession } from "@/actions/createCheckoutSession";
@@ -34,12 +35,17 @@ const CartClient = ({ addresses }: CartClientProps) => {
   const { user } = useUser();
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const { shipping, setShipping } = useStore();
+  const router = useRouter();
 
   useEffect(() => {
     if (addresses.length > 0) {
       setSelectedAddress(addresses.find((a) => a.default) ?? addresses[0]);
     }
   }, [addresses]);
+
+  useEffect(() => {
+    router.refresh();
+  }, [router]);
 
   const handleResetCart = () => {
     confirmToast({
@@ -124,6 +130,7 @@ const CartClient = ({ addresses }: CartClientProps) => {
                             "Tem certeza que deseja excluir este endereço?",
                           onConfirm: async () => {
                             await deleteAddress(id);
+                            router.refresh();
                             toast.success("Endereço removido com sucesso!");
                           },
                         });
