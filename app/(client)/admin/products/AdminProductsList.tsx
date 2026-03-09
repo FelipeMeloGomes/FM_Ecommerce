@@ -52,9 +52,14 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-semibold tracking-tight">Produtos</h1>
-          <Button asChild>
-            <Link href="/admin/add">Novo Produto</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild>
+              <Link href="/admin/add">Novo Produto</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/admin/add/categories">Adicionar Categoria</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
