@@ -7,9 +7,7 @@ import { writeClient } from "@/sanity/lib/writeClient";
 export async function deleteAddress(id: string) {
   const { userId } = await auth();
 
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
+  if (!userId) throw new Error("Unauthorized");
 
   await writeClient.delete(id);
 

@@ -17,9 +17,7 @@ export async function createAddress(data: CreateAddressInput) {
   const { userId } = await auth();
   const user = await currentUser();
 
-  if (!userId || !user) {
-    throw new Error("Unauthorized");
-  }
+  if (!userId || !user) throw new Error("Unauthorized");
 
   const email = user.primaryEmailAddress?.emailAddress;
 
