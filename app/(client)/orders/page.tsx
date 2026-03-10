@@ -43,10 +43,10 @@ async function OrdersList({
   const start = (currentPage - 1) * LIMIT;
   const end = start + LIMIT;
 
-  const { orders, total } = await getMyOrders(userId, isAdmin, start, end);
-  const totalPages = Math.ceil(total / LIMIT);
+  const orderData = await getMyOrders(userId, isAdmin, start, end);
+  const totalPages = Math.ceil(orderData.total / LIMIT);
 
-  if (!orders?.length) {
+  if (!orderData.orders?.length) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <FileX className="h-24 w-24 text-gray-400 mb-4" />
@@ -88,7 +88,7 @@ async function OrdersList({
                 {isAdmin && <TableHead className="text-center">Ação</TableHead>}
               </TableRow>
             </TableHeader>
-            <OrdersComponent orders={orders} isAdmin={isAdmin} />
+            <OrdersComponent orders={orderData.orders} isAdmin={isAdmin} />
           </Table>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>

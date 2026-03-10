@@ -15,7 +15,7 @@ import {
 } from "./ui/table";
 
 interface OrderDetailsDialogProps {
-  order: MY_ORDERS_QUERY_RESULT[number] | null;
+  order: MY_ORDERS_QUERY_RESULT["orders"][number] | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -71,12 +71,12 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {order.products?.map((product) => (
-              <TableRow key={product._key}>
+            {order.products?.map((item) => (
+              <TableRow key={item._key}>
                 <TableCell className="flex items-center gap-2">
-                  {product?.product?.images && (
+                  {item?.product?.images && (
                     <Image
-                      src={urlFor(product?.product?.images[0]).url()}
+                      src={urlFor(item?.product?.images[0]).url()}
                       alt="productImage"
                       width={50}
                       height={50}
@@ -84,12 +84,12 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
                     />
                   )}
 
-                  {product?.product?.name}
+                  {item?.product?.name}
                 </TableCell>
-                <TableCell>{product?.quantity}</TableCell>
+                <TableCell>{item?.quantity}</TableCell>
                 <TableCell>
                   <PriceFormatter
-                    amount={product?.product?.price}
+                    amount={item?.product?.price}
                     className="text-black font-medium"
                   />
                 </TableCell>
@@ -120,6 +120,19 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
                 />
               </div>
             )}
+            {order?.shipping?.price && (
+              <div className="w-full flex items-center justify-between">
+                <strong>
+                  Frete{" "}
+                  {order?.shipping?.method && `(${order.shipping.method})`}:
+                </strong>
+                <PriceFormatter
+                  amount={order.shipping.price}
+                  className="text-black font-medium"
+                />
+              </div>
+            )}
+
             <div className="w-full flex items-center justify-between">
               <strong>Total: </strong>
               <PriceFormatter

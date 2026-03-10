@@ -25,14 +25,14 @@ const OrdersComponent = ({
   orders,
   isAdmin,
 }: {
-  orders: MY_ORDERS_QUERY_RESULT;
+  orders: MY_ORDERS_QUERY_RESULT["orders"];
   isAdmin: boolean;
 }) => {
   const router = useRouter();
   const [localOrders, setLocalOrders] =
-    useState<MY_ORDERS_QUERY_RESULT>(orders);
+    useState<MY_ORDERS_QUERY_RESULT["orders"]>(orders);
   const [selectedOrder, setSelectedOrder] = useState<
-    MY_ORDERS_QUERY_RESULT[number] | null
+    MY_ORDERS_QUERY_RESULT["orders"][number] | null
   >(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
