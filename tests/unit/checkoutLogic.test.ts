@@ -1,100 +1,70 @@
 import { describe, expect, it, vi } from "vitest";
 import { performCheckout } from "../../app/(client)/cart/checkoutLogic";
-import type { Address, Product } from "../../sanity.types";
+import {
+  makeAddress,
+  makeCartItem,
+  makeProduct,
+  makeShipping,
+} from "../factories/entityFactories";
 
-const address: Address = {
-  _id: "a1",
-  _type: "address",
-  _createdAt: "",
-  _updatedAt: "",
-  _rev: "",
-  name: "Casa",
-  address: "Rua 1",
-  city: "Cidade",
-  state: "ST",
-  zip: "12345-678",
-  default: true,
-  createdAt: "",
-};
+const makeUser = (overrides = {}) => ({
+  fullName: "John",
+  emailAddresses: [{ emailAddress: "john@e.com" }],
+  id: "user-1",
+  ...overrides,
+});
 
-const product = (overrides: Partial<Product> = {}): Product =>
-  ({
-    _id: "p1",
-    name: "Produto Teste",
-    price: 100,
-    ...overrides,
-  }) as Product;
+const makeDeps = (url = "https://checkout.example/ok") => ({
+  createCheckoutSession: vi.fn(async () => url),
+});
 
 describe("checkoutLogic.performCheckout", () => {
-  it("erro quando endereço não selecionado", async () => {
-    const deps = {
-      createCheckoutSession: vi.fn(async () => "url"),
-    };
+  it("lança erro quando endereço não selecionado", async () => {
+    const deps = makeDeps();
     await expect(
-      performCheckout(
-        [{ product: product(), quantity: 1 }],
-        { fullName: "John", emailAddresses: [{ emailAddress: "john@e.com" }] },
-        null,
-        { service: "PAC", price: 10 },
-        deps,
-      ),
+      performCheckout([makeCartItem()], makeUser(), null, makeShipping(), deps),
     ).rejects.toThrow("Selecione um endereço de entrega");
     expect(deps.createCheckoutSession).not.toHaveBeenCalled();
   });
 
-  it("erro quando frete não selecionado", async () => {
-    const deps = {
-      createCheckoutSession: vi.fn(async () => "url"),
-    };
+  it("lança erro quando frete não selecionado", async () => {
+    const deps = makeDeps();
     await expect(
-      performCheckout(
-        [{ product: product(), quantity: 1 }],
-        { fullName: "John", emailAddresses: [{ emailAddress: "john@e.com" }] },
-        address,
-        null,
-        deps,
-      ),
+      performCheckout([makeCartItem()], makeUser(), makeAddress(), null, deps),
     ).rejects.toThrow("Selecione uma opção de frete");
     expect(deps.createCheckoutSession).not.toHaveBeenCalled();
   });
 
-  it("sucesso retorna URL e chama createCheckoutSession", async () => {
-    const deps = {
-      createCheckoutSession: vi.fn(async () => "https://checkout.example/ok"),
-    };
+  it("retorna URL e chama createCheckoutSession no sucesso", async () => {
+    const deps = makeDeps("https://checkout.example/ok");
+    const shipping = makeShipping({
+      service: "SEDEX",
+      price: 29.9,
+      deliveryDays: 2,
+    });
 
     const url = await performCheckout(
-      [{ product: product(), quantity: 2 }],
-      {
-        fullName: "John",
-        emailAddresses: [{ emailAddress: "john@e.com" }],
-        id: "user-1",
-      },
-      address,
-      { service: "SEDEX", price: 29.9 },
+      [makeCartItem({ product: makeProduct(), quantity: 2 })],
+      makeUser(),
+      makeAddress(),
+      shipping,
       deps,
     );
 
     expect(url).toBe("https://checkout.example/ok");
     expect(deps.createCheckoutSession).toHaveBeenCalledTimes(1);
 
-    const callArgs = deps.createCheckoutSession.mock.calls[0] as unknown[];
-    expect(callArgs).toBeDefined();
-    expect(callArgs.length).toBeGreaterThanOrEqual(2);
-
-    const itemsArg = callArgs[0] as unknown[];
-    const metadataArg = callArgs[1] as Record<string, unknown>;
-
+    const [itemsArg, metadataArg] = deps.createCheckoutSession.mock
+      .calls[0] as unknown as [unknown[], Record<string, unknown>];
     expect(itemsArg).toHaveLength(1);
-
     expect(metadataArg.shipping).toEqual({
       method: "SEDEX",
       price: 29.9,
-      estimatedDays: undefined,
+      estimatedDays: 2,
     });
   });
 
-  it("falha quando createCheckoutSession lança erro e não retorna URL", async () => {
+  it("propaga erro quando createCheckoutSession lança exceção", async () => {
     const deps = {
       createCheckoutSession: vi.fn(async () => {
         throw new Error("Falhou no gateway");
@@ -102,10 +72,10 @@ describe("checkoutLogic.performCheckout", () => {
     };
     await expect(
       performCheckout(
-        [{ product: product(), quantity: 1 }],
-        { fullName: "John", emailAddresses: [{ emailAddress: "john@e.com" }] },
-        address,
-        { service: "PAC", price: 10 },
+        [makeCartItem()],
+        makeUser(),
+        makeAddress(),
+        makeShipping(),
         deps,
       ),
     ).rejects.toThrow("Falhou no gateway");

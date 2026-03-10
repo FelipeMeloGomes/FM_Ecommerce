@@ -2,29 +2,18 @@ import type { User } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// mocks devem vir antes dos imports
 vi.mock("@/lib/requireAdmin");
 
 vi.mock("@/sanity/lib/backendClient", () => ({
-  backendClient: {
-    create: vi.fn(),
-    patch: vi.fn(),
-    delete: vi.fn(),
-  },
+  backendClient: { create: vi.fn(), patch: vi.fn(), delete: vi.fn() },
 }));
 
 vi.mock("@/sanity/lib/writeClient", () => ({
-  writeClient: {
-    create: vi.fn(),
-    patch: vi.fn(),
-    delete: vi.fn(),
-  },
+  writeClient: { create: vi.fn(), patch: vi.fn(), delete: vi.fn() },
 }));
 
 vi.mock("@/sanity/lib/client", () => ({
-  client: {
-    fetch: vi.fn(),
-  },
+  client: { fetch: vi.fn() },
 }));
 
 vi.mock("@/sanity/env", () => ({
@@ -35,23 +24,17 @@ vi.mock("@/sanity/env", () => ({
 
 import { DELETE as deleteOrderById } from "@/app/(client)/api/admin/orders/[id]/route";
 import { DELETE as bulkDeleteOrders } from "@/app/(client)/api/admin/orders/bulk-delete/route";
-
 import { requireAdmin } from "@/lib/requireAdmin";
 import { backendClient } from "@/sanity/lib/backendClient";
 
-/* -------------------------------------------------------------------------- */
-/*                                  FACTORIES                                 */
-/* -------------------------------------------------------------------------- */
-
-const createMockUser = (): User =>
+const makeAdminUser = (): User =>
   ({
     id: "user_test_123",
     emailAddresses: [],
     firstName: "Admin",
-    lastName: "Test",
   }) as unknown as User;
 
-const createMockDeletedOrder = (id: string) => ({
+const makeDeletedOrder = (id: string) => ({
   _id: id,
   _rev: "rev-test",
   _type: "order",
@@ -59,198 +42,110 @@ const createMockDeletedOrder = (id: string) => ({
   _updatedAt: new Date().toISOString(),
 });
 
-/* -------------------------------------------------------------------------- */
-/*                             MOCKS TIPADOS                                  */
-/* -------------------------------------------------------------------------- */
+const makeDeleteRequest = (url: string, body?: object) =>
+  new NextRequest(new URL(url), {
+    method: "DELETE",
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
 
 const mockedDelete = vi.mocked(backendClient.delete);
 
-/* -------------------------------------------------------------------------- */
-/*                                   SETUP                                    */
-/* -------------------------------------------------------------------------- */
-
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(requireAdmin).mockResolvedValue(createMockUser());
+  vi.mocked(requireAdmin).mockResolvedValue(makeAdminUser());
 });
-
-/* -------------------------------------------------------------------------- */
-/*                                   TESTS                                    */
-/* -------------------------------------------------------------------------- */
 
 describe("Orders API Endpoints", () => {
   describe("DELETE /api/admin/orders/[id]", () => {
-    it("deve deletar ordem individual com sucesso", async () => {
-      // Arrange
+    it("deleta ordem individual com sucesso", async () => {
       const orderId = "order-123";
+      mockedDelete.mockImplementation(async () => makeDeletedOrder(orderId));
 
-      mockedDelete.mockImplementation(async () =>
-        createMockDeletedOrder(orderId),
+      const response = await deleteOrderById(
+        makeDeleteRequest(`http://localhost:3000/api/admin/orders/${orderId}`),
+        { params: Promise.resolve({ id: orderId }) },
       );
-
-      const request = new NextRequest(
-        new URL(`http://localhost:3000/api/admin/orders/${orderId}`),
-        { method: "DELETE" },
-      );
-
-      // Act
-      const response = await deleteOrderById(request, {
-        params: Promise.resolve({ id: orderId }),
-      });
-
       const data = await response.json();
 
-      // Assert
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(mockedDelete).toHaveBeenCalled();
     });
 
-    it("deve retornar erro quando não autorizado", async () => {
-      // Arrange
+    it("retorna 401/403/500 quando não autorizado", async () => {
       vi.mocked(requireAdmin).mockRejectedValue(new Error("Unauthorized"));
 
-      const request = new NextRequest(
-        new URL("http://localhost:3000/api/admin/orders/order-123"),
-        { method: "DELETE" },
+      const response = await deleteOrderById(
+        makeDeleteRequest("http://localhost:3000/api/admin/orders/order-123"),
+        { params: Promise.resolve({ id: "order-123" }) },
       );
 
-      // Act
-      const response = await deleteOrderById(request, {
-        params: Promise.resolve({ id: "order-123" }),
-      });
-
-      // Assert
       expect([401, 403, 500]).toContain(response.status);
     });
   });
 
   describe("DELETE /api/admin/orders/bulk-delete", () => {
-    it("deve deletar múltiplas ordens com sucesso", async () => {
-      // Arrange
+    const bulkUrl = "http://localhost:3000/api/admin/orders/bulk-delete";
+
+    it("deleta múltiplas ordens com sucesso", async () => {
       const ids = ["order-1", "order-2", "order-3"];
-
       mockedDelete.mockImplementation(async (id) =>
-        createMockDeletedOrder(String(id)),
+        makeDeletedOrder(String(id)),
       );
 
-      const request = new NextRequest(
-        new URL("http://localhost:3000/api/admin/orders/bulk-delete"),
-        {
-          method: "DELETE",
-          body: JSON.stringify({ ids }),
-        },
+      const response = await bulkDeleteOrders(
+        makeDeleteRequest(bulkUrl, { ids }),
       );
-
-      // Act
-      const response = await bulkDeleteOrders(request);
       const data = await response.json();
 
-      // Assert
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(mockedDelete).toHaveBeenCalledTimes(ids.length);
     });
 
-    it("deve retornar 400 se nenhum ID for fornecido", async () => {
-      const request = new NextRequest(
-        new URL("http://localhost:3000/api/admin/orders/bulk-delete"),
-        {
-          method: "DELETE",
-          body: JSON.stringify({ ids: [] }),
-        },
-      );
-
-      const response = await bulkDeleteOrders(request);
-
+    it.each([
+      [{ ids: [] }, "array vazio"],
+      [{ ids: "order-1" }, "ids não é array"],
+      [{}, "ids ausente"],
+    ])("retorna 400 quando body é %s", async (body, _label) => {
+      const response = await bulkDeleteOrders(makeDeleteRequest(bulkUrl, body));
       expect(response.status).toBe(400);
     });
 
-    it("deve retornar 400 se ids não for um array", async () => {
-      const request = new NextRequest(
-        new URL("http://localhost:3000/api/admin/orders/bulk-delete"),
-        {
-          method: "DELETE",
-          body: JSON.stringify({ ids: "order-1" }),
-        },
-      );
-
-      const response = await bulkDeleteOrders(request);
-
-      expect(response.status).toBe(400);
-    });
-
-    it("deve retornar 400 se ids não for fornecido", async () => {
-      const request = new NextRequest(
-        new URL("http://localhost:3000/api/admin/orders/bulk-delete"),
-        {
-          method: "DELETE",
-          body: JSON.stringify({}),
-        },
-      );
-
-      const response = await bulkDeleteOrders(request);
-
-      expect(response.status).toBe(400);
-    });
-
-    it("deve retornar erro quando não autorizado", async () => {
+    it("retorna 401/403 quando não autorizado", async () => {
       vi.mocked(requireAdmin).mockRejectedValue(new Error("Unauthorized"));
 
-      const request = new NextRequest(
-        new URL("http://localhost:3000/api/admin/orders/bulk-delete"),
-        {
-          method: "DELETE",
-          body: JSON.stringify({
-            ids: ["order-1", "order-2"],
-          }),
-        },
+      const response = await bulkDeleteOrders(
+        makeDeleteRequest(bulkUrl, { ids: ["order-1", "order-2"] }),
       );
-
-      const response = await bulkDeleteOrders(request);
 
       expect([401, 403]).toContain(response.status);
     });
 
-    it("deve retornar 500 em caso de erro no banco", async () => {
+    it("retorna 500 em caso de erro no banco", async () => {
       mockedDelete.mockRejectedValue(new Error("Database error"));
 
-      const request = new NextRequest(
-        new URL("http://localhost:3000/api/admin/orders/bulk-delete"),
-        {
-          method: "DELETE",
-          body: JSON.stringify({
-            ids: ["order-1", "order-2"],
-          }),
-        },
+      const response = await bulkDeleteOrders(
+        makeDeleteRequest(bulkUrl, { ids: ["order-1", "order-2"] }),
       );
-
-      const response = await bulkDeleteOrders(request);
 
       expect(response.status).toBe(500);
     });
 
-    it("deve permitir deletar muitas ordens", async () => {
+    it("suporta deleção em larga escala (50 ordens)", async () => {
       const ids = Array.from({ length: 50 }, (_, i) => `order-${i + 1}`);
-
       mockedDelete.mockImplementation(async (id) =>
-        createMockDeletedOrder(String(id)),
+        makeDeletedOrder(String(id)),
       );
 
-      const request = new NextRequest(
-        new URL("http://localhost:3000/api/admin/orders/bulk-delete"),
-        {
-          method: "DELETE",
-          body: JSON.stringify({ ids }),
-        },
+      const response = await bulkDeleteOrders(
+        makeDeleteRequest(bulkUrl, { ids }),
       );
-
-      const response = await bulkDeleteOrders(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      expect(mockedDelete).toHaveBeenCalledTimes(ids.length);
+      expect(mockedDelete).toHaveBeenCalledTimes(50);
     });
   });
 });
