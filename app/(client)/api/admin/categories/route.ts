@@ -11,6 +11,11 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const imageFile = formData.get("image") as File | null;
 
+    const featured = formData.get("featured");
+    const featuredBoolean =
+      featured !== null &&
+      (featured === "true" || featured === "on" || featured === "1");
+
     const useCase = new CreateCategory(
       new SanityCategoryRepository(),
       new SlugService(),
@@ -18,13 +23,11 @@ export async function POST(request: Request) {
     );
 
     await useCase.execute({
-      title: String(formData.get("title")),
-      description: formData.get("description")?.toString(),
-      range: formData.get("range")
-        ? Number(formData.get("range"))
-        : undefined,
-      featured: formData.get("featured") === "true",
-      imageFile: imageFile || undefined,
+      title: String(formData.get("title") ?? ""),
+      description: formData.get("description")?.toString() ?? undefined,
+      range: formData.get("range") ? Number(formData.get("range")) : undefined,
+      featured: featuredBoolean,
+      imageFile: imageFile && imageFile.size > 0 ? imageFile : undefined,
     });
 
     return NextResponse.json({ success: true });
@@ -32,7 +35,7 @@ export async function POST(request: Request) {
     if (error instanceof Error && error.message === "Slug já existe") {
       return NextResponse.json({ message: error.message }, { status: 400 });
     }
-    console.error(error);
+    console.error("Erro ao criar categoria:", error);
     return NextResponse.json(
       { message: "Erro interno do servidor" },
       { status: 500 },

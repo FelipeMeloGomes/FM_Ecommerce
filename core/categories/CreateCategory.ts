@@ -1,7 +1,7 @@
+import type { SlugGateway } from "@/core/products/SlugGateway";
 import type { Category } from "./Category";
 import type { CategoryImageGateway } from "./CategoryImageGateway";
 import type { CategoryRepository } from "./CategoryRepository";
-import type { SlugGateway } from "@/core/products/SlugGateway";
 
 export interface CreateCategoryInput {
   title: string;

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -10,65 +11,89 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import type { Category } from "@/core/categories/Category";
 import { apiRequest } from "@/lib/api/apiRequest";
+import { urlFor } from "@/sanity/lib/image";
 import {
   type CreateCategoryInput,
   createCategorySchema,
 } from "@/schemas/createCategorySchema";
 
-export default function AdminAddCategory() {
+interface EditCategoryFormProps {
+  category: Category;
+}
+
+export default function EditCategoryForm({ category }: EditCategoryFormProps) {
+  const router = useRouter();
   const [image, setImage] = useState<ImagePreview | null>(null);
+  const [shouldRemoveImage, setShouldRemoveImage] = useState(false);
 
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors, isSubmitting },
   } = useForm<CreateCategoryInput>({
     resolver: zodResolver(createCategorySchema),
     defaultValues: {
-      featured: false,
+      title: category.title,
+      description: category.description,
+      range: category.range,
+      featured: category.featured,
     },
   });
 
   useEffect(() => {
+    // Só carrega a imagem inicial se não foi explicitamente removida
+    if (category.image?.asset?._ref && !image && !shouldRemoveImage) {
+      const previewUrl = urlFor(category.image.asset._ref).url();
+      setImage({
+        id: category.image._key || crypto.randomUUID(),
+        previewUrl,
+        file: undefined,
+      });
+    }
+
     return () => {
-      if (image) {
+      if (image?.previewUrl && image?.file) {
         URL.revokeObjectURL(image.previewUrl);
       }
     };
-  }, [image]);
+  }, [category.image, shouldRemoveImage, image]);
 
   const onSubmit = async (data: CreateCategoryInput) => {
     const formData = new FormData();
 
-    formData.append("title", String(data.title));
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    });
 
-    if (data.description) {
-      formData.append("description", String(data.description));
+    // Se quer remover a imagem, envia o sinalizador
+    if (shouldRemoveImage) {
+      formData.append("_removeImage", "true");
     }
 
-    formData.append("range", String(data.range ?? 0));
-    formData.append("featured", String(data.featured ?? false));
-
+    // Se tem uma nova imagem para upload, envia o arquivo
     if (image?.file) {
       formData.append("image", image.file);
     }
 
     try {
-      await apiRequest<{ success: true }>("/api/admin/categories", {
-        method: "POST",
-        body: formData,
-      });
+      await apiRequest<{ success: true }>(
+        `/api/admin/categories/${category._id}`,
+        {
+          method: "PUT",
+          body: formData,
+        },
+      );
 
-      toast.success("Categoria criada com sucesso");
-
-      reset();
-      setImage(null);
+      toast.success("Categoria atualizada com sucesso");
+      router.push("/admin/categories");
+      router.refresh();
     } catch (error) {
-      console.error("Erro ao criar categoria:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Erro ao criar categoria";
+        error instanceof Error ? error.message : "Erro ao atualizar categoria";
       toast.error(errorMessage);
     }
   };
@@ -76,7 +101,7 @@ export default function AdminAddCategory() {
   return (
     <div className="min-h-screen bg-muted/40 p-6">
       <div className="max-w-3xl mx-auto space-y-6">
-        <h1 className="text-3xl font-semibold">Nova Categoria</h1>
+        <h1 className="text-3xl font-semibold">Editar Categoria</h1>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Card>
@@ -138,14 +163,37 @@ export default function AdminAddCategory() {
             <CardContent>
               <ImageUploader
                 value={image ? [image] : []}
-                onChange={(images) => setImage(images[0] || null)}
+                onChange={(images) => {
+                  const newImage = images[0] || null;
+                  setImage(newImage);
+
+                  // Se tinha imagem original e agora não tem nenhuma, marca para remover
+                  if (category.image?.asset?._ref && !newImage) {
+                    setShouldRemoveImage(true);
+                  }
+                  // Se adiciona uma nova imagem (arquivo), desmarca a flag de remover
+                  else if (newImage?.file) {
+                    setShouldRemoveImage(false);
+                  }
+                  // Se remove a imagem nova mas tem imagem original, volta a marcar para remover
+                  else if (!newImage && !category.image?.asset?._ref) {
+                    setShouldRemoveImage(false);
+                  }
+                }}
               />
             </CardContent>
           </Card>
 
           <div className="flex gap-3">
             <Button type="submit" disabled={isSubmitting} className="flex-1">
-              {isSubmitting ? "Criando..." : "Criar Categoria"}
+              {isSubmitting ? "Salvando..." : "Salvar Alterações"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/admin/categories")}
+            >
+              Cancelar
             </Button>
           </div>
         </form>

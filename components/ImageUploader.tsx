@@ -80,9 +80,9 @@ export function ImageUploader({
 
       {value.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {value.map((image) => (
+          {value.map((image, index) => (
             <div
-              key={image.id}
+              key={image.id || `image-${index}`}
               className="relative rounded-xl overflow-hidden border"
             >
               <Image

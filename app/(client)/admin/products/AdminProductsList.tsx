@@ -57,7 +57,7 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
               <Link href="/admin/add">Novo Produto</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/admin/add/categories">Adicionar Categoria</Link>
+              <Link href="/admin/categories">Gerenciar Categorias</Link>
             </Button>
           </div>
         </div>
