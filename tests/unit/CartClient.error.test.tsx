@@ -33,7 +33,29 @@ vi.mock("@/components/Title", () => ({
   default: ({ children }: { children: ReactNode }) => children,
 }));
 vi.mock("@/components/cart/CartItemsList", () => ({ default: () => null }));
-vi.mock("@/components/cart/AddressSection", () => ({ default: () => null }));
+vi.mock("@/components/cart/AddressSection", () => ({
+  default: ({
+    addresses,
+    onSelectAddress: _onSelectAddress,
+    onDeleteAddress: _onDeleteAddress,
+  }: {
+    addresses: unknown[];
+    onSelectAddress: (id: string) => void;
+    onDeleteAddress: (id: string) => void;
+  }) => {
+    if (!addresses.length) {
+      return (
+        <div data-testid="address-section">
+          <p>Você ainda não possui um endereço cadastrado.</p>
+          <a href="/account/addresses" data-testid="add-address-link">
+            Cadastrar Endereço
+          </a>
+        </div>
+      );
+    }
+    return <div data-testid="address-section">Address List</div>;
+  },
+}));
 vi.mock("@/components/cart/MobileOrderSummary", () => ({
   default: () => null,
 }));
@@ -100,5 +122,77 @@ describe("CartClient — tratamento de erro no checkout", () => {
     expect(performCheckout).toHaveBeenCalled();
     expect(toast.error).toHaveBeenCalledWith("Erro ao criar sessão");
     expect(window.location.href).toBe("");
+  });
+});
+
+describe("CartClient — sem endereços cadastrados", () => {
+  it("renderiza mensagem quando addresses é array vazio", async () => {
+    const { default: CartClient } = await import(
+      "@/app/(client)/cart/CartClient"
+    );
+    const { addItem, setShipping } = useStore.getState();
+
+    addItem(makeProduct({ _id: "p1", price: 80 }));
+    setShipping(makeShipping());
+
+    const container = document.createElement("div");
+    const root = createRoot(container);
+    root.render(<CartClient addresses={[]} />);
+
+    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
+
+    const addressSection = container.querySelector(
+      "[data-testid='address-section']",
+    );
+    expect(addressSection).not.toBeNull();
+    expect(addressSection?.textContent).toContain(
+      "Você ainda não possui um endereço cadastrado",
+    );
+  });
+
+  it("não permite checkout quando não há endereços", async () => {
+    const { default: CartClient } = await import(
+      "@/app/(client)/cart/CartClient"
+    );
+    const { addItem, setShipping } = useStore.getState();
+
+    addItem(makeProduct({ _id: "p1", price: 80 }));
+    setShipping(makeShipping());
+
+    const container = document.createElement("div");
+    const root = createRoot(container);
+    root.render(<CartClient addresses={[]} />);
+
+    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(
+      container.querySelector("[data-testid='address-section']"),
+    ).not.toBeNull();
+    expect(container.textContent).toContain(
+      "Você ainda não possui um endereço cadastrado",
+    );
+  });
+
+  it("exibe link para cadastrar novo endereço", async () => {
+    const { default: CartClient } = await import(
+      "@/app/(client)/cart/CartClient"
+    );
+    const { addItem, setShipping } = useStore.getState();
+
+    addItem(makeProduct({ _id: "p1", price: 80 }));
+    setShipping(makeShipping());
+
+    const container = document.createElement("div");
+    const root = createRoot(container);
+    root.render(<CartClient addresses={[]} />);
+
+    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
+
+    const link = container.querySelector("[data-testid='add-address-link']");
+    expect(link).not.toBeNull();
+    expect(link?.getAttribute("href")).toBe("/account/addresses");
   });
 });

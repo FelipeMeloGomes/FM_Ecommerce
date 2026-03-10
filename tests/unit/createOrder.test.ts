@@ -11,6 +11,11 @@ vi.mock("@/sanity/lib/backendClient", () => ({
     patch: vi.fn().mockImplementation(() => ({
       set: vi.fn().mockReturnValue({ commit: vi.fn().mockResolvedValue(null) }),
     })),
+    transaction: vi.fn(() => ({
+      createOrReplace: vi.fn(),
+      patch: vi.fn(),
+      commit: vi.fn().mockResolvedValue(null),
+    })),
   },
 }));
 
@@ -40,7 +45,12 @@ describe("createOrder with Clerk User ID", () => {
   it("deve salvar clerkUserId no order", async () => {
     await createOrder(makeSession());
 
-    const mock = vi.mocked(backendClient.createOrReplace);
+    const transactionMock = vi.mocked(backendClient.transaction);
+    expect(transactionMock).toHaveBeenCalled();
+
+    const mock = vi.mocked(
+      transactionMock.mock.results[0].value.createOrReplace,
+    );
     expect(mock).toHaveBeenCalled();
 
     const payload = mock.mock.calls[0][0];
@@ -51,7 +61,7 @@ describe("createOrder with Clerk User ID", () => {
 describe("createOrder sem Clerk User ID", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("salva order com clerkUserId undefined quando ausente", async () => {
+  it("deve lançar erro quando clerkUserId ausente", async () => {
     const session = makeSession({
       metadata: {
         orderNumber: "ORDER-2",
@@ -62,12 +72,8 @@ describe("createOrder sem Clerk User ID", () => {
       },
     });
 
-    await createOrder(session);
-
-    const mock = vi.mocked(backendClient.createOrReplace);
-    expect(mock).toHaveBeenCalled();
-
-    const payload = mock.mock.calls[0][0];
-    expect(payload.clerkUserId).toBeUndefined();
+    await expect(createOrder(session)).rejects.toThrow(
+      "Clerk User ID não encontrado",
+    );
   });
 });
