@@ -60,8 +60,8 @@ describe("POST /api/admin/categories - Criação de Categoria", () => {
     expect(Number(formDataObject.range)).toBe(500);
     expect(
       formDataObject.featured === "true" ||
-      formDataObject.featured === "on" ||
-      formDataObject.featured === "1",
+        formDataObject.featured === "on" ||
+        formDataObject.featured === "1",
     ).toBe(true);
   });
 
@@ -512,13 +512,13 @@ describe("Testes de Campos Específicos por Endpoint", () => {
 
     expect(
       formDataTrue.featured === "true" ||
-      formDataTrue.featured === "on" ||
-      formDataTrue.featured === "1",
+        formDataTrue.featured === "on" ||
+        formDataTrue.featured === "1",
     ).toBe(true);
     expect(
       formDataFalse.featured === "true" ||
-      formDataFalse.featured === "on" ||
-      formDataFalse.featured === "1",
+        formDataFalse.featured === "on" ||
+        formDataFalse.featured === "1",
     ).toBe(false);
     expect("featured" in formDataOmitted).toBe(false);
   });

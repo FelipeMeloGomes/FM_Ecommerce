@@ -234,7 +234,7 @@ describe("Testes de Tratamento de Erros - Categoria API", () => {
   it("deve logar erros adequadamente", () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
-      .mockImplementation(() => { });
+      .mockImplementation(() => {});
 
     const error = new Error("Erro ao processar categoria");
     console.error("Erro:", error);
