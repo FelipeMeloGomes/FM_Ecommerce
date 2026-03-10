@@ -12,6 +12,10 @@ export async function createOrder(session: PaymentSession) {
     clerkUserId,
   } = session.metadata;
 
+  if (!clerkUserId) {
+    throw new Error("Clerk User ID não encontrado");
+  }
+
   const products = session.products.map((p) => ({
     _key: crypto.randomUUID(),
     product: { _type: "reference", _ref: p.productId },
@@ -39,6 +43,9 @@ export async function createOrder(session: PaymentSession) {
     amountDiscount: 0,
   };
 
-  await backendClient.createOrReplace(orderPayload);
-  await updateStock(session.products);
+  const transaction = backendClient.transaction();
+  transaction.createOrReplace(orderPayload);
+
+  await updateStock(session.products, transaction);
+  await transaction.commit();
 }
