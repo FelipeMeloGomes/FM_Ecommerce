@@ -17,7 +17,7 @@ export class UpdateCategory {
     private repository: CategoryRepository,
     private slugGateway: SlugGateway,
     private imageGateway: CategoryImageGateway,
-  ) {}
+  ) { }
 
   async execute(id: string, input: UpdateCategoryInput): Promise<void> {
     const existing = await this.repository.findById(id);

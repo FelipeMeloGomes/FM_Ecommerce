@@ -1,7 +1,7 @@
 import type { CategoryRepository } from "./CategoryRepository";
 
 export class DeleteCategory {
-  constructor(private repository: CategoryRepository) {}
+  constructor(private repository: CategoryRepository) { }
 
   async execute(id: string): Promise<void> {
     const existing = await this.repository.findById(id);

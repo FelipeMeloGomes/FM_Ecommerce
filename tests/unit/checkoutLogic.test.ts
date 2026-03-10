@@ -78,7 +78,12 @@ describe("checkoutLogic.performCheckout", () => {
     expect(url).toBe("https://checkout.example/ok");
     expect(deps.createCheckoutSession).toHaveBeenCalledTimes(1);
 
-    const [itemsArg, metadataArg] = deps.createCheckoutSession.mock.calls[0];
+    const callArgs = deps.createCheckoutSession.mock.calls[0] as unknown[];
+    expect(callArgs).toBeDefined();
+    expect(callArgs.length).toBeGreaterThanOrEqual(2);
+
+    const itemsArg = callArgs[0] as unknown[];
+    const metadataArg = callArgs[1] as Record<string, unknown>;
 
     expect(itemsArg).toHaveLength(1);
 
