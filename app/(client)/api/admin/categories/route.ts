@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server";
 import { CreateCategory } from "@/core/categories/CreateCategory";
+import { errorResponse, successResponse } from "@/lib/api/apiResponse";
+import { toHttpStatus } from "@/lib/httpError";
 import { requireAdmin } from "@/lib/requireAdmin";
+import { categorySchema } from "@/lib/schemas/categorySchema";
 import { SanityCategoryImageGateway } from "@/services/categories/SanityCategoryImageGateway";
 import { SanityCategoryRepository } from "@/services/categories/SanityCategoryRepository";
 import { SlugService } from "@/services/products/SlugService";
@@ -8,13 +10,26 @@ import { SlugService } from "@/services/products/SlugService";
 export async function POST(request: Request) {
   try {
     await requireAdmin();
-    const formData = await request.formData();
-    const imageFile = formData.get("image") as File | null;
 
-    const featured = formData.get("featured");
-    const featuredBoolean =
-      featured !== null &&
-      (featured === "true" || featured === "on" || featured === "1");
+    const formData = await request.formData();
+    const data = {
+      title: formData.get("title")?.toString() ?? "",
+      description: formData.get("description")?.toString() ?? undefined,
+      range: formData.get("range") ? Number(formData.get("range")) : undefined,
+      featured:
+        formData.get("featured") !== null &&
+        (formData.get("featured") === "true" ||
+          formData.get("featured") === "on" ||
+          formData.get("featured") === "1"),
+      image: formData.get("image")
+        ? (formData.get("image") as File)
+        : undefined,
+    };
+
+    const result = categorySchema.safeParse(data);
+    if (!result.success) {
+      return errorResponse(result.error.issues[0].message, 400);
+    }
 
     const useCase = new CreateCategory(
       new SanityCategoryRepository(),
@@ -22,23 +37,13 @@ export async function POST(request: Request) {
       new SanityCategoryImageGateway(),
     );
 
-    await useCase.execute({
-      title: String(formData.get("title") ?? ""),
-      description: formData.get("description")?.toString() ?? undefined,
-      range: formData.get("range") ? Number(formData.get("range")) : undefined,
-      featured: featuredBoolean,
-      imageFile: imageFile && imageFile.size > 0 ? imageFile : undefined,
-    });
+    await useCase.execute(result.data);
 
-    return NextResponse.json({ success: true });
+    return successResponse();
   } catch (error: unknown) {
-    if (error instanceof Error && error.message === "Slug já existe") {
-      return NextResponse.json({ message: error.message }, { status: 400 });
-    }
-    console.error("Erro ao criar categoria:", error);
-    return NextResponse.json(
-      { message: "Erro interno do servidor" },
-      { status: 500 },
-    );
+    const status = toHttpStatus(error);
+    const message =
+      error instanceof Error ? error.message : "Erro interno do servidor";
+    return errorResponse(message, status);
   }
 }

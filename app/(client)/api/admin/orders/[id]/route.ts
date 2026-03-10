@@ -1,19 +1,7 @@
-import { NextResponse } from "next/server";
+import { errorResponse, successResponse } from "@/lib/api/apiResponse";
+import { toHttpStatus } from "@/lib/httpError";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { backendClient } from "@/sanity/lib/backendClient";
-
-function handleError(error: unknown) {
-  if (error instanceof Error) {
-    if (error.message === "Unauthorized" || error.message === "Forbidden") {
-      return NextResponse.json({ message: error.message }, { status: 403 });
-    }
-  }
-  console.error(error);
-  return NextResponse.json(
-    { message: "Erro interno do servidor" },
-    { status: 500 },
-  );
-}
 
 export async function DELETE(
   _request: Request,
@@ -26,8 +14,12 @@ export async function DELETE(
 
     await backendClient.delete(id);
 
-    return NextResponse.json({ success: true });
+    return successResponse();
   } catch (error: unknown) {
-    return handleError(error);
+    const status = toHttpStatus(error);
+    const message =
+      error instanceof Error ? error.message : "Erro interno do servidor";
+    console.error(error);
+    return errorResponse(message, status);
   }
 }

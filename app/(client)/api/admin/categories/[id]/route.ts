@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server";
 import { DeleteCategory, UpdateCategory } from "@/core/categories";
+import { errorResponse, successResponse } from "@/lib/api/apiResponse";
+import { toHttpStatus } from "@/lib/httpError";
 import { requireAdmin } from "@/lib/requireAdmin";
+import { categorySchema } from "@/lib/schemas/categorySchema";
 import {
   SanityCategoryImageGateway,
   SanityCategoryRepository,
@@ -13,6 +15,7 @@ export async function PUT(
 ) {
   try {
     await requireAdmin();
+
     const { id } = await params;
     const formData = await request.formData();
     const imageFile = formData.get("image") as File | null;
@@ -21,6 +24,19 @@ export async function PUT(
     const featuredBoolean =
       featured !== null &&
       (featured === "true" || featured === "on" || featured === "1");
+
+    const data = {
+      title: formData.get("title")?.toString() ?? "",
+      description: formData.get("description")?.toString() ?? undefined,
+      range: formData.get("range") ? Number(formData.get("range")) : undefined,
+      featured: featuredBoolean,
+      image: imageFile && imageFile.size > 0 ? imageFile : undefined,
+    };
+
+    const result = categorySchema.safeParse(data);
+    if (!result.success) {
+      return errorResponse(result.error.issues[0].message, 400);
+    }
 
     console.log("[PUT /api/admin/categories/[id]]", {
       categoryId: id,
@@ -37,37 +53,19 @@ export async function PUT(
     );
 
     await useCase.execute(id, {
-      title: String(formData.get("title") ?? ""),
-      description: formData.get("description")?.toString(),
-      range: formData.get("range") ? Number(formData.get("range")) : undefined,
-      featured: featuredBoolean,
-      imageFile: imageFile && imageFile.size > 0 ? imageFile : undefined,
+      ...result.data,
       removeImage,
     });
 
     console.log("[PUT /api/admin/categories/[id]] Sucesso:", { id });
 
-    return NextResponse.json({ success: true });
+    return successResponse();
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Desconhecido";
-    console.error("Erro ao atualizar categoria:", errorMessage, error);
-
-    if (errorMessage === "Slug já existe") {
-      return NextResponse.json({ message: "Slug já existe" }, { status: 400 });
-    }
-
-    if (errorMessage === "Categoria não encontrada") {
-      return NextResponse.json(
-        { message: "Categoria não encontrada" },
-        { status: 404 },
-      );
-    }
-
-    return NextResponse.json(
-      { message: `Erro ao atualizar categoria: ${errorMessage}` },
-      { status: 500 },
-    );
+    const status = toHttpStatus(error);
+    const message =
+      error instanceof Error ? error.message : "Erro desconhecido";
+    console.error("Erro ao atualizar categoria:", message, error);
+    return errorResponse(message, status);
   }
 }
 
@@ -77,28 +75,17 @@ export async function DELETE(
 ) {
   try {
     await requireAdmin();
+
     const { id } = await params;
 
-    const useCase = new DeleteCategory(new SanityCategoryRepository());
+    await new DeleteCategory(new SanityCategoryRepository()).execute(id);
 
-    await useCase.execute(id);
-
-    return NextResponse.json({ success: true });
+    return successResponse();
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Desconhecido";
-    console.error("Erro ao deletar categoria:", errorMessage, error);
-
-    if (errorMessage === "Categoria não encontrada") {
-      return NextResponse.json(
-        { message: "Categoria não encontrada" },
-        { status: 404 },
-      );
-    }
-
-    return NextResponse.json(
-      { message: `Erro ao deletar categoria: ${errorMessage}` },
-      { status: 500 },
-    );
+    const status = toHttpStatus(error);
+    const message =
+      error instanceof Error ? error.message : "Erro desconhecido";
+    console.error("Erro ao deletar categoria:", message, error);
+    return errorResponse(message, status);
   }
 }
