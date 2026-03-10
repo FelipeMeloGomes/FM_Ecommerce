@@ -4,6 +4,23 @@ import { requireAdmin } from "@/lib/requireAdmin";
 import { SanityImageGateway } from "@/services/products/SanityImageGateway";
 import { SanityProductRepository } from "@/services/products/SanityProductRepository";
 import { SlugService } from "@/services/products/SlugService";
+
+function handleError(error: unknown) {
+  if (error instanceof Error) {
+    if (error.message === "Unauthorized" || error.message === "Forbidden") {
+      return NextResponse.json({ message: error.message }, { status: 403 });
+    }
+    if (error.message === "Slug já existe") {
+      return NextResponse.json({ message: error.message }, { status: 400 });
+    }
+  }
+  console.error(error);
+  return NextResponse.json(
+    { message: "Erro interno do servidor" },
+    { status: 500 },
+  );
+}
+
 export async function POST(request: Request) {
   try {
     await requireAdmin();
@@ -42,13 +59,6 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    if (error instanceof Error && error.message === "Slug já existe") {
-      return NextResponse.json({ message: error.message }, { status: 400 });
-    }
-    console.error(error);
-    return NextResponse.json(
-      { message: "Erro interno do servidor" },
-      { status: 500 },
-    );
+    return handleError(error);
   }
 }
