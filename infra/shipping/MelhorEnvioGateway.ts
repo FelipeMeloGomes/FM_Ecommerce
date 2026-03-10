@@ -10,6 +10,10 @@ interface MelhorEnvioServiceResponse {
 const API_URL =
   "https://sandbox.melhorenvio.com.br/api/v2/me/shipment/calculate";
 
+const normalizeServiceName = (name: string) => {
+  return name.split(".")[0].trim();
+};
+
 export class MelhorEnvioGateway implements ShippingGateway {
   async calculate(
     zipCode: string,
@@ -38,7 +42,7 @@ export class MelhorEnvioGateway implements ShippingGateway {
 
     return data.map(
       (service): ShippingQuote => ({
-        service: service.name,
+        service: normalizeServiceName(service.name),
         price: Number(service.price),
         deliveryDays: Number(service.delivery_time),
       }),

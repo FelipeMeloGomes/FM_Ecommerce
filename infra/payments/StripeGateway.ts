@@ -48,10 +48,19 @@ export class StripeGateway implements PaymentGateway {
         shipping: raw.shipping ? JSON.parse(raw.shipping) : undefined,
       },
 
-      products: items.data.map((i) => ({
-        productId: (i.price?.product as Stripe.Product).metadata.id,
-        quantity: i.quantity || 0,
-      })),
+      products: items.data
+        .filter((i) => {
+          const product = i.price?.product;
+          const name =
+            typeof product === "object" && product !== null && "name" in product
+              ? (product as Stripe.Product).name
+              : (i.description ?? "");
+          return !name.startsWith("Frete -");
+        })
+        .map((i) => ({
+          productId: (i.price?.product as Stripe.Product).metadata.id,
+          quantity: i.quantity || 0,
+        })),
 
       invoice: invoice
         ? {
