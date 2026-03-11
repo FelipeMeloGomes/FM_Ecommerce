@@ -1,5 +1,6 @@
 import type { ShippingGateway } from "@/core/shipping/ShippingGateway";
 import type { ShippingQuote } from "@/core/shipping/ShippingQuote";
+import { fetchWithRetry } from "@/lib/fetchWithRetry";
 
 interface MelhorEnvioServiceResponse {
   name: string;
@@ -34,7 +35,7 @@ export class MelhorEnvioGateway implements ShippingGateway {
       quantity: number;
     }[],
   ): Promise<ShippingQuote[]> {
-    const response = await fetch(API_URL, {
+    const response = await fetchWithRetry(API_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.MELHOR_ENVIO_TOKEN}`,
@@ -45,7 +46,16 @@ export class MelhorEnvioGateway implements ShippingGateway {
         to: { postal_code: zipCode },
         products: items,
       }),
+      retries: 3,
+      retryDelay: 1000,
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `Melhor Envio API error: ${response.status} - ${errorText || response.statusText}`,
+      );
+    }
 
     const data: MelhorEnvioServiceResponse[] = await response.json();
 
