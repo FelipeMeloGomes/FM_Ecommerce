@@ -143,8 +143,10 @@ export const makeWebhookRequest = ({
  */
 export const makeProductFormData = (
   overrides: Record<string, string> = {},
+  categories: string[] = ["cat-1"],
 ): FormData => {
   const formData = new FormData();
+  const { ...rest } = overrides;
   const defaults: Record<string, string> = {
     name: "Produto Teste",
     description: "Descrição",
@@ -155,10 +157,16 @@ export const makeProductFormData = (
     width: "10",
     height: "20",
     length: "30",
-    ...overrides,
+    status: "new",
+    variant: "gadget",
+    brand: "brand-1",
+    ...rest,
   };
   for (const [key, value] of Object.entries(defaults)) {
     formData.append(key, value);
+  }
+  for (const cat of categories) {
+    formData.append("categories", cat);
   }
   return formData;
 };

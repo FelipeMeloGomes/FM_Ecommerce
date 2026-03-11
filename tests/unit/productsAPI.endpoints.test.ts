@@ -67,8 +67,8 @@ describe("POST /api/admin/products", () => {
       "http://localhost:3000/api/admin/products",
       "POST",
       makeProductFormData({
-        status: "active",
-        variant: "color",
+        status: "new",
+        variant: "gadget",
         isFeatured: "true",
       }),
     );
@@ -100,9 +100,7 @@ describe("POST /api/admin/products", () => {
 
   it("cria produto com categorias", async () => {
     const spy = vi.spyOn(CreateProduct.prototype, "execute");
-    const formData = makeProductFormData();
-    formData.append("categories", "cat-1");
-    formData.append("categories", "cat-2");
+    const formData = makeProductFormData({}, ["cat-1", "cat-2"]);
 
     const req = makeRequest(
       "http://localhost:3000/api/admin/products",
