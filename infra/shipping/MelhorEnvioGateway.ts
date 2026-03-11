@@ -14,6 +14,15 @@ const normalizeServiceName = (name: string) => {
   return name.split(".")[0].trim();
 };
 
+const isValidQuote = (s: MelhorEnvioServiceResponse) => {
+  const name = normalizeServiceName(s.name ?? "");
+  return (
+    name.length > 0 &&
+    !Number.isNaN(Number(s.price)) &&
+    !Number.isNaN(Number(s.delivery_time))
+  );
+};
+
 export class MelhorEnvioGateway implements ShippingGateway {
   async calculate(
     zipCode: string,
@@ -40,21 +49,10 @@ export class MelhorEnvioGateway implements ShippingGateway {
 
     const data: MelhorEnvioServiceResponse[] = await response.json();
 
-    return data
-      .filter(
-        (service) =>
-          service.name &&
-          service.price !== undefined &&
-          service.delivery_time !== undefined &&
-          !Number.isNaN(Number(service.price)) &&
-          !Number.isNaN(Number(service.delivery_time)),
-      )
-      .map(
-        (service): ShippingQuote => ({
-          service: normalizeServiceName(service.name),
-          price: Number(service.price),
-          deliveryDays: Number(service.delivery_time),
-        }),
-      );
+    return data.filter(isValidQuote).map((s) => ({
+      service: normalizeServiceName(s.name),
+      price: Number(s.price),
+      deliveryDays: Number(s.delivery_time),
+    }));
   }
 }
