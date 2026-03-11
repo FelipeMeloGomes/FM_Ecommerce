@@ -2,16 +2,14 @@
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import type { z } from "zod";
+import {
+  type addressSchema,
+  addressSchemaWithDefault,
+} from "@/lib/schemas/addressSchema";
 import { writeClient } from "@/sanity/lib/writeClient";
 
-export type CreateAddressInput = {
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  default?: boolean;
-};
+export type CreateAddressInput = z.input<typeof addressSchema>;
 
 export async function createAddress(data: CreateAddressInput) {
   const { userId } = await auth();
@@ -19,18 +17,20 @@ export async function createAddress(data: CreateAddressInput) {
 
   if (!userId || !user) throw new Error("Unauthorized");
 
+  const validated = addressSchemaWithDefault.parse(data);
+
   const email = user.primaryEmailAddress?.emailAddress;
 
   const addressPayload = {
     _type: "address",
     clerkUserId: userId,
     email,
-    name: data.name,
-    address: data.address,
-    city: data.city,
-    state: data.state,
-    zip: data.zip,
-    default: data.default ?? false,
+    name: validated.name,
+    address: validated.address,
+    city: validated.city,
+    state: validated.state,
+    zip: validated.zip,
+    default: validated.default ?? false,
     createdAt: new Date().toISOString(),
   };
 
