@@ -20,11 +20,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRequest } from "@/lib/api/apiRequest";
-import type { Brand, Category } from "@/sanity.types";
 import {
   type CreateProductInput,
   createProductSchema,
-} from "@/schemas/createProductSchema";
+} from "@/lib/schemas/createProductSchema";
+import type { Brand, Category } from "@/sanity.types";
 
 interface Props {
   categories: Category[];

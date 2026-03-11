@@ -13,8 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatCep } from "@/helpers/validateCep";
+import { type AddressInput, addressSchema } from "@/lib/schemas/addressSchema";
 import type { Address } from "@/sanity.types";
-import { type AddressFormData, addressSchema } from "@/schemas/addressSchema";
 
 interface AddressFormProps {
   address?: Address;
@@ -24,7 +24,7 @@ export default function AddressForm({ address }: AddressFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<AddressFormData>({
+  const form = useForm<AddressInput>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
       name: address?.name ?? "",
@@ -36,7 +36,7 @@ export default function AddressForm({ address }: AddressFormProps) {
     },
   });
 
-  const handleSubmit = async (data: AddressFormData) => {
+  const handleSubmit = async (data: AddressInput) => {
     setLoading(true);
 
     try {

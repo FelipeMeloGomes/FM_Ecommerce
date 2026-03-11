@@ -13,11 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Category } from "@/core/categories/Category";
 import { apiRequest } from "@/lib/api/apiRequest";
-import { urlFor } from "@/sanity/lib/image";
 import {
   type CreateCategoryInput,
   createCategorySchema,
-} from "@/schemas/createCategorySchema";
+} from "@/lib/schemas/createCategorySchema";
+import { urlFor } from "@/sanity/lib/image";
 
 interface EditCategoryFormProps {
   category: Category;

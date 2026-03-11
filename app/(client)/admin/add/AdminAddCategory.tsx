@@ -14,7 +14,7 @@ import { apiRequest } from "@/lib/api/apiRequest";
 import {
   type CreateCategoryInput,
   createCategorySchema,
-} from "@/schemas/createCategorySchema";
+} from "@/lib/schemas/createCategorySchema";
 
 export default function AdminAddCategory() {
   const [image, setImage] = useState<ImagePreview | null>(null);

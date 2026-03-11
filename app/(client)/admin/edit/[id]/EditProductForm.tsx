@@ -22,12 +22,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import type { Product, ProductImage } from "@/core/products/Product";
 import { apiRequest } from "@/lib/api/apiRequest";
-import { urlFor } from "@/sanity/lib/image";
-import type { Brand, Category } from "@/sanity.types";
 import {
   type ProductFormInput,
   productSchema,
-} from "@/schemas/productFormInput";
+} from "@/lib/schemas/productFormInput";
+import { urlFor } from "@/sanity/lib/image";
+import type { Brand, Category } from "@/sanity.types";
 
 interface Props {
   product: Product;
