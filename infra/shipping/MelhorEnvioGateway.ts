@@ -40,12 +40,21 @@ export class MelhorEnvioGateway implements ShippingGateway {
 
     const data: MelhorEnvioServiceResponse[] = await response.json();
 
-    return data.map(
-      (service): ShippingQuote => ({
-        service: normalizeServiceName(service.name),
-        price: Number(service.price),
-        deliveryDays: Number(service.delivery_time),
-      }),
-    );
+    return data
+      .filter(
+        (service) =>
+          service.name &&
+          service.price !== undefined &&
+          service.delivery_time !== undefined &&
+          !Number.isNaN(Number(service.price)) &&
+          !Number.isNaN(Number(service.delivery_time)),
+      )
+      .map(
+        (service): ShippingQuote => ({
+          service: normalizeServiceName(service.name),
+          price: Number(service.price),
+          deliveryDays: Number(service.delivery_time),
+        }),
+      );
   }
 }
