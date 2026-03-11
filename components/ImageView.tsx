@@ -62,6 +62,8 @@ const ImageView = ({ images = [], isStock }: Props) => {
               alt={`Thumbnail ${image._key}`}
               width={100}
               height={100}
+              sizes="100px"
+              loading="lazy"
               className="w-full h-auto object-contain"
             />
           </button>
