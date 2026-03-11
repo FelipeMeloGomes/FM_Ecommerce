@@ -112,6 +112,7 @@ const CartClient = ({ addresses }: CartClientProps) => {
                         discount={getSubTotalPrice() - getTotalPrice()}
                         total={getTotalPrice()}
                         loading={loading}
+                        selectedAddressId={selectedAddress?._id}
                         onCheckout={handleCheckout}
                       />
                     </div>

@@ -9,6 +9,7 @@ interface OrderSummaryProps {
   discount: number;
   total: number;
   loading?: boolean;
+  selectedAddressId?: string;
   onCheckout: () => void;
 }
 
@@ -17,6 +18,7 @@ const OrderSummary = ({
   discount,
   total,
   loading = false,
+  selectedAddressId: _selectedAddressId,
   onCheckout,
 }: OrderSummaryProps) => {
   return (
