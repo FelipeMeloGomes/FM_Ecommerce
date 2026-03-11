@@ -17,6 +17,14 @@ const mockSession = (overrides = {}) => ({
   id: "session-123",
   payment_status: "paid",
   customer_email: "customer@example.com",
+  metadata: {
+    orderNumber: "order-123",
+    clerkUserId: "user-123",
+    customerName: "Test Customer",
+    customerEmail: "test@example.com",
+    address: { street: "Test St", city: "Test City" },
+    shipping: { method: "PAC", price: 20 },
+  },
   ...overrides,
 });
 

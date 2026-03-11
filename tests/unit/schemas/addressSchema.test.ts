@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addressSchema } from "../../../lib/schemas/addressSchema";
+import { addressSchemaWithDefault } from "../../../lib/schemas/addressSchema";
 
 describe("addressSchema", () => {
   const validAddress = {
@@ -12,12 +12,12 @@ describe("addressSchema", () => {
   };
 
   it("deve validar endereço válido com todos os campos", () => {
-    const result = addressSchema.safeParse(validAddress);
+    const result = addressSchemaWithDefault.safeParse(validAddress);
     expect(result.success).toBe(true);
   });
 
   it("deve validar endereço válido com CEP sem hífen", () => {
-    const result = addressSchema.safeParse({
+    const result = addressSchemaWithDefault.safeParse({
       ...validAddress,
       zip: "01234567",
     });
@@ -25,34 +25,34 @@ describe("addressSchema", () => {
   });
 
   it("deve falhar quando name está vazio", () => {
-    const result = addressSchema.safeParse({
+    const result = addressSchemaWithDefault.safeParse({
       ...validAddress,
       name: "",
     });
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toBe("Nome é obrigatório");
+    expect(result.error?.issues[0].message).toBe("Nome muito curto");
   });
 
   it("deve falhar quando address está vazio", () => {
-    const result = addressSchema.safeParse({
+    const result = addressSchemaWithDefault.safeParse({
       ...validAddress,
       address: "",
     });
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toBe("Endereço é obrigatório");
+    expect(result.error?.issues[0].message).toBe("Endereço muito curto");
   });
 
   it("deve falhar quando city está vazio", () => {
-    const result = addressSchema.safeParse({
+    const result = addressSchemaWithDefault.safeParse({
       ...validAddress,
       city: "",
     });
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toBe("Cidade é obrigatória");
+    expect(result.error?.issues[0].message).toBe("Cidade obrigatória");
   });
 
   it("deve falhar quando state tem mais de 2 caracteres", () => {
-    const result = addressSchema.safeParse({
+    const result = addressSchemaWithDefault.safeParse({
       ...validAddress,
       state: "SPD",
     });
@@ -63,7 +63,7 @@ describe("addressSchema", () => {
   });
 
   it("deve falhar quando state tem menos de 2 caracteres", () => {
-    const result = addressSchema.safeParse({
+    const result = addressSchemaWithDefault.safeParse({
       ...validAddress,
       state: "S",
     });
@@ -74,29 +74,25 @@ describe("addressSchema", () => {
   });
 
   it("deve falhar quando CEP tem formato inválido", () => {
-    const result = addressSchema.safeParse({
+    const result = addressSchemaWithDefault.safeParse({
       ...validAddress,
       zip: "12345",
     });
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toBe(
-      "CEP inválido (formato: 00000-000)",
-    );
+    expect(result.error?.issues[0].message).toBe("CEP inválido");
   });
 
   it("deve falhar quando CEP tem letras", () => {
-    const result = addressSchema.safeParse({
+    const result = addressSchemaWithDefault.safeParse({
       ...validAddress,
       zip: "abcde-fgh",
     });
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toBe(
-      "CEP inválido (formato: 00000-000)",
-    );
+    expect(result.error?.issues[0].message).toBe("CEP inválido");
   });
 
   it("deve usar default como false por padrão", () => {
-    const result = addressSchema.safeParse({
+    const result = addressSchemaWithDefault.safeParse({
       name: "Casa",
       address: "Rua Teste",
       city: "São Paulo",

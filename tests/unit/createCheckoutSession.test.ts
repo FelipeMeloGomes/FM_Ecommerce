@@ -19,6 +19,17 @@ vi.mock("../../sanity/lib/image", () => ({
   urlFor: () => ({ url: () => "https://img.example/test.png" }),
 }));
 
+vi.mock("../../services/products/SanityProductRepository", () => ({
+  SanityProductRepository: vi.fn().mockImplementation(() => ({
+    findById: vi.fn().mockResolvedValue({
+      _id: "prod-1",
+      name: "Produto X",
+      price: 100,
+      stock: 10,
+    }),
+  })),
+}));
+
 import { auth } from "@clerk/nextjs/server";
 import { createCheckoutSession } from "../../actions/createCheckoutSession";
 
@@ -27,6 +38,7 @@ const product = makeProduct({
   name: "Produto X",
   price: 100,
   images: [],
+  stock: 10,
 });
 const address = makeAddress({ _id: "addr-1" });
 

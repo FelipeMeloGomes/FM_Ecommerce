@@ -32,6 +32,17 @@ vi.mock("@/sanity/lib/backendClient", () => ({
   },
 }));
 
+vi.mock("@/services/products/SanityProductRepository", () => ({
+  SanityProductRepository: vi.fn().mockImplementation(() => ({
+    findById: vi.fn().mockResolvedValue({
+      _id: "prod-1",
+      name: "Produto Teste",
+      price: 50,
+      stock: 100,
+    }),
+  })),
+}));
+
 import { checkoutGateway } from "@/config/checkoutGateway";
 import { backendClient } from "@/sanity/lib/backendClient";
 
