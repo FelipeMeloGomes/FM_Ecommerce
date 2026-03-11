@@ -1,19 +1,26 @@
-/**
- * @file repositoryMocks.ts
- * Factories para mocks de repositórios e gateways de domínio.
- *
- * Evita redeclarar os mesmos objetos `vi.fn()` em categoryUseCases e productUseCases.
- *
- * Uso:
- *   import { makeCategoryRepositoryMock, makeProductRepositoryMock } from "@/tests/factories/repositoryMocks";
- */
-
 import { vi } from "vitest";
+import type { BrandImageGateway } from "../../core/brands/BrandImageGateway";
+import type { BrandRepository } from "../../core/brands/BrandRepository";
 import type { CategoryImageGateway } from "../../core/categories/CategoryImageGateway";
 import type { CategoryRepository } from "../../core/categories/CategoryRepository";
 import type { ProductImageGateway } from "../../core/products/ProductImageGateway";
 import type { ProductRepository } from "../../core/products/ProductRepository";
 import type { SlugGateway } from "../../core/products/SlugGateway";
+
+// ─── Brand ─────────────────────────────────────────────────────────────────
+
+export const makeBrandRepositoryMock = (): BrandRepository => ({
+  findAll: vi.fn(),
+  findById: vi.fn(),
+  findBySlug: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+});
+
+export const makeBrandImageGatewayMock = (): BrandImageGateway => ({
+  upload: vi.fn(),
+});
 
 // ─── Category ────────────────────────────────────────────────────────────────
 
