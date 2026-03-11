@@ -58,9 +58,10 @@ export class StripeGateway implements PaymentGateway {
           return !name.startsWith("Frete -");
         })
         .map((i) => ({
-          productId: (i.price?.product as Stripe.Product).metadata.id,
+          productId: (i.price?.product as Stripe.Product).metadata?.id,
           quantity: i.quantity || 0,
-        })),
+        }))
+        .filter((p) => p.productId),
 
       invoice: invoice
         ? {

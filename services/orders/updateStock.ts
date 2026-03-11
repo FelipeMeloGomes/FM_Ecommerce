@@ -6,6 +6,11 @@ export async function updateStock(
   transaction?: Transaction,
 ) {
   for (const item of items) {
+    if (!item.productId) {
+      console.warn("updateStock: skipping item with empty productId");
+      continue;
+    }
+
     const product = await backendClient.getDocument(item.productId);
 
     if (!product?.stock) continue;
