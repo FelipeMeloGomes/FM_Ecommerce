@@ -12,25 +12,32 @@ import HomeTabBar from "./HomeTabBar";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
 
-const ProductGrid = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
+interface ProductGridProps {
+  initialProducts: Product[];
+}
+
+export function ProductGrid({ initialProducts }: ProductGridProps) {
   const [selectedTab, setSelectedTab] = useState(productType[0]?.title || "");
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (selectedTab === productType[0]?.title) return;
+
     const fetchData = async () => {
       setLoading(true);
       try {
         const response = await client.fetch(PRODUCTS_BY_VARIANT_QUERY, {
           variant: selectedTab.toLowerCase(),
         });
-        setProducts(await response);
+        setProducts(response);
       } catch (error) {
         console.log("Product fetching Error", error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [selectedTab]);
 
@@ -47,14 +54,14 @@ const ProductGrid = () => {
       ) : products?.length ? (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-10">
           {products?.map((product) => (
-            <AnimatePresence key={product?._id}>
+            <AnimatePresence key={product._id}>
               <motion.div
                 layout
                 initial={{ opacity: 0.2 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <ProductCard key={product?._id} product={product} />
+                <ProductCard key={product._id} product={product} />
               </motion.div>
             </AnimatePresence>
           ))}
@@ -64,6 +71,4 @@ const ProductGrid = () => {
       )}
     </Container>
   );
-};
-
-export default ProductGrid;
+}

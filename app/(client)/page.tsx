@@ -1,7 +1,7 @@
 import Container from "@/components/Container";
 import HomeBanner from "@/components/HomeBanner";
 import HomeCategories from "@/components/HomeCategories";
-import { ProductGridClient } from "@/components/ProductGridClient";
+import { ProductGrid } from "@/components/ProductGrid";
 import ShopByBrands from "@/components/ShopByBrands";
 import { client } from "@/sanity/lib/client";
 import { getCategories } from "@/sanity/queries";
@@ -22,7 +22,7 @@ export default async function Home() {
   return (
     <Container className="bg-shop-light-pink">
       <HomeBanner />
-      <ProductGridClient initialProducts={products} />
+      <ProductGrid initialProducts={products} />
       <HomeCategories categories={categories} />
       <ShopByBrands />
     </Container>
