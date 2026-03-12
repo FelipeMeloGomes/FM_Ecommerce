@@ -1,209 +1,313 @@
+import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { resolveHttpStatus } from "../factories/sharedMocks";
 
-vi.mock("server-only", () => ({}));
+vi.mock("@/lib/requireAdmin");
+vi.mock("@/core/categories/CreateCategory");
+vi.mock("@/core/categories/UpdateCategory");
+vi.mock("@/core/categories/DeleteCategory");
+vi.mock("@/services/categories/SanityCategoryRepository");
+vi.mock("@/services/categories/SanityCategoryImageGateway");
+vi.mock("@/services/products/SlugService");
 
-vi.mock("@/lib/requireAdmin", () => ({
-  requireAdmin: vi.fn(async () => ({ userId: "admin_user_123" })),
+vi.mock("@/sanity/env", () => ({
+  projectId: "test-project-id",
+  dataset: "test-dataset",
+  apiVersion: "2024-01-01",
 }));
 
-vi.mock("@/core/categories", () => ({
-  CreateCategory: vi.fn(),
-  UpdateCategory: vi.fn(),
-  DeleteCategory: vi.fn(),
-}));
-
-vi.mock("@/services/categories", () => ({
-  SanityCategoryRepository: vi.fn(() => ({
-    findAll: vi.fn(),
-    findById: vi.fn(),
-    findBySlug: vi.fn(),
+vi.mock("@/sanity/lib/writeClient", () => ({
+  writeClient: {
     create: vi.fn(),
-    update: vi.fn(),
+    fetch: vi.fn(),
+    patch: vi.fn(() => ({
+      set: vi.fn(() => ({ commit: vi.fn() })),
+      unset: vi.fn(() => ({ commit: vi.fn() })),
+    })),
     delete: vi.fn(),
-  })),
-  SanityCategoryImageGateway: vi.fn(() => ({ upload: vi.fn() })),
+  },
 }));
 
-vi.mock("@/services/products/SlugService", () => ({
-  SlugService: vi.fn(() => ({
-    generate: vi.fn(async (t: string) => t.toLowerCase().replace(/\s+/g, "-")),
-  })),
-}));
+import { DELETE, PUT } from "@/app/(client)/api/admin/categories/[id]/route";
+import * as categoriesRoute from "@/app/(client)/api/admin/categories/route";
+import { CreateCategory } from "@/core/categories/CreateCategory";
+import { DeleteCategory } from "@/core/categories/DeleteCategory";
+import { UpdateCategory } from "@/core/categories/UpdateCategory";
+import { requireAdmin } from "@/lib/requireAdmin";
+import { makeAdminUser } from "../factories/sharedMocks";
 
 const makeFormData = (
-  fields: Record<string, string | File | null> = {},
-): Record<string, string | File | null> => ({
-  title: "Categoria",
-  ...fields,
+  fields: Record<string, string | File | undefined> = {},
+): FormData => {
+  const formData = new FormData();
+  Object.entries(fields).forEach(([key, value]) => {
+    if (value !== undefined) {
+      formData.append(key, value as string | Blob);
+    }
+  });
+  return formData;
+};
+
+const makeImageFile = (name = "test.jpg", content = "fake content") =>
+  new File([content], name, { type: "image/jpeg" });
+
+const makeRequest = (url: string, method: string, formData: FormData) => {
+  const req = new NextRequest(new URL(url), {
+    method,
+    body: formData as never,
+  });
+  vi.spyOn(req, "formData").mockResolvedValue(formData);
+  return req;
+};
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(requireAdmin).mockResolvedValue(makeAdminUser());
 });
 
-const makeImageFile = (name = "img.jpg", size = 7) =>
-  new File([new Array(size).fill("x").join("")], name, { type: "image/jpeg" });
-
 describe("POST /api/admin/categories — Criação", () => {
-  beforeEach(() => vi.clearAllMocks());
+  it("retorna 200 quando categoria é criada com sucesso", async () => {
+    const spy = vi
+      .spyOn(CreateCategory.prototype, "execute")
+      .mockResolvedValue(undefined);
 
-  it("cria com todos os campos", () => {
-    const form = makeFormData({
+    const formData = makeFormData({
       title: "Eletrônicos",
       description: "Descrição",
       range: "500",
       featured: "true",
     });
-    expect(form.title).toBe("Eletrônicos");
-    expect(Number(form.range)).toBe(500);
-    expect(["true", "on", "1"].includes(form.featured as string)).toBe(true);
+    formData.append("image", makeImageFile());
+
+    const req = makeRequest(
+      "http://localhost:3000/api/admin/categories",
+      "POST",
+      formData,
+    );
+
+    const response = await categoriesRoute.POST(req);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(spy).toHaveBeenCalled();
   });
 
-  it("cria só com campos obrigatórios", () => {
-    const form = makeFormData();
-    expect(form.title).toBeDefined();
-    expect("description" in { title: form.title }).toBe(false);
+  it("retorna 400 quando título está vazio", async () => {
+    const formData = makeFormData({
+      title: "",
+      description: "Descrição",
+    });
+
+    const req = makeRequest(
+      "http://localhost:3000/api/admin/categories",
+      "POST",
+      formData,
+    );
+
+    const response = await categoriesRoute.POST(req);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.message).toBe("Título é obrigatório");
   });
 
-  it.each([
-    [null, false],
-    ["true", true],
-    ["on", true],
-    ["1", true],
-    ["false", false],
-  ])("featured '%s' → boolean %s", (input, expected) => {
-    const result = input !== null && ["true", "on", "1"].includes(input);
-    expect(result).toBe(expected);
+  it("retorna 400 quando slug já existe", async () => {
+    vi.spyOn(CreateCategory.prototype, "execute").mockRejectedValue(
+      new Error("Slug já existe"),
+    );
+
+    const formData = makeFormData({
+      title: "Eletrônicos",
+      description: "Descrição",
+    });
+
+    const req = makeRequest(
+      "http://localhost:3000/api/admin/categories",
+      "POST",
+      formData,
+    );
+
+    const response = await categoriesRoute.POST(req);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.message).toBe("Slug já existe");
   });
 
-  it("range undefined quando não fornecido", () => {
-    const parseRange = (value: string | null) =>
-      value !== null ? Number(value) : undefined;
+  it("retorna 403 quando usuário não está autenticado", async () => {
+    vi.mocked(requireAdmin).mockRejectedValue(new Error("Unauthorized"));
 
-    expect(parseRange(null)).toBeUndefined();
-    expect(parseRange("500")).toBe(500);
+    const formData = makeFormData({
+      title: "Eletrônicos",
+    });
+
+    const req = makeRequest(
+      "http://localhost:3000/api/admin/categories",
+      "POST",
+      formData,
+    );
+
+    const response = await categoriesRoute.POST(req);
+
+    expect(response.status).toBe(403);
   });
 
-  it("aceita arquivo de imagem válido", () => {
-    const file = makeImageFile();
-    expect(file.size > 0).toBe(true);
-    expect(file.name).toBe("img.jpg");
-  });
+  it("retorna 403 quando usuário não é admin", async () => {
+    vi.mocked(requireAdmin).mockRejectedValue(new Error("Forbidden"));
 
-  it("ignora arquivo vazio", () => {
-    expect(new File([], "vazio.jpg").size > 0).toBe(false);
-  });
+    const formData = makeFormData({
+      title: "Eletrônicos",
+    });
 
-  it.each([
-    ["Slug já existe", 400],
-    [undefined, 200],
-    ["Erro interno do servidor", 500],
-  ])("resposta para erro '%s' → status %d", (msg, expected) => {
-    expect(resolveHttpStatus(msg)).toBe(expected);
+    const req = makeRequest(
+      "http://localhost:3000/api/admin/categories",
+      "POST",
+      formData,
+    );
+
+    const response = await categoriesRoute.POST(req);
+
+    expect(response.status).toBe(403);
   });
 });
 
-describe("PUT /api/admin/categories/{id} — Edição", () => {
-  beforeEach(() => vi.clearAllMocks());
+describe("PUT /api/admin/categories/{id} — Atualização", () => {
+  const catUrl = "http://localhost:3000/api/admin/categories/cat-123";
+  const catParams = { params: Promise.resolve({ id: "cat-123" }) };
 
-  it("atualiza título, descrição e range", () => {
-    const form = {
-      id: "cat-1",
-      title: "Informática",
-      description: "Computadores",
+  it("retorna 200 quando categoria é atualizada com sucesso", async () => {
+    const spy = vi
+      .spyOn(UpdateCategory.prototype, "execute")
+      .mockResolvedValue(undefined);
+
+    const formData = makeFormData({
+      title: "Eletrônicos Atualizado",
+      description: "Nova descrição",
       range: "1000",
-    };
-    expect(form.id).toBe("cat-1");
-    expect(Number(form.range)).toBe(1000);
+      featured: "false",
+    });
+
+    const req = makeRequest(catUrl, "PUT", formData);
+    const response = await PUT(req, catParams);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(spy).toHaveBeenCalled();
   });
 
-  it("toggle featured via string boolean", () => {
-    expect(["true", "on", "1"].includes("true")).toBe(true);
-    expect(["true", "on", "1"].includes("false")).toBe(false);
+  it("retorna 400 quando título está vazio", async () => {
+    const formData = makeFormData({
+      title: "",
+      description: "Nova descrição",
+    });
+
+    const req = makeRequest(catUrl, "PUT", formData);
+    const response = await PUT(req, catParams);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.message).toBe("Título é obrigatório");
   });
 
-  it("remove imagem com _removeImage flag", () => {
-    const parseRemoveImage = (value: string | null) => value === "true";
+  it("retorna 404 quando categoria não existe", async () => {
+    vi.spyOn(UpdateCategory.prototype, "execute").mockRejectedValue(
+      new Error("Categoria não encontrada"),
+    );
 
-    expect(parseRemoveImage("true")).toBe(true);
-    expect(parseRemoveImage("false")).toBe(false);
-    expect(parseRemoveImage(null)).toBe(false);
+    const formData = makeFormData({
+      title: "Nova Categoria",
+    });
+
+    const req = makeRequest(catUrl, "PUT", formData);
+    const notFoundParams = { params: Promise.resolve({ id: "cat-999" }) };
+    const response = await PUT(req, notFoundParams);
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.message).toBe("Categoria não encontrada");
   });
 
-  it("faz upload de nova imagem", () => {
-    const file = makeImageFile("nova.jpg");
-    expect(file.size > 0).toBe(true);
+  it("retorna 400 quando slug já existe em outra categoria", async () => {
+    vi.spyOn(UpdateCategory.prototype, "execute").mockRejectedValue(
+      new Error("Slug já existe"),
+    );
+
+    const formData = makeFormData({
+      title: "Nova Categoria",
+    });
+
+    const req = makeRequest(catUrl, "PUT", formData);
+    const response = await PUT(req, catParams);
+    const body = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(body.message).toBe("Slug já existe");
   });
 
-  it.each([
-    ["Slug já existe", 400],
-    ["Categoria não encontrada", 404],
-    [undefined, 200],
-    ["Erro na conexão com Sanity", 500],
-  ])("resposta para erro '%s' → status %d", (msg, expected) => {
-    expect(resolveHttpStatus(msg)).toBe(expected);
-  });
+  it("remove imagem quando _removeImage=true", async () => {
+    vi.spyOn(UpdateCategory.prototype, "execute").mockResolvedValue(undefined);
 
-  it("valida ID não-vazio", () => {
-    expect("cat-123".length > 0).toBe(true);
-    expect("".length > 0).toBe(false);
-  });
+    const formData = makeFormData({
+      title: "Categoria Atualizada",
+      _removeImage: "true",
+    });
 
-  it("aguarda promise de params (Next.js 16)", async () => {
-    const { id } = await Promise.resolve({ id: "cat-1" });
-    expect(id).toBe("cat-1");
+    const req = makeRequest(catUrl, "PUT", formData);
+    const response = await PUT(req, catParams);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
   });
 });
 
 describe("DELETE /api/admin/categories/{id} — Deleção", () => {
-  beforeEach(() => vi.clearAllMocks());
+  const catUrl = "http://localhost:3000/api/admin/categories/cat-123";
+  const catParams = { params: Promise.resolve({ id: "cat-123" }) };
 
-  it("deleta por ID válido", () => {
-    const id = "cat-1";
-    expect(id.length > 0).toBe(true);
-    expect(typeof id).toBe("string");
+  it("retorna 200 quando categoria é deletada com sucesso", async () => {
+    const spy = vi
+      .spyOn(DeleteCategory.prototype, "execute")
+      .mockResolvedValue(undefined);
+
+    const req = new NextRequest(new URL(catUrl), { method: "DELETE" });
+    const response = await DELETE(req, catParams);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(spy).toHaveBeenCalledWith("cat-123");
   });
 
-  it.each([
-    ["Categoria não encontrada", 404],
-    [undefined, 200],
-    ["Erro ao deletar na base de dados", 500],
-  ])("resposta para erro '%s' → status %d", (msg, expected) => {
-    expect(resolveHttpStatus(msg)).toBe(expected);
+  it("retorna 404 quando categoria não existe", async () => {
+    vi.spyOn(DeleteCategory.prototype, "execute").mockRejectedValue(
+      new Error("Categoria não encontrada"),
+    );
+
+    const req = new NextRequest(new URL(catUrl), { method: "DELETE" });
+    const response = await DELETE(req, catParams);
+    const body = await response.json();
+
+    expect(response.status).toBe(404);
+    expect(body.message).toBe("Categoria não encontrada");
   });
 
-  it("aguarda promise de params (Next.js 16)", async () => {
-    const { id } = await Promise.resolve({ id: "cat-1" });
-    expect(id).toBe("cat-1");
+  it("retorna 403 quando usuário não está autenticado", async () => {
+    vi.mocked(requireAdmin).mockRejectedValue(new Error("Unauthorized"));
+
+    const req = new NextRequest(new URL(catUrl), { method: "DELETE" });
+    const response = await DELETE(req, catParams);
+
+    expect(response.status).toBe(403);
   });
 
-  it("verifica admin antes de deletar", async () => {
-    const mock = vi.fn(async () => ({ userId: "admin_123" }));
-    const auth = await mock();
-    expect(auth.userId).toBe("admin_123");
-  });
-});
+  it("retorna 403 quando usuário não é admin", async () => {
+    vi.mocked(requireAdmin).mockRejectedValue(new Error("Forbidden"));
 
-describe("Categoria API — Cobertura de Endpoints", () => {
-  const endpoints = [
-    { method: "POST", path: "/api/admin/categories" },
-    { method: "PUT", path: "/api/admin/categories/{id}" },
-    { method: "DELETE", path: "/api/admin/categories/{id}" },
-  ];
+    const req = new NextRequest(new URL(catUrl), { method: "DELETE" });
+    const response = await DELETE(req, catParams);
 
-  it("todos os endpoints são protegidos por requireAdmin", () => {
-    // Garantido pelos mocks de requireAdmin acima
-    expect(endpoints).toHaveLength(3);
-    for (const e of endpoints) {
-      expect(e.method).toBeDefined();
-    }
-  });
-
-  it("todos retornam JSON", () => {
-    [{ success: true }, { message: "erro" }].forEach((res) => {
-      expect(typeof res).toBe("object");
-    });
-  });
-
-  it("campos obrigatórios por método", () => {
-    expect("title").toBeDefined(); // POST: title obrigatório
-    expect("id").toBeDefined(); // PUT/DELETE: id via path
+    expect(response.status).toBe(403);
   });
 });

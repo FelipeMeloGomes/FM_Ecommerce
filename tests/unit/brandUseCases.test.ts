@@ -8,10 +8,6 @@ import {
   makeSlugGatewayMock,
 } from "../factories/repositoryMocks";
 
-const repo = makeBrandRepositoryMock();
-const imageGateway = makeBrandImageGatewayMock();
-const slugGateway = makeSlugGatewayMock();
-
 const makeImageFile = (name = "marca.jpg") =>
   new File(["content"], name, { type: "image/jpeg" });
 
@@ -23,12 +19,22 @@ const makeBrand = (overrides: Partial<Brand> = {}): Brand => ({
 });
 
 describe("CreateBrand", () => {
-  beforeEach(() => vi.clearAllMocks());
+  let repo: ReturnType<typeof makeBrandRepositoryMock>;
+  let imageGateway: ReturnType<typeof makeBrandImageGatewayMock>;
+  let slugGateway: ReturnType<typeof makeSlugGatewayMock>;
+
+  beforeEach(() => {
+    repo = makeBrandRepositoryMock();
+    imageGateway = makeBrandImageGatewayMock();
+    slugGateway = makeSlugGatewayMock();
+  });
 
   const useCase = () => new CreateBrand(repo, slugGateway, imageGateway);
 
   it("cria marca com todos os campos", async () => {
+    const file = makeImageFile();
     const imageRef = makeSanityImageRef("image-ref-123", "img-1");
+
     vi.mocked(slugGateway.generate).mockResolvedValue("nike");
     vi.mocked(repo.findBySlug).mockResolvedValue(null);
     vi.mocked(imageGateway.upload).mockResolvedValue(imageRef);
@@ -37,12 +43,12 @@ describe("CreateBrand", () => {
     await useCase().execute({
       title: "Nike",
       description: "Marca de esportes",
-      imageFile: makeImageFile(),
+      imageFile: file,
     });
 
     expect(slugGateway.generate).toHaveBeenCalledWith("Nike");
     expect(repo.findBySlug).toHaveBeenCalledWith("nike");
-    expect(imageGateway.upload).toHaveBeenCalled();
+    expect(imageGateway.upload).toHaveBeenCalledWith(file);
     expect(repo.create).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Nike",
@@ -64,6 +70,7 @@ describe("CreateBrand", () => {
       description: "Marca de esportes",
     });
 
+    expect(imageGateway.upload).toHaveBeenCalledWith(undefined);
     expect(repo.create).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Adidas",
@@ -104,5 +111,15 @@ describe("CreateBrand", () => {
     ).rejects.toThrow("Slug já existe");
 
     expect(repo.create).not.toHaveBeenCalled();
+  });
+
+  it("propaga erro do slugGateway", async () => {
+    vi.mocked(slugGateway.generate).mockRejectedValue(
+      new Error("Serviço indisponível"),
+    );
+
+    await expect(useCase().execute({ title: "Nike" })).rejects.toThrow(
+      "Serviço indisponível",
+    );
   });
 });

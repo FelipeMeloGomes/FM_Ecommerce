@@ -7,6 +7,20 @@ import type { ProductImageGateway } from "../../core/products/ProductImageGatewa
 import type { ProductRepository } from "../../core/products/ProductRepository";
 import type { SlugGateway } from "../../core/products/SlugGateway";
 
+// ─── Sanity writeClient mock ────────────────────────────────────────────────────
+
+export const makeSanityWriteClientMock = () => ({
+  fetch: vi.fn(),
+  create: vi.fn(),
+  patch: vi.fn(() => ({
+    set: vi.fn(() => ({
+      commit: vi.fn(),
+      unset: vi.fn(() => ({ commit: vi.fn() })),
+    })),
+  })),
+  delete: vi.fn(),
+});
+
 // ─── Brand ─────────────────────────────────────────────────────────────────
 
 export const makeBrandRepositoryMock = (): BrandRepository => ({

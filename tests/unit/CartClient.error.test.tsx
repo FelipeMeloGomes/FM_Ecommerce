@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type CartClientType from "@/app/(client)/cart/CartClient";
 import useStore from "../../store";
 import {
   makeAddress,
@@ -62,9 +63,7 @@ vi.mock("@/components/cart/AddressSection", () => ({
 vi.mock("@/components/cart/MobileOrderSummary", () => ({
   default: () => null,
 }));
-
 vi.mock("@/components/EmptyCart", () => ({ default: () => null }));
-
 vi.mock("@/components/ShippingCalculator", () => ({
   ShippingCalculator: () => null,
 }));
@@ -103,56 +102,52 @@ vi.mock("react-hot-toast", () => ({
   success: vi.fn(),
 }));
 
+let container: HTMLDivElement;
+let root: ReturnType<typeof createRoot>;
+let CartClient: typeof CartClientType;
+
+beforeEach(async () => {
+  useStore.setState({ items: [], shipping: null, favoriteProduct: [] }, false);
+  vi.resetAllMocks();
+
+  // biome-ignore lint/suspicious/noExplicitAny: test setup
+  delete (window as any).location;
+  // biome-ignore lint/suspicious/noExplicitAny: test setup
+  (window as any).location = { href: "" };
+
+  mockPerformCheckout.mockImplementation(async () => {
+    throw new Error("Erro ao criar sessão");
+  });
+
+  const { addItem, setShipping } = useStore.getState();
+  addItem(makeProduct({ _id: "p1", price: 80 }));
+  setShipping(makeShipping());
+
+  const module = await import("@/app/(client)/cart/CartClient");
+  CartClient = module.default;
+
+  container = document.createElement("div");
+  root = createRoot(container);
+});
+
+afterEach(() => {
+  root.unmount();
+  container.remove();
+});
+
 describe("CartClient — tratamento de erro no checkout", () => {
-  let container: HTMLDivElement;
-  let root: ReturnType<typeof createRoot>;
-
-  beforeEach(() => {
-    useStore.setState(
-      { items: [], shipping: null, favoriteProduct: [] },
-      false,
-    );
-    vi.resetAllMocks();
-
-    // biome-ignore lint/suspicious/noExplicitAny: test setup
-    delete (window as any).location;
-    // biome-ignore lint/suspicious/noExplicitAny: test setup
-    (window as any).location = { href: "" };
-
-    mockPerformCheckout.mockImplementation(async () => {
-      throw new Error("Erro ao criar sessão");
-    });
-
-    container = document.createElement("div");
-    root = createRoot(container);
-  });
-
-  afterEach(() => {
-    root.unmount();
-    container.remove();
-  });
-
   it("exibe toast de erro e não redireciona quando checkout falha", async () => {
     const { default: toast } = await import("react-hot-toast");
     const { performCheckout } = await import(
       "@/app/(client)/cart/checkoutLogic"
     );
-    const { default: CartClient } = await import(
-      "@/app/(client)/cart/CartClient"
-    );
-    const { addItem, setShipping } = useStore.getState();
-
-    addItem(makeProduct({ _id: "p1", price: 80 }));
-    setShipping(makeShipping());
 
     await new Promise<void>((resolve) => {
       root.render(<CartClient addresses={[makeAddress()]} />);
       setTimeout(resolve, 0);
     });
 
-    await new Promise<void>((resolve) => {
-      setTimeout(resolve, 50);
-    });
+    await new Promise<void>((resolve) => setTimeout(resolve, 50));
 
     expect(performCheckout).toHaveBeenCalled();
     expect(toast.error).toHaveBeenCalledWith("Erro ao criar sessão");
@@ -162,49 +157,17 @@ describe("CartClient — tratamento de erro no checkout", () => {
 });
 
 describe("CartClient — sem endereços cadastrados", () => {
-  let container: HTMLDivElement;
-  let root: ReturnType<typeof createRoot>;
-
   beforeEach(() => {
-    useStore.setState(
-      { items: [], shipping: null, favoriteProduct: [] },
-      false,
-    );
-    vi.resetAllMocks();
-
-    // biome-ignore lint/suspicious/noExplicitAny: test setup
-    delete (window as any).location;
-    // biome-ignore lint/suspicious/noExplicitAny: test setup
-    (window as any).location = { href: "" };
-
     mockPerformCheckout.mockReset();
-
-    container = document.createElement("div");
-    root = createRoot(container);
   });
 
-  afterEach(() => {
-    root.unmount();
-    container.remove();
-  });
-
-  it("renderiza mensagem quando addresses é array vazio", async () => {
-    const { default: CartClient } = await import(
-      "@/app/(client)/cart/CartClient"
-    );
-    const { addItem, setShipping } = useStore.getState();
-
-    addItem(makeProduct({ _id: "p1", price: 80 }));
-    setShipping(makeShipping());
-
+  it("renderiza mensagem e link quando addresses é array vazio", async () => {
     await new Promise<void>((resolve) => {
       root.render(<CartClient addresses={[]} />);
       setTimeout(resolve, 0);
     });
 
-    await new Promise<void>((resolve) => {
-      setTimeout(resolve, 0);
-    });
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
     const addressSection = container.querySelector(
       "[data-testid='address-section']",
@@ -213,51 +176,6 @@ describe("CartClient — sem endereços cadastrados", () => {
     expect(addressSection?.textContent).toContain(
       "Você ainda não possui um endereço cadastrado",
     );
-  });
-
-  it("não permite checkout quando não há endereços", async () => {
-    const { default: CartClient } = await import(
-      "@/app/(client)/cart/CartClient"
-    );
-    const { addItem, setShipping } = useStore.getState();
-
-    addItem(makeProduct({ _id: "p1", price: 80 }));
-    setShipping(makeShipping());
-
-    await new Promise<void>((resolve) => {
-      root.render(<CartClient addresses={[]} />);
-      setTimeout(resolve, 0);
-    });
-
-    await new Promise<void>((resolve) => {
-      setTimeout(resolve, 0);
-    });
-
-    expect(
-      container.querySelector("[data-testid='address-section']"),
-    ).not.toBeNull();
-    expect(container.textContent).toContain(
-      "Você ainda não possui um endereço cadastrado",
-    );
-  });
-
-  it("exibe link para cadastrar novo endereço", async () => {
-    const { default: CartClient } = await import(
-      "@/app/(client)/cart/CartClient"
-    );
-    const { addItem, setShipping } = useStore.getState();
-
-    addItem(makeProduct({ _id: "p1", price: 80 }));
-    setShipping(makeShipping());
-
-    await new Promise<void>((resolve) => {
-      root.render(<CartClient addresses={[]} />);
-      setTimeout(resolve, 0);
-    });
-
-    await new Promise<void>((resolve) => {
-      setTimeout(resolve, 0);
-    });
 
     const link = container.querySelector("[data-testid='add-address-link']");
     expect(link).not.toBeNull();
