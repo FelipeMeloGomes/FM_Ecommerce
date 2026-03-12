@@ -3,6 +3,8 @@ import ProductCard from "@/components/ProductCard";
 import Title from "@/components/Title";
 import { getDealProducts } from "@/sanity/queries";
 
+export const revalidate = 300;
+
 const DealPage = async () => {
   const products = await getDealProducts();
   return (

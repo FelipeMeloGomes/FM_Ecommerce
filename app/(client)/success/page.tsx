@@ -7,12 +7,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import useStore from "@/store";
 
+interface SuccessPageContentProps {
+  initialOrderNumber?: string | null;
+}
+
 const REDIRECT_SECONDS = 5;
 
-const SuccessPageContent = () => {
+const SuccessPageContent = ({
+  initialOrderNumber,
+}: SuccessPageContentProps) => {
   const { resetCart } = useStore();
   const searchParams = useSearchParams();
-  const orderNumber = searchParams.get("orderNumber");
+  const orderNumber = searchParams?.get("orderNumber") ?? initialOrderNumber;
   const router = useRouter();
   const [countdown, setCountdown] = useState(REDIRECT_SECONDS);
 
@@ -71,7 +77,7 @@ const SuccessPageContent = () => {
         </div>
         <div className="space-y-4 mb-4 text-left">
           <p className="text-gray-700">
-            Obrigado pela sua compra. Estamos processando seu pedido e ele será
+            obrigado pela sua compra. Estamos processando seu pedido e ele será
             enviado em breve.
           </p>
           <p className="text-gray-700">
@@ -107,10 +113,15 @@ const SuccessPageContent = () => {
   );
 };
 
-const SuccessPage = () => {
+type Props = {
+  searchParams: Promise<{ orderNumber?: string }>;
+};
+
+const SuccessPage = async ({ searchParams }: Props) => {
+  const params = await searchParams;
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <SuccessPageContent />
+      <SuccessPageContent initialOrderNumber={params.orderNumber} />
     </Suspense>
   );
 };

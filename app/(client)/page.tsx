@@ -7,6 +7,8 @@ import { client } from "@/sanity/lib/client";
 import { getCategories } from "@/sanity/queries";
 import { PRODUCTS_BY_VARIANT_QUERY } from "@/sanity/queries/query";
 
+export const revalidate = 60;
+
 const DEFAULT_VARIANT = "gadget";
 
 async function getProducts(variant: string) {

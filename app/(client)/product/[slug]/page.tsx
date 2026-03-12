@@ -1,4 +1,5 @@
 import { CornerDownLeft, Truck } from "lucide-react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { FiShare2 } from "react-icons/fi";
@@ -12,6 +13,37 @@ import PriceView from "@/components/PriceView";
 import ProductCharacteristics from "@/components/ProductCharacteristics";
 import StarRating from "@/components/StarRating";
 import { getProductBySlug } from "@/sanity/queries";
+
+export const revalidate = 30;
+
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+
+  if (!product) {
+    return {
+      title: "Produto não encontrado | FMShop",
+    };
+  }
+
+  const imageUrl = product.images?.[0]?.asset?._ref
+    ? `https://cdn.sanity.io/images/${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}/production/${product.images[0].asset._ref}`
+    : null;
+
+  return {
+    title: `${product.name} | FMShop`,
+    description: product.description || `Compre ${product.name} na FMShop`,
+    openGraph: {
+      title: product.name,
+      description: product.description || `Compre ${product.name} na FMShop`,
+      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630 }] : [],
+    },
+  };
+}
 
 const SingleProductPage = async ({
   params,

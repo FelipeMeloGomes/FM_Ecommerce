@@ -9,12 +9,16 @@ import AddressForm from "./AddressForm";
 
 interface AddressClientProps {
   addresses: Address[];
+  initialEditId?: string;
 }
 
-export default function AddressesClient({ addresses }: AddressClientProps) {
+export default function AddressesClient({
+  addresses,
+  initialEditId,
+}: AddressClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const editId = searchParams.get("edit");
+  const editId = searchParams?.get("edit") ?? initialEditId;
 
   const editingAddress = addresses.find((address) => address._id === editId);
 

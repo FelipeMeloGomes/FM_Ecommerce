@@ -1,7 +1,23 @@
+import type { Metadata } from "next";
 import CategoryProducts from "@/components/CategoryProducts";
 import Container from "@/components/Container";
 import Title from "@/components/Title";
 import { getCategories } from "@/sanity/queries";
+
+export const revalidate = 60;
+
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+
+  return {
+    title: `${slug && slug.charAt(0).toUpperCase() + slug.slice(1)} | FMShop`,
+    description: `Veja produtos da categoria ${slug} na FMShop`,
+  };
+}
 
 const CategoryPage = async ({
   params,

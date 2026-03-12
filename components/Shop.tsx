@@ -16,11 +16,13 @@ import Title from "./Title";
 interface Props {
   categories: Category[];
   brands: BRANDS_QUERY_RESULT;
+  initialBrand?: string | null;
+  initialCategory?: string | null;
 }
-const Shop = ({ categories, brands }: Props) => {
+const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
   const searchParams = useSearchParams();
-  const brandParams = searchParams?.get("brand");
-  const categoryParams = searchParams?.get("category");
+  const brandParams = searchParams?.get("brand") ?? initialBrand;
+  const categoryParams = searchParams?.get("category") ?? initialCategory;
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
