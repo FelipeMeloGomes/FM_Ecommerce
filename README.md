@@ -383,3 +383,4 @@ Este projeto está sob a licença [MIT](LICENSE).
 - [Stripe](https://stripe.com/)
 - [Vercel](https://vercel.com/)
 - [shadcn/ui](https://ui.shadcn.com/)
+- [Framer Motion](https://www.framer.com/motion/)
