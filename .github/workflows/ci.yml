@@ -80,6 +80,7 @@ jobs:
         uses: "vercel/repository-dispatch/actions/status@v1"
         with:
           name: "Vercel - fm-ecommerce: Build"
+          github_token: ${{ secrets.GH_PAT_STATUS }}
 
   deploy:
     name: Deploy to Vercel
