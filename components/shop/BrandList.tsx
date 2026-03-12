@@ -13,7 +13,7 @@ interface Props {
 const BrandList = ({ brands, selectedBrand, setSelectedBrand }: Props) => {
   return (
     <div className="w-full bg-white p-5">
-      <Title className="text-base font-black">Brands</Title>
+      <Title className="text-base font-black">Marcas</Title>
       <RadioGroup
         value={selectedBrand || ""}
         onValueChange={(value) => setSelectedBrand(value || null)}

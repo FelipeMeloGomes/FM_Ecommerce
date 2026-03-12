@@ -80,7 +80,7 @@ const SingleProductPage = async ({
           <p
             className={`px-4 py-1.5 text-sm text-center inline-block font-semibold rounded-lg ${product?.stock === 0 ? "bg-red-100 text-red-600" : "text-green-600 bg-green-100"}`}
           >
-            {(product?.stock as number) > 0 ? "In Stock" : "Out of Stock"}
+            {(product?.stock as number) > 0 ? "Em estoque" : "Sem estoque"}
           </p>
         </div>
         <div className="flex items-center gap-2.5 lg:gap-3">

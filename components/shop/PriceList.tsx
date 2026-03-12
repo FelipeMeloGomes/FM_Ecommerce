@@ -3,11 +3,11 @@ import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 const priceArray = [
-  { title: "Under $100", value: "0-100" },
-  { title: "$100 - $200", value: "100-200" },
-  { title: "$200 - $300", value: "200-300" },
-  { title: "$300 - $500", value: "300-500" },
-  { title: "Over $500", value: "500-10000" },
+  { title: "Até R$ 100", value: "0-100" },
+  { title: "R$ 100 - R$ 200", value: "100-200" },
+  { title: "R$ 200 - R$ 300", value: "200-300" },
+  { title: "R$ 300 - R$ 500", value: "300-500" },
+  { title: "Acima de R$ 500", value: "500-10000" },
 ];
 
 interface Props {
@@ -17,7 +17,7 @@ interface Props {
 const PriceList = ({ selectedPrice, setSelectedPrice }: Props) => {
   return (
     <div className="w-full bg-white p-5">
-      <Title className="text-base font-black">Price</Title>
+      <Title className="text-base font-black">Preço</Title>
       <RadioGroup
         className="mt-2 space-y-1"
         value={selectedPrice || ""}

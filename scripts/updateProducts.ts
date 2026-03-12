@@ -1,10 +1,11 @@
 import { createClient } from "@sanity/client";
 
 const client = createClient({
-  projectId: `${process.env.NEXT_PUBLIC_SANITY_PROJECT_ID}`,
-  dataset: `${process.env.NEXT_PUBLIC_SANITY_DATASET}`,
+  projectId: "8vdm88f4",
+  dataset: "production",
   apiVersion: "2026-02-13",
-  token: `${process.env.SANITY_TOKEN_ADM}`,
+  token:
+    "skJW8Jp9j9TLbvc34yaScYEUQlpEDmN5bxzBrE5ix4hUGpZoEyUjRhz1rAvcpy5tT9a2IaZBeUVvIZ4w4i6mNnF2Z0wZUyHZQa49pSbMKLWNu2EfOI01EpvSQF8yc5k8Av4n9HwjpL3o6QruSvtniMLGd271vfdovGfjQ9sFYB3lJt78eSAy",
   useCdn: false,
 });
 
