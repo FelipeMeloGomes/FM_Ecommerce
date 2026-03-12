@@ -57,7 +57,7 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
             <AnimatePresence key={product._id}>
               <motion.div
                 layout
-                initial={{ opacity: 0.2 }}
+                initial={false}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >

@@ -1,5 +1,6 @@
 "use client";
 import { ShoppingBag } from "lucide-react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
@@ -15,8 +16,13 @@ interface Props {
 
 const AddToCartButton = ({ product, className }: Props) => {
   const { addItem, getItemCount } = useStore();
+  const [isMounted, setIsMounted] = useState(false);
   const itemCount = getItemCount(product?._id);
   const isOutOfStock = product?.stock === 0;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleAddToCart = () => {
     if ((product?.stock as number) > itemCount) {
@@ -28,6 +34,23 @@ const AddToCartButton = ({ product, className }: Props) => {
       toast.error("Não é possível adicionar mais do que o estoque disponível");
     }
   };
+
+  if (!isMounted) {
+    return (
+      <div className="w-full h-12 flex items-center">
+        <Button
+          disabled={isOutOfStock}
+          className={cn(
+            "w-full bg-shop_dark_green/80 text-lightBg shadow-none border border-shop_dark_green/80 font-semibold tracking-wide text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect",
+            className,
+          )}
+        >
+          <ShoppingBag /> {isOutOfStock ? "Esgotado" : "Comprar"}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-12 flex items-center">
       {itemCount ? (
