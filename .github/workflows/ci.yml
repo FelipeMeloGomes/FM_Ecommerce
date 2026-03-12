@@ -76,6 +76,11 @@ jobs:
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm run build
 
+      - name: "notify vercel"
+        uses: "vercel/repository-dispatch/actions/status@v1"
+        with:
+          name: "Vercel - fm-ecommerce: Build"
+
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
