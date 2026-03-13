@@ -1,5 +1,6 @@
 import type { Product } from "@/core/products/Product";
 import type { ProductRepository } from "@/core/products/ProductRepository";
+import type { PaginatedResult } from "@/core/types/Pagination";
 import { writeClient } from "@/sanity/lib/writeClient";
 
 type SanityProduct = Omit<Product, "slug"> & {
@@ -26,6 +27,39 @@ export class SanityProductRepository implements ProductRepository {
       ...product,
       slug: product.slug?.current ?? "",
     }));
+  }
+
+  async findPaginated(
+    page: number,
+    pageSize: number,
+    query?: string,
+  ): Promise<PaginatedResult<Product>> {
+    const offset = (page - 1) * pageSize;
+    const end = offset + pageSize;
+
+    const filter = query
+      ? `_type == "product" && (name match "*${query}*" || description match "*${query}*")`
+      : `_type == "product"`;
+
+    const [items, total] = await Promise.all([
+      writeClient.fetch<SanityProduct[]>(
+        `*[${filter}] | order(_createdAt desc) [$offset...$end]`,
+        { offset, end },
+      ),
+      writeClient.fetch<number>(`count(*[${filter}])`),
+    ]);
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      items: items.map((product) => ({
+        ...product,
+        slug: product.slug?.current ?? "",
+      })),
+      totalItems: total,
+      totalPages,
+      currentPage: page,
+    };
   }
 
   async findById(id: string): Promise<Product | null> {

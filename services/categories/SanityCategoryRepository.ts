@@ -1,5 +1,6 @@
 import type { Category } from "@/core/categories/Category";
 import type { CategoryRepository } from "@/core/categories/CategoryRepository";
+import type { PaginatedResult } from "@/core/types/Pagination";
 import { writeClient } from "@/sanity/lib/writeClient";
 
 type SanityCategory = Omit<Category, "slug"> & {
@@ -27,6 +28,42 @@ export class SanityCategoryRepository implements CategoryRepository {
       ...category,
       slug: category.slug?.current ?? "",
     }));
+  }
+
+  async findPaginated(
+    page: number,
+    pageSize: number,
+    query?: string,
+  ): Promise<PaginatedResult<Category>> {
+    const offset = (page - 1) * pageSize;
+    const end = offset + pageSize;
+
+    const searchFilter = query
+      ? `&& (title match "*${query}*" || description match "*${query}*")`
+      : "";
+
+    const baseQuery = `*[_type == "category" ${searchFilter}]`;
+    const countQuery = `count(${baseQuery})`;
+
+    const [items, total] = await Promise.all([
+      writeClient.fetch<SanityCategory[]>(
+        `${baseQuery} | order(_createdAt desc) [$offset...$end]`,
+        { offset, end },
+      ),
+      writeClient.fetch<number>(countQuery),
+    ]);
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      items: items.map((category) => ({
+        ...category,
+        slug: category.slug?.current ?? "",
+      })),
+      totalItems: total,
+      totalPages,
+      currentPage: page,
+    };
   }
 
   async findById(id: string): Promise<Category | null> {

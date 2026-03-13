@@ -4,8 +4,9 @@ import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { AdminPagination } from "@/components/admin/pagination";
 import { AdminSearch } from "@/components/ui/admin-search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,53 +19,77 @@ interface AdminCategoriesListProps {
   initialCategories: Category[];
 }
 
+const PAGE_SIZE = 10;
+
+function normalize(str: string) {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 export default function AdminCategoriesList({
   initialCategories,
 }: AdminCategoriesListProps) {
-  const [allCategories, setAllCategories] =
-    useState<Category[]>(initialCategories);
-  const [filtered, setFiltered] = useState<Category[]>(initialCategories);
+  const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
 
-  useEffect(() => {
-    setAllCategories(initialCategories);
-    setFiltered(initialCategories);
-  }, [initialCategories]);
+  const filteredCategories = useMemo(() => {
+    if (!query.trim()) return initialCategories;
+    const q = normalize(query);
+    return initialCategories.filter(
+      (c) =>
+        normalize(c.title).includes(q) ||
+        normalize(c.description ?? "").includes(q),
+    );
+  }, [initialCategories, query]);
 
-  const handleFilter = useCallback((result: Category[]) => {
-    setFiltered(result);
+  const totalPages = Math.ceil(filteredCategories.length / PAGE_SIZE);
+
+  const paginatedCategories = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredCategories.slice(start, start + PAGE_SIZE);
+  }, [filteredCategories, currentPage]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
   }, []);
 
-  const handleDelete = (id: string | undefined) => {
-    if (!id) return;
+  const handleQueryChange = useCallback((value: string) => {
+    setQuery(value);
+    setCurrentPage(1);
+  }, []);
 
-    confirmToast({
-      message: "Tem certeza que deseja deletar esta categoria?",
-      onConfirm: async () => {
-        try {
-          const _response = await apiRequest<{ success: true }>(
-            `/api/admin/categories/${id}`,
-            {
-              method: "DELETE",
-            },
-          );
+  const handleDelete = useCallback(
+    (id: string | undefined) => {
+      if (!id) return;
 
-          setAllCategories((current) => current.filter((c) => c._id !== id));
-          setFiltered((current) => current.filter((c) => c._id !== id));
+      confirmToast({
+        message: "Tem certeza que deseja deletar esta categoria?",
+        onConfirm: async () => {
+          try {
+            const _response = await apiRequest<{ success: true }>(
+              `/api/admin/categories/${id}`,
+              {
+                method: "DELETE",
+              },
+            );
 
-          toast.success("Categoria deletada com sucesso!");
-          router.refresh();
-        } catch (error) {
-          console.error("Erro no delete:", error);
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : "Erro ao deletar categoria";
-          toast.error(errorMessage);
-        }
-      },
-    });
-  };
+            toast.success("Categoria deletada com sucesso!");
+            router.refresh();
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error
+                ? error.message
+                : "Erro ao deletar categoria";
+            toast.error(errorMessage);
+          }
+        },
+      });
+    },
+    [router],
+  );
 
   return (
     <div className="min-h-screen bg-muted/40 p-6">
@@ -74,16 +99,19 @@ export default function AdminCategoriesList({
         </div>
 
         <AdminSearch
-          items={allCategories}
-          searchKeys={["title", "slug"]}
-          onFilter={handleFilter}
+          query={query}
+          onQueryChange={handleQueryChange}
           placeholder="Buscar categorias..."
           createLabel="Nova categoria"
           createHref="/admin/add/categories"
         />
 
+        <p className="text-sm text-muted-foreground">
+          {filteredCategories.length} de {initialCategories.length} categorias
+        </p>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((category) => {
+          {paginatedCategories.map((category) => {
             const imageUrl = category.image?.asset?._ref
               ? urlFor(category.image.asset._ref).url()
               : "/placeholder.png";
@@ -142,7 +170,7 @@ export default function AdminCategoriesList({
           })}
         </div>
 
-        {filtered.length === 0 && (
+        {paginatedCategories.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground">
@@ -151,6 +179,12 @@ export default function AdminCategoriesList({
             </CardContent>
           </Card>
         )}
+
+        <AdminPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );

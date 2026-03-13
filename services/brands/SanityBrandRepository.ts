@@ -1,5 +1,6 @@
 import type { Brand } from "@/core/brands/Brand";
 import type { BrandRepository } from "@/core/brands/BrandRepository";
+import type { PaginatedResult } from "@/core/types/Pagination";
 import { writeClient } from "@/sanity/lib/writeClient";
 import type { Slug } from "@/sanity.types";
 
@@ -28,6 +29,45 @@ export class SanityBrandRepository implements BrandRepository {
       description: brand.description,
       image: brand.image,
     }));
+  }
+
+  async findPaginated(
+    page: number,
+    pageSize: number,
+    query?: string,
+  ): Promise<PaginatedResult<Brand>> {
+    const offset = (page - 1) * pageSize;
+    const end = offset + pageSize;
+
+    const searchFilter = query
+      ? `&& (title match "*${query}*" || description match "*${query}*")`
+      : "";
+
+    const baseQuery = `*[_type == "brand" ${searchFilter}]`;
+    const countQuery = `count(${baseQuery})`;
+
+    const [items, total] = await Promise.all([
+      writeClient.fetch<SanityBrand[]>(
+        `${baseQuery} | order(_createdAt desc) [$offset...$end]`,
+        { offset, end },
+      ),
+      writeClient.fetch<number>(countQuery),
+    ]);
+
+    const totalPages = Math.ceil(total / pageSize);
+
+    return {
+      items: items.map((brand) => ({
+        _id: brand._id,
+        title: brand.title ?? "",
+        slug: brand.slug?.current ?? "",
+        description: brand.description,
+        image: brand.image,
+      })),
+      totalItems: total,
+      totalPages,
+      currentPage: page,
+    };
   }
 
   async findById(id: string): Promise<Brand | null> {

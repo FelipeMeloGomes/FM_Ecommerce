@@ -4,8 +4,9 @@ import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { AdminPagination } from "@/components/admin/pagination";
 import { AdminSearch } from "@/components/ui/admin-search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,45 +19,72 @@ interface AdminProductsListProps {
   initialProducts: Product[];
 }
 
+const PAGE_SIZE = 10;
+
+function normalize(str: string) {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
-  const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
-  const [filtered, setFiltered] = useState<Product[]>(initialProducts);
+  const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
 
-  useEffect(() => {
-    setAllProducts(initialProducts);
-  }, [initialProducts]);
+  const filteredProducts = useMemo(() => {
+    if (!query.trim()) return initialProducts;
+    const q = normalize(query);
+    return initialProducts.filter(
+      (p) =>
+        normalize(p.name).includes(q) ||
+        normalize(p.description ?? "").includes(q),
+    );
+  }, [initialProducts, query]);
 
-  const handleFilter = useCallback((result: Product[]) => {
-    setFiltered(result);
+  const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredProducts.slice(start, start + PAGE_SIZE);
+  }, [filteredProducts, currentPage]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
   }, []);
 
-  const handleDelete = (id: string | undefined) => {
-    if (!id) return;
+  const handleQueryChange = useCallback((value: string) => {
+    setQuery(value);
+    setCurrentPage(1);
+  }, []);
 
-    confirmToast({
-      message: "Tem certeza que deseja deletar este produto?",
-      onConfirm: async () => {
-        try {
-          await apiRequest(`/api/admin/products/${id}`, {
-            method: "DELETE",
-          });
+  const handleDelete = useCallback(
+    (id: string | undefined) => {
+      if (!id) return;
 
-          setAllProducts((current) => current.filter((p) => p._id !== id));
-          setFiltered((current) => current.filter((p) => p._id !== id));
+      confirmToast({
+        message: "Tem certeza que deseja deletar este produto?",
+        onConfirm: async () => {
+          try {
+            await apiRequest(`/api/admin/products/${id}`, {
+              method: "DELETE",
+            });
 
-          toast.success("Produto deletado com sucesso!");
-          router.refresh();
-        } catch (error) {
-          console.error("Erro no delete:", error);
-
-          toast.error(
-            error instanceof Error ? error.message : "Erro ao deletar produto",
-          );
-        }
-      },
-    });
-  };
+            toast.success("Produto deletado com sucesso!");
+            router.refresh();
+          } catch (error) {
+            toast.error(
+              error instanceof Error
+                ? error.message
+                : "Erro ao deletar produto",
+            );
+          }
+        },
+      });
+    },
+    [router],
+  );
 
   return (
     <div className="min-h-screen bg-muted/40 p-6">
@@ -74,16 +102,19 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
         </div>
 
         <AdminSearch
-          items={allProducts}
-          searchKeys={["name", "description"]}
-          onFilter={handleFilter}
+          query={query}
+          onQueryChange={handleQueryChange}
           placeholder="Buscar produtos..."
           createLabel="Novo produto"
           createHref="/admin/add"
         />
 
+        <p className="text-sm text-muted-foreground">
+          {filteredProducts.length} de {initialProducts.length} produtos
+        </p>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((product) => {
+          {paginatedProducts.map((product) => {
             const imageUrl = product.images?.[0]?.asset?._ref
               ? urlFor(product.images[0].asset._ref).url()
               : "/placeholder.png";
@@ -133,11 +164,21 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
           })}
         </div>
 
-        {filtered.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            Nenhum produto cadastrado ainda.
-          </div>
+        {paginatedProducts.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">
+                Nenhum produto encontrado.
+              </p>
+            </CardContent>
+          </Card>
         )}
+
+        <AdminPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );

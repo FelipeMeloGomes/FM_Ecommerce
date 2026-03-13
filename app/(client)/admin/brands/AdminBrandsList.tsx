@@ -4,8 +4,9 @@ import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { AdminPagination } from "@/components/admin/pagination";
 import { AdminSearch } from "@/components/ui/admin-search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,47 +19,72 @@ interface AdminBrandsListProps {
   initialBrands: Brand[];
 }
 
+const PAGE_SIZE = 10;
+
+function normalize(str: string) {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 export default function AdminBrandsList({
   initialBrands,
 }: AdminBrandsListProps) {
-  const [allBrands, setAllBrands] = useState<Brand[]>(initialBrands);
-  const [filtered, setFiltered] = useState<Brand[]>(initialBrands);
+  const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
 
-  useEffect(() => {
-    setAllBrands(initialBrands);
-    setFiltered(initialBrands);
-  }, [initialBrands]);
+  const filteredBrands = useMemo(() => {
+    if (!query.trim()) return initialBrands;
+    const q = normalize(query);
+    return initialBrands.filter(
+      (b) =>
+        normalize(b.title).includes(q) ||
+        normalize(b.description ?? "").includes(q),
+    );
+  }, [initialBrands, query]);
 
-  const handleFilter = useCallback((result: Brand[]) => {
-    setFiltered(result);
+  const totalPages = Math.ceil(filteredBrands.length / PAGE_SIZE);
+
+  const paginatedBrands = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredBrands.slice(start, start + PAGE_SIZE);
+  }, [filteredBrands, currentPage]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
   }, []);
 
-  const handleDelete = (id: string | undefined) => {
-    if (!id) return;
+  const handleQueryChange = useCallback((value: string) => {
+    setQuery(value);
+    setCurrentPage(1);
+  }, []);
 
-    confirmToast({
-      message: "Tem certeza que deseja deletar esta marca?",
-      onConfirm: async () => {
-        try {
-          await apiRequest<{ success: true }>(`/api/admin/brands/${id}`, {
-            method: "DELETE",
-          });
+  const handleDelete = useCallback(
+    (id: string | undefined) => {
+      if (!id) return;
 
-          setAllBrands((current) => current.filter((b) => b._id !== id));
-          setFiltered((current) => current.filter((b) => b._id !== id));
+      confirmToast({
+        message: "Tem certeza que deseja deletar esta marca?",
+        onConfirm: async () => {
+          try {
+            await apiRequest<{ success: true }>(`/api/admin/brands/${id}`, {
+              method: "DELETE",
+            });
 
-          toast.success("Marca deletada com sucesso!");
-          router.refresh();
-        } catch (error) {
-          console.error("Erro no delete:", error);
-          const errorMessage =
-            error instanceof Error ? error.message : "Erro ao deletar marca";
-          toast.error(errorMessage);
-        }
-      },
-    });
-  };
+            toast.success("Marca deletada com sucesso!");
+            router.refresh();
+          } catch (error) {
+            const errorMessage =
+              error instanceof Error ? error.message : "Erro ao deletar marca";
+            toast.error(errorMessage);
+          }
+        },
+      });
+    },
+    [router],
+  );
 
   return (
     <div className="min-h-screen bg-muted/40 p-6">
@@ -68,16 +94,19 @@ export default function AdminBrandsList({
         </div>
 
         <AdminSearch
-          items={allBrands}
-          searchKeys={["title"]}
-          onFilter={handleFilter}
+          query={query}
+          onQueryChange={handleQueryChange}
           placeholder="Buscar marcas..."
           createLabel="Nova marca"
           createHref="/admin/add/brands"
         />
 
+        <p className="text-sm text-muted-foreground">
+          {filteredBrands.length} de {initialBrands.length} marcas
+        </p>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((brand) => {
+          {paginatedBrands.map((brand) => {
             const imageUrl = brand.image?.asset?._ref
               ? urlFor(brand.image.asset._ref).url()
               : "/placeholder.png";
@@ -122,13 +151,19 @@ export default function AdminBrandsList({
           })}
         </div>
 
-        {filtered.length === 0 && (
+        {paginatedBrands.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground">Nenhuma marca encontrada</p>
             </CardContent>
           </Card>
         )}
+
+        <AdminPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );
