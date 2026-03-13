@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FormError } from "@/components/FormError";
-import { type ImagePreview, ImageUploader } from "@/components/ImageUploader";
+import { type ImageFile, ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -38,7 +38,7 @@ interface Props {
 export function EditProductForm({ product, categories, brands }: Props) {
   const router = useRouter();
 
-  const [images, setImages] = useState<ImagePreview[]>([]);
+  const [images, setImages] = useState<ImageFile[]>([]);
 
   const {
     register,
@@ -78,11 +78,11 @@ export function EditProductForm({ product, categories, brands }: Props) {
 
   useEffect(() => {
     if (product.images?.length) {
-      const existingImages: ImagePreview[] = product.images
+      const existingImages: ImageFile[] = product.images
         .filter((img) => img.asset?._ref)
         .map((img) => ({
           id: crypto.randomUUID(),
-          previewUrl: urlFor(img.asset._ref).url(),
+          preview: urlFor(img.asset._ref).url(),
           sanityRef: img,
         }));
 
@@ -94,7 +94,7 @@ export function EditProductForm({ product, categories, brands }: Props) {
     return () => {
       images.forEach((img) => {
         if (img.file) {
-          URL.revokeObjectURL(img.previewUrl);
+          URL.revokeObjectURL(img.preview);
         }
       });
     };
@@ -108,7 +108,7 @@ export function EditProductForm({ product, categories, brands }: Props) {
       if (image.file) {
         formData.append("images", image.file);
       } else if (image.sanityRef) {
-        retainedImages.push(image.sanityRef);
+        retainedImages.push(image.sanityRef as ProductImage);
       }
     });
 

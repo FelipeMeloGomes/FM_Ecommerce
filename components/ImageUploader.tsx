@@ -2,14 +2,15 @@
 
 import { ImageIcon, Upload, X } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export interface ImageFile {
   id: string;
-  file: File;
+  file?: File;
   preview: string;
+  sanityRef?: unknown;
 }
 
 interface ImageUploaderProps {
@@ -22,7 +23,8 @@ interface ImageUploaderProps {
   maxFiles?: number;
   maxSizeMB?: number;
   acceptedFormats?: string[];
-  onImagesChange?: (images: ImageFile[]) => void;
+  value?: ImageFile[];
+  onChange?: (images: ImageFile[]) => void;
   className?: string;
 }
 
@@ -36,19 +38,32 @@ export function ImageUploader({
   maxFiles = 10,
   maxSizeMB = 5,
   acceptedFormats = ["image/jpeg", "image/png", "image/gif", "image/webp"],
-  onImagesChange,
+  value,
+  onChange,
   className,
 }: ImageUploaderProps) {
-  const [images, setImages] = useState<ImageFile[]>([]);
+  const isControlled = value !== undefined;
+  const [internalImages, setInternalImages] = useState<ImageFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
 
-  const generateId = useCallback(
-    () => Math.random().toString(36).substring(2, 9),
-    [],
+  const images = isControlled ? value : internalImages;
+  const setImages = useCallback(
+    (newImages: ImageFile[] | ((prev: ImageFile[]) => ImageFile[])) => {
+      if (isControlled) {
+        const updated =
+          typeof newImages === "function" ? newImages(images) : newImages;
+        onChange?.(updated);
+      } else {
+        setInternalImages(newImages);
+      }
+    },
+    [isControlled, onChange, images],
   );
+
+  const generateId = useCallback(() => crypto.randomUUID(), []);
 
   const validateFile = useCallback(
     (file: File): string | null => {
@@ -99,9 +114,8 @@ export function ImageUploader({
 
       const updatedImages = multiple ? [...images, ...newImages] : newImages;
       setImages(updatedImages);
-      onImagesChange?.(updatedImages);
     },
-    [images, multiple, maxFiles, validateFile, onImagesChange, generateId],
+    [images, multiple, maxFiles, validateFile, setImages, generateId],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -146,25 +160,37 @@ export function ImageUploader({
   const removeImage = useCallback(
     (id: string) => {
       const imageToRemove = images.find((img) => img.id === id);
-      if (imageToRemove) {
+      if (imageToRemove?.file) {
         URL.revokeObjectURL(imageToRemove.preview);
       }
       const updatedImages = images.filter((img) => img.id !== id);
       setImages(updatedImages);
-      onImagesChange?.(updatedImages);
       setError(null);
     },
-    [images, onImagesChange],
+    [images, setImages],
   );
 
   const clearAll = useCallback(() => {
     images.forEach((img) => {
-      URL.revokeObjectURL(img.preview);
+      if (img.file) {
+        URL.revokeObjectURL(img.preview);
+      }
     });
     setImages([]);
-    onImagesChange?.([]);
     setError(null);
-  }, [images, onImagesChange]);
+  }, [images, setImages]);
+
+  useEffect(() => {
+    return () => {
+      if (!isControlled) {
+        images.forEach((img) => {
+          if (img.file) {
+            URL.revokeObjectURL(img.preview);
+          }
+        });
+      }
+    };
+  }, [isControlled, images]);
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -273,7 +299,7 @@ export function ImageUploader({
               >
                 <Image
                   src={image.preview}
-                  alt={image.file.name}
+                  alt={image.file?.name || "Image"}
                   fill
                   className="object-cover transition-transform duration-200 group-hover:scale-105"
                 />
@@ -288,11 +314,13 @@ export function ImageUploader({
                 >
                   <X className="h-4 w-4" />
                 </button>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
-                  <p className="truncate text-xs text-white">
-                    {image.file.name}
-                  </p>
-                </div>
+                {image.file && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
+                    <p className="truncate text-xs text-white">
+                      {image.file.name}
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
 

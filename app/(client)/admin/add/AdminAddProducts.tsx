@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FormError } from "@/components/FormError";
-import { type ImagePreview, ImageUploader } from "@/components/ImageUploader";
+import { type ImageFile, ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export default function AdminAddProducts({ categories, brands }: Props) {
-  const [images, setImages] = useState<ImagePreview[]>([]);
+  const [images, setImages] = useState<ImageFile[]>([]);
 
   const {
     register,
@@ -58,7 +58,9 @@ export default function AdminAddProducts({ categories, brands }: Props) {
   useEffect(() => {
     return () => {
       images.forEach((img) => {
-        URL.revokeObjectURL(img.previewUrl);
+        if (img.file) {
+          URL.revokeObjectURL(img.preview);
+        }
       });
     };
   }, [images]);
