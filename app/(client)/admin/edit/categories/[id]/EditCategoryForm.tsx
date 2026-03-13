@@ -46,11 +46,13 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
     // Só carrega a imagem inicial se não foi explicitamente removida
     if (category.image?.asset?._ref && !image && !shouldRemoveImage) {
       const previewUrl = urlFor(category.image.asset._ref).url();
-      setImage({
-        id: category.image._key || crypto.randomUUID(),
-        preview: previewUrl,
-        file: undefined,
-      });
+      if (previewUrl) {
+        setImage({
+          id: category.image._key || crypto.randomUUID(),
+          preview: previewUrl,
+          file: undefined,
+        });
+      }
     }
 
     return () => {

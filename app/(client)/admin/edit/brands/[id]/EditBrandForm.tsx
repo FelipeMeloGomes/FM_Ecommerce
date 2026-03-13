@@ -47,11 +47,13 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
   useEffect(() => {
     if (brand.image?.asset?._ref && !image && !shouldRemoveImage) {
       const previewUrl = urlFor(brand.image.asset._ref).url();
-      setImage({
-        id: brand.image._key || crypto.randomUUID(),
-        preview: previewUrl,
-        file: undefined,
-      });
+      if (previewUrl) {
+        setImage({
+          id: brand.image._key || crypto.randomUUID(),
+          preview: previewUrl,
+          file: undefined,
+        });
+      }
     }
 
     return () => {

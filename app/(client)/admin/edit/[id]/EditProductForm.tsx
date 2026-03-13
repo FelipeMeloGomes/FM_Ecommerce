@@ -78,13 +78,20 @@ export function EditProductForm({ product, categories, brands }: Props) {
 
   useEffect(() => {
     if (product.images?.length) {
-      const existingImages: ImageFile[] = product.images
-        .filter((img) => img.asset?._ref)
-        .map((img) => ({
-          id: crypto.randomUUID(),
-          preview: urlFor(img.asset._ref).url(),
-          sanityRef: img,
-        }));
+      const existingImages: ImageFile[] = [];
+
+      for (const img of product.images) {
+        if (img.asset?._ref) {
+          const previewUrl = urlFor(img.asset._ref).url();
+          if (previewUrl) {
+            existingImages.push({
+              id: crypto.randomUUID(),
+              preview: previewUrl,
+              sanityRef: img,
+            });
+          }
+        }
+      }
 
       setImages(existingImages);
     }

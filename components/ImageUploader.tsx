@@ -293,7 +293,7 @@ export function ImageUploader({
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {images
-              .filter((img) => img.preview)
+              .filter((img) => !!img?.preview && img.preview.trim() !== "")
               .map((image) => (
                 <div
                   key={image.id}
