@@ -8,7 +8,7 @@ export interface CreateCategoryInput {
   description?: string;
   range?: number;
   featured?: boolean;
-  imageFile?: File;
+  image?: File;
 }
 
 export class CreateCategory {
@@ -27,7 +27,7 @@ export class CreateCategory {
       throw new Error("Slug já existe");
     }
 
-    const image = await this.imageGateway.upload(input.imageFile);
+    const image = await this.imageGateway.upload(input.image);
 
     const category: Category = {
       title: input.title,

@@ -8,7 +8,7 @@ export interface UpdateCategoryInput {
   description?: string;
   range?: number;
   featured?: boolean;
-  imageFile?: File;
+  image?: File;
   removeImage?: boolean;
 }
 
@@ -29,7 +29,7 @@ export class UpdateCategory {
     console.log("[UpdateCategory] Processando update:", {
       id,
       removeImage: input.removeImage,
-      hasImageFile: !!input.imageFile,
+      hasImage: !!input.image,
       currentImage: !!existing.image,
     });
 
@@ -49,9 +49,9 @@ export class UpdateCategory {
     if (input.removeImage) {
       console.log("[UpdateCategory] Removendo imagem da categoria:", id);
       image = undefined;
-    } else if (input.imageFile) {
+    } else if (input.image) {
       console.log("[UpdateCategory] Fazendo upload de nova imagem para:", id);
-      image = await this.imageGateway.upload(input.imageFile);
+      image = await this.imageGateway.upload(input.image);
     }
 
     const category: Category = {

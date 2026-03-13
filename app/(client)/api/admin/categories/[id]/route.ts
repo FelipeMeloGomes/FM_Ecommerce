@@ -30,7 +30,7 @@ export async function PUT(
       description: formData.get("description")?.toString() ?? undefined,
       range: formData.get("range") ? Number(formData.get("range")) : undefined,
       featured: featuredBoolean,
-      imageFile: imageFile && imageFile.size > 0 ? imageFile : undefined,
+      image: imageFile && imageFile.size > 0 ? imageFile : undefined,
     };
 
     const result = categorySchema.safeParse(data);
