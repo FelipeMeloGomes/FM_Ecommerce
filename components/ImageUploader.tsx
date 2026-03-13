@@ -1,107 +1,312 @@
 "use client";
 
-import { X } from "lucide-react";
+import { ImageIcon, Upload, X } from "lucide-react";
 import Image from "next/image";
-import * as React from "react";
-import { Input } from "@/components/ui/input";
-import type { ProductImage } from "@/core/products/Product";
+import { useCallback, useId, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-export interface ImagePreview {
+export interface ImageFile {
   id: string;
-  file?: File;
-  previewUrl: string;
-  sanityRef?: ProductImage;
+  file: File;
+  preview: string;
 }
+
 interface ImageUploaderProps {
-  value: ImagePreview[];
-  onChange: (images: ImagePreview[]) => void;
+  name?: string;
+  label?: string;
+  description?: string;
+  required?: boolean;
+  disabled?: boolean;
   multiple?: boolean;
+  maxFiles?: number;
+  maxSizeMB?: number;
+  acceptedFormats?: string[];
+  onImagesChange?: (images: ImageFile[]) => void;
+  className?: string;
 }
 
 export function ImageUploader({
-  value,
-  onChange,
+  name,
+  label,
+  description,
+  required = false,
+  disabled = false,
   multiple = true,
+  maxFiles = 10,
+  maxSizeMB = 5,
+  acceptedFormats = ["image/jpeg", "image/png", "image/gif", "image/webp"],
+  onImagesChange,
+  className,
 }: ImageUploaderProps) {
-  /**
-   * Cleanup apenas dos object URLs criados
-   * Quando o componente desmontar
-   */
-  React.useEffect(() => {
-    return () => {
-      value.forEach((img) => {
-        if (img.file) {
-          URL.revokeObjectURL(img.previewUrl);
-        }
-      });
-    };
-  }, [value]);
+  const [images, setImages] = useState<ImageFile[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
 
-  const handleImageChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (!event.target.files) return;
-
-      const files = Array.from(event.target.files);
-
-      const newImages: ImagePreview[] = files.map((file) => ({
-        id: crypto.randomUUID(),
-        file,
-        previewUrl: URL.createObjectURL(file),
-      }));
-
-      onChange([...value, ...newImages]);
-
-      event.target.value = "";
-    },
-    [value, onChange],
+  const generateId = useCallback(
+    () => Math.random().toString(36).substring(2, 9),
+    [],
   );
 
-  const removeImage = React.useCallback(
-    (id: string) => {
-      const image = value.find((img) => img.id === id);
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      if (!acceptedFormats.includes(file.type)) {
+        return `Formato não suportado. Use: ${acceptedFormats
+          .map((f) => f.split("/")[1].toUpperCase())
+          .join(", ")}`;
+      }
+      if (file.size > maxSizeMB * 1024 * 1024) {
+        return `Arquivo muito grande. Máximo: ${maxSizeMB}MB`;
+      }
+      return null;
+    },
+    [acceptedFormats, maxSizeMB],
+  );
 
-      if (image?.file) {
-        URL.revokeObjectURL(image.previewUrl);
+  const processFiles = useCallback(
+    (files: FileList | File[]) => {
+      setError(null);
+      const fileArray = Array.from(files);
+
+      if (!multiple && fileArray.length > 1) {
+        setError("Apenas uma imagem permitida");
+        return;
       }
 
-      onChange(value.filter((img) => img.id !== id));
+      const remainingSlots = multiple ? maxFiles - images.length : 1;
+      if (fileArray.length > remainingSlots) {
+        setError(`Máximo de ${maxFiles} imagens permitido`);
+        return;
+      }
+
+      const newImages: ImageFile[] = [];
+
+      for (const file of fileArray) {
+        const validationError = validateFile(file);
+        if (validationError) {
+          setError(validationError);
+          return;
+        }
+
+        newImages.push({
+          id: generateId(),
+          file,
+          preview: URL.createObjectURL(file),
+        });
+      }
+
+      const updatedImages = multiple ? [...images, ...newImages] : newImages;
+      setImages(updatedImages);
+      onImagesChange?.(updatedImages);
     },
-    [value, onChange],
+    [images, multiple, maxFiles, validateFile, onImagesChange, generateId],
   );
 
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        processFiles(files);
+      }
+    },
+    [processFiles],
+  );
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        processFiles(files);
+      }
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+    },
+    [processFiles],
+  );
+
+  const removeImage = useCallback(
+    (id: string) => {
+      const imageToRemove = images.find((img) => img.id === id);
+      if (imageToRemove) {
+        URL.revokeObjectURL(imageToRemove.preview);
+      }
+      const updatedImages = images.filter((img) => img.id !== id);
+      setImages(updatedImages);
+      onImagesChange?.(updatedImages);
+      setError(null);
+    },
+    [images, onImagesChange],
+  );
+
+  const clearAll = useCallback(() => {
+    images.forEach((img) => {
+      URL.revokeObjectURL(img.preview);
+    });
+    setImages([]);
+    onImagesChange?.([]);
+    setError(null);
+  }, [images, onImagesChange]);
+
   return (
-    <div className="space-y-4">
-      <Input
+    <div className={cn("space-y-2", className)}>
+      {label && (
+        <label
+          htmlFor={inputId}
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          {label}
+          {required && <span className="text-destructive">*</span>}
+        </label>
+      )}
+      {description && (
+        <p className="text-sm text-muted-foreground">{description}</p>
+      )}
+
+      <input
+        ref={inputRef}
+        id={inputId}
+        name={name}
         type="file"
+        accept={acceptedFormats.join(",")}
         multiple={multiple}
-        accept="image/*"
-        onChange={handleImageChange}
+        disabled={disabled}
+        onChange={handleFileSelect}
+        className="hidden"
       />
 
-      {value.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {value.map((image, index) => (
-            <div
-              key={image.id || `image-${index}`}
-              className="relative rounded-xl overflow-hidden border"
-            >
-              <Image
-                src={image.previewUrl}
-                alt="Preview"
-                width={300}
-                height={300}
-                className="object-cover w-full h-40"
-              />
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => inputRef.current?.click()}
+        onDragOver={disabled ? undefined : handleDragOver}
+        onDragLeave={disabled ? undefined : handleDragLeave}
+        onDrop={disabled ? undefined : handleDrop}
+        className={cn(
+          "relative flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed p-6 transition-all duration-200 w-full",
+          disabled
+            ? "cursor-not-allowed bg-muted/50 opacity-60"
+            : "cursor-pointer",
+          !disabled && isDragging
+            ? "border-primary bg-primary/5 scale-[1.01]"
+            : !disabled &&
+                "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30",
+          images.length > 0 && "pb-4",
+        )}
+      >
+        <div
+          className={cn(
+            "flex h-16 w-16 items-center justify-center rounded-full transition-colors",
+            isDragging ? "bg-primary/10" : "bg-muted",
+          )}
+        >
+          <Upload
+            className={cn(
+              "h-8 w-8 transition-colors",
+              isDragging ? "text-primary" : "text-muted-foreground",
+            )}
+          />
+        </div>
 
+        <div className="text-center">
+          <p className="text-base font-medium text-foreground">
+            {isDragging
+              ? "Solte as imagens aqui"
+              : "Arraste e solte suas imagens"}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            ou clique para selecionar
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {acceptedFormats
+              .map((f) => f.split("/")[1].toUpperCase())
+              .join(", ")}{" "}
+            - Máx. {maxSizeMB}MB
+            {multiple && ` - Até ${maxFiles} arquivos`}
+          </p>
+        </div>
+      </button>
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      {images.length > 0 && (
+        <div className="mt-4">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-sm font-medium text-foreground">
+              {images.length} {images.length === 1 ? "imagem" : "imagens"}{" "}
+              selecionada
+              {images.length > 1 ? "s" : ""}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAll}
+              className="text-muted-foreground hover:text-destructive"
+            >
+              Remover todas
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {images.map((image) => (
+              <div
+                key={image.id}
+                className="group relative aspect-square overflow-hidden rounded-lg bg-muted"
+              >
+                <Image
+                  src={image.preview}
+                  alt={image.file.name}
+                  fill
+                  className="object-cover transition-transform duration-200 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100" />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeImage(image.id);
+                  }}
+                  className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
+                  <p className="truncate text-xs text-white">
+                    {image.file.name}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            {multiple && images.length < maxFiles && (
               <button
                 type="button"
-                onClick={() => removeImage(image.id)}
-                className="absolute top-2 right-2 bg-black/70 text-white rounded-full p-1 hover:bg-black"
+                onClick={() => inputRef.current?.click()}
+                className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 transition-colors hover:border-primary/50 hover:bg-muted/50"
               >
-                <X size={14} />
+                <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Adicionar</span>
               </button>
-            </div>
-          ))}
+            )}
+          </div>
         </div>
       )}
     </div>
