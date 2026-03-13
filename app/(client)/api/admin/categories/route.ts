@@ -21,7 +21,7 @@ export async function POST(request: Request) {
         (formData.get("featured") === "true" ||
           formData.get("featured") === "on" ||
           formData.get("featured") === "1"),
-      image: formData.get("image")
+      imageFile: formData.get("image")
         ? (formData.get("image") as File)
         : undefined,
     };

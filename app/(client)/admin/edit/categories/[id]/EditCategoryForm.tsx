@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FormError } from "@/components/FormError";
-import { type ImagePreview, ImageUploader } from "@/components/ImageUploader";
+import { type ImageFile, ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ interface EditCategoryFormProps {
 
 export default function EditCategoryForm({ category }: EditCategoryFormProps) {
   const router = useRouter();
-  const [image, setImage] = useState<ImagePreview | null>(null);
+  const [image, setImage] = useState<ImageFile | null>(null);
   const [shouldRemoveImage, setShouldRemoveImage] = useState(false);
 
   const {
@@ -48,14 +48,14 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
       const previewUrl = urlFor(category.image.asset._ref).url();
       setImage({
         id: category.image._key || crypto.randomUUID(),
-        previewUrl,
+        preview: previewUrl,
         file: undefined,
       });
     }
 
     return () => {
-      if (image?.previewUrl && image?.file) {
-        URL.revokeObjectURL(image.previewUrl);
+      if (image?.preview && image?.file) {
+        URL.revokeObjectURL(image.preview);
       }
     };
   }, [category.image, shouldRemoveImage, image]);
