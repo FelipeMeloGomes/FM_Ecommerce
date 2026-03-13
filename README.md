@@ -110,9 +110,11 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 ### 🔍 Busca e Filtros
 
 - Busca por nome de produto
+- Busca com suporte a acentos (normalização Unicode)
 - Filtros por categoria
 - Filtros por marca
 - Ordenação por preço
+- Busca client-side em memória no painel administrativo
 
 ### 👤 Sistema de Autenticação
 
@@ -129,11 +131,12 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 
 ### 🧪 Testes Unitários (Vitest)
 
-- Testes de API (category endpoints)
+- Testes de API (category, brand, product endpoints)
 - Mocks de writeClient (Sanity)
 - Testes de use cases (criação, atualização, exclusão)
 - Factories para criação de dados de teste
 - Padrão AAA (Arrange, Act, Assert)
+-Mocks de apiRequest e outros serviços
 
 ### ⚙️ CI/CD
 
@@ -145,6 +148,21 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 ---
 
 ## 🔧 Refatorações Recentes
+
+### Busca e Paginação Client-Side (Admin)
+
+- Migração de busca/paginação server-side para client-side
+- Carregamento de todos os dados via `findAll()` no servidor
+- Componentes `AdminSearch` e `AdminPagination` simplificados
+- Busca com normalização de acentos (acha "cafe" ao digitar "café")
+- Contador de resultados abaixo do campo de busca
+
+### Performance de Componentes
+
+- `useCallback` nos handlers para evitar recriação de funções
+- `useMemo` para filtragem e paginação em memória
+- `React.memo` no componente `AdminPagination` para evitar re-renders desnecessários
+- Função `normalize()` para busca insensitive com acentos
 
 ### Componentes Skeleton
 
@@ -281,9 +299,12 @@ fm-ecommerce/
 │   │   └── ...
 │   └── api/             # API Routes
 ├── components/           # Componentes React
-│   ├── skeletons/       # Componentes skeleton
-│   ├── ui/             # Componentes shadcn/ui
+│   ├── admin/          # Componentes administrativos
+│   ├── skeletons/     # Componentes skeleton
+│   └── ui/            # Componentes shadcn/ui
 │   └── ...
+├── core/                # Interfaces e tipos (Domain Driven Design)
+│   └── types/         # Tipos compartilhados (Pagination, etc.)
 ├── lib/                  # Utilitários e configurações
 │   ├── sanity/          # Cliente e queries Sanity
 │   └── ...
@@ -298,8 +319,11 @@ fm-ecommerce/
 
 - **`app/`** - Todas as rotas e páginas usando App Router
 - **`components/`** - Componentes React reutilizáveis
+- **`components/admin/`** - Componentes específicos do admin (Pagination)
 - **`components/ui/`** - Componentes shadcn/ui base
 - **`components/skeletons/`** - Skeletons para estados de loading
+- **`core/`** - Interfaces de domínio e tipos (DDD)
+- **`core/types/`** - Tipos compartilhados (PaginatedResult, etc.)
 - **`lib/`** - Utilitários, clientes e configurações
 - **`sanity/`** - Schemas do CMS (produtos, categorias, marcas)
 - **`tests/`** - Testes unitários e configuração
