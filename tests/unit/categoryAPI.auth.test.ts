@@ -46,8 +46,10 @@ const makeFormData = (
   return formData;
 };
 
-const makeImageFile = (name = "test.jpg", content = "fake content") =>
-  new File([content], name, { type: "image/jpeg" });
+const makeImageFile = (name = "test.jpg", content = "fake content") => {
+  const file = new File([content], name, { type: "image/jpeg" });
+  return file;
+};
 
 const makeRequest = (url: string, method: string, formData: FormData) => {
   const req = new NextRequest(new URL(url), {

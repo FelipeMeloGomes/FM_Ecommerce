@@ -41,7 +41,7 @@ describe("CreateCategory", () => {
       description: "Produtos eletrônicos diversos",
       range: 500,
       featured: true,
-      imageFile: makeImageFile(),
+      image: makeImageFile(),
     });
 
     expect(slugGateway.generate).toHaveBeenCalledWith("Eletrônicos");
@@ -195,7 +195,7 @@ describe("UpdateCategory", () => {
     await useCase().execute("cat-1", {
       title: "Roupas",
       description: "Vestuário",
-      imageFile: makeImageFile("nova-imagem.jpg"),
+      image: makeImageFile("nova-imagem.jpg"),
     });
 
     expect(imageGateway.upload).toHaveBeenCalled();
