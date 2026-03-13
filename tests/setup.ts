@@ -1,4 +1,3 @@
-import "@testing-library/jest-dom";
 import { vi } from "vitest";
 
 process.env.NEXT_PUBLIC_SANITY_DATASET = "production";
