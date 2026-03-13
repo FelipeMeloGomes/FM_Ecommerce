@@ -4,8 +4,9 @@ import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { AdminSearch } from "@/components/ui/admin-search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Category } from "@/core/categories/Category";
@@ -20,8 +21,19 @@ interface AdminCategoriesListProps {
 export default function AdminCategoriesList({
   initialCategories,
 }: AdminCategoriesListProps) {
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [allCategories, setAllCategories] =
+    useState<Category[]>(initialCategories);
+  const [filtered, setFiltered] = useState<Category[]>(initialCategories);
   const router = useRouter();
+
+  useEffect(() => {
+    setAllCategories(initialCategories);
+    setFiltered(initialCategories);
+  }, [initialCategories]);
+
+  const handleFilter = useCallback((result: Category[]) => {
+    setFiltered(result);
+  }, []);
 
   const handleDelete = (id: string | undefined) => {
     if (!id) return;
@@ -37,7 +49,8 @@ export default function AdminCategoriesList({
             },
           );
 
-          setCategories((current) => current.filter((c) => c._id !== id));
+          setAllCategories((current) => current.filter((c) => c._id !== id));
+          setFiltered((current) => current.filter((c) => c._id !== id));
 
           toast.success("Categoria deletada com sucesso!");
           router.refresh();
@@ -58,13 +71,19 @@ export default function AdminCategoriesList({
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-semibold tracking-tight">Categorias</h1>
-          <Button asChild>
-            <Link href="/admin/add/categories">Nova Categoria</Link>
-          </Button>
         </div>
 
+        <AdminSearch
+          items={allCategories}
+          searchKeys={["title", "slug"]}
+          onFilter={handleFilter}
+          placeholder="Buscar categorias..."
+          createLabel="Nova categoria"
+          createHref="/admin/add/categories"
+        />
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category) => {
+          {filtered.map((category) => {
             const imageUrl = category.image?.asset?._ref
               ? urlFor(category.image.asset._ref).url()
               : "/placeholder.png";
@@ -123,7 +142,7 @@ export default function AdminCategoriesList({
           })}
         </div>
 
-        {categories.length === 0 && (
+        {filtered.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground">

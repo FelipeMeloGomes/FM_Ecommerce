@@ -4,8 +4,9 @@ import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { AdminSearch } from "@/components/ui/admin-search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Product } from "@/core/products/Product";
@@ -18,8 +19,17 @@ interface AdminProductsListProps {
 }
 
 export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [allProducts, setAllProducts] = useState<Product[]>(initialProducts);
+  const [filtered, setFiltered] = useState<Product[]>(initialProducts);
   const router = useRouter();
+
+  useEffect(() => {
+    setAllProducts(initialProducts);
+  }, [initialProducts]);
+
+  const handleFilter = useCallback((result: Product[]) => {
+    setFiltered(result);
+  }, []);
 
   const handleDelete = (id: string | undefined) => {
     if (!id) return;
@@ -32,7 +42,8 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
             method: "DELETE",
           });
 
-          setProducts((current) => current.filter((p) => p._id !== id));
+          setAllProducts((current) => current.filter((p) => p._id !== id));
+          setFiltered((current) => current.filter((p) => p._id !== id));
 
           toast.success("Produto deletado com sucesso!");
           router.refresh();
@@ -53,9 +64,6 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-semibold tracking-tight">Produtos</h1>
           <div className="flex gap-2">
-            <Button asChild>
-              <Link href="/admin/add">Novo Produto</Link>
-            </Button>
             <Button asChild variant="outline">
               <Link href="/admin/brands">Gerenciar Marcas</Link>
             </Button>
@@ -65,8 +73,17 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
           </div>
         </div>
 
+        <AdminSearch
+          items={allProducts}
+          searchKeys={["name", "description"]}
+          onFilter={handleFilter}
+          placeholder="Buscar produtos..."
+          createLabel="Novo produto"
+          createHref="/admin/add"
+        />
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => {
+          {filtered.map((product) => {
             const imageUrl = product.images?.[0]?.asset?._ref
               ? urlFor(product.images[0].asset._ref).url()
               : "/placeholder.png";
@@ -116,7 +133,7 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
           })}
         </div>
 
-        {products.length === 0 && (
+        {filtered.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
             Nenhum produto cadastrado ainda.
           </div>

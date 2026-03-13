@@ -4,8 +4,9 @@ import { Edit, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { AdminSearch } from "@/components/ui/admin-search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Brand } from "@/core/brands/Brand";
@@ -20,8 +21,18 @@ interface AdminBrandsListProps {
 export default function AdminBrandsList({
   initialBrands,
 }: AdminBrandsListProps) {
-  const [brands, setBrands] = useState<Brand[]>(initialBrands);
+  const [allBrands, setAllBrands] = useState<Brand[]>(initialBrands);
+  const [filtered, setFiltered] = useState<Brand[]>(initialBrands);
   const router = useRouter();
+
+  useEffect(() => {
+    setAllBrands(initialBrands);
+    setFiltered(initialBrands);
+  }, [initialBrands]);
+
+  const handleFilter = useCallback((result: Brand[]) => {
+    setFiltered(result);
+  }, []);
 
   const handleDelete = (id: string | undefined) => {
     if (!id) return;
@@ -34,7 +45,8 @@ export default function AdminBrandsList({
             method: "DELETE",
           });
 
-          setBrands((current) => current.filter((b) => b._id !== id));
+          setAllBrands((current) => current.filter((b) => b._id !== id));
+          setFiltered((current) => current.filter((b) => b._id !== id));
 
           toast.success("Marca deletada com sucesso!");
           router.refresh();
@@ -53,13 +65,19 @@ export default function AdminBrandsList({
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-semibold tracking-tight">Marcas</h1>
-          <Button asChild>
-            <Link href="/admin/add/brands">Nova Marca</Link>
-          </Button>
         </div>
 
+        <AdminSearch
+          items={allBrands}
+          searchKeys={["title"]}
+          onFilter={handleFilter}
+          placeholder="Buscar marcas..."
+          createLabel="Nova marca"
+          createHref="/admin/add/brands"
+        />
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {brands.map((brand) => {
+          {filtered.map((brand) => {
             const imageUrl = brand.image?.asset?._ref
               ? urlFor(brand.image.asset._ref).url()
               : "/placeholder.png";
@@ -104,7 +122,7 @@ export default function AdminBrandsList({
           })}
         </div>
 
-        {brands.length === 0 && (
+        {filtered.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground">Nenhuma marca encontrada</p>
