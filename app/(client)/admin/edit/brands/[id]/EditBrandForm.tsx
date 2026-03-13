@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { z } from "zod";
 import { FormError } from "@/components/FormError";
-import { type ImagePreview, ImageUploader } from "@/components/ImageUploader";
+import { type ImageFile, ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,7 @@ interface EditBrandFormProps {
 
 export default function EditBrandForm({ brand }: EditBrandFormProps) {
   const router = useRouter();
-  const [image, setImage] = useState<ImagePreview | null>(null);
+  const [image, setImage] = useState<ImageFile | null>(null);
   const [shouldRemoveImage, setShouldRemoveImage] = useState(false);
 
   const {
@@ -49,14 +49,14 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
       const previewUrl = urlFor(brand.image.asset._ref).url();
       setImage({
         id: brand.image._key || crypto.randomUUID(),
-        previewUrl,
+        preview: previewUrl,
         file: undefined,
       });
     }
 
     return () => {
-      if (image?.previewUrl && image?.file) {
-        URL.revokeObjectURL(image.previewUrl);
+      if (image?.preview && image?.file) {
+        URL.revokeObjectURL(image.preview);
       }
     };
   }, [brand.image, shouldRemoveImage, image]);
