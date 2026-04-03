@@ -48,6 +48,7 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 | **shadcn/ui**     | Componentes acessíveis e customizáveis |
 | **Framer Motion** | Animações declarativas                 |
 | **Lucide React**  | Ícones                                 |
+| **next-themes**   | Sistema de tema dark/light             |
 
 ### Backend-as-a-Service
 
@@ -68,7 +69,8 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 
 ### Outras Bibliotecas
 
-- **react-hot-toast**: Notificações toast
+- **next-themes**: Sistema de tema dark/light
+- **sonner**: Notificações toast
 - **zustand**: Gerenciamento de estado global (carrinho)
 - **clsx** e **tailwind-merge**: Utilitários de classes
 
@@ -147,6 +149,37 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 
 ---
 
+## 🎨 Sistema de Tema Dark/Light
+
+### ThemeProvider e ThemeToggle
+
+- Implementação com `next-themes` para alternância entre temas
+- Suporte a tema do sistema (`enableSystem`)
+- Componente `ThemeToggle` no header para troca manual
+- Transições suaves entre temas
+
+### Clerk com Tema Dark
+
+- `ClerkThemeProvider` com appearance dinâmico
+- Localização em português (`ptBR`)
+- Aparência customizada para light e dark mode
+- Cores alinhadas com o tema do site (#063c28 para primary)
+
+---
+
+## 📱 Menu Mobile
+
+### SideMenu Refatorado
+
+- Menu mobile com Accordion (shadcn/ui)
+- Seções: Navegação, Minha Conta, Administração
+- Botão de alternar tema integrado
+- Backdrop com animação de opacity
+- Suporte completo dark mode
+- Ícones e links para todas as funcionalidades
+
+---
+
 ## 🔧 Refatorações Recentes
 
 ### Busca e Paginação Client-Side (Admin)
@@ -188,8 +221,6 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Biome configurado com regras de lint
 - Correção automática de formatação
 - Imports organizados automaticamente
-
----
 
 ## ⚙️ Configurações de Ambiente
 
