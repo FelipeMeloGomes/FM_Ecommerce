@@ -2,8 +2,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProductCardSkeleton() {
   return (
-    <div className="text-sm border rounded-md border-darkBlue/20 bg-white">
-      <div className="relative group overflow-hidden bg-shop_light_bg">
+    <div className="text-sm border rounded-md border-border dark:border-border bg-card dark:bg-card">
+      <div className="relative group overflow-hidden bg-muted dark:bg-muted">
         <Skeleton className="w-full h-64 object-contain" />
       </div>
       <div className="p-3 flex flex-col gap-2">

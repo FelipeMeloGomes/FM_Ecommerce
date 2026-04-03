@@ -4,7 +4,7 @@ import { Heart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { confirmToast } from "@/helpers/confirmToast";
 import { urlFor } from "@/sanity/lib/image";
 import type { Product } from "@/sanity.types";
@@ -12,6 +12,7 @@ import useStore from "@/store";
 import AddToCartButton from "./AddToCartButton";
 import Container from "./Container";
 import PriceFormatter from "./PriceFormatter";
+import Title from "./Title";
 import { Button } from "./ui/button";
 
 const WishListProducts = () => {
@@ -37,117 +38,146 @@ const WishListProducts = () => {
   return (
     <Container>
       {favoriteProduct?.length > 0 ? (
-        <>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead className="border-b">
-                <tr className="bg-black/5">
-                  <th className="p-2 text-left">Imagem</th>
-                  <th className="p-2 text-left hidden md:table-cell">
-                    Categoria
-                  </th>
-                  <th className="p-2 text-left hidden md:table-cell">Tipo</th>
-                  <th className="p-2 text-left hidden md:table-cell">Status</th>
-                  <th className="p-2 text-left">Preço</th>
-                  <th className="p-2 text-center md:text-left">Ação</th>
-                </tr>
-              </thead>
-              <tbody>
-                {favoriteProduct
-                  ?.slice(0, visibleProducts)
-                  ?.map((product: Product) => (
-                    <tr key={product?._id} className="border-b">
-                      <td className="px-2 py-4 flex items-center gap-2">
-                        <X
-                          onClick={() => {
-                            removeFromFavorite(product?._id);
-                            toast.success(
-                              "Produto removido da lista de favoritos",
-                            );
-                          }}
-                          size={18}
-                          className="hover:text-red-600 hover:cursor-pointer hoverEffect"
-                        />
-                        {product?.images && (
-                          <Link
-                            href={`/product/${product?.slug?.current}`}
-                            className="border rounded-md group hidden md:inline-flex"
-                          >
-                            <Image
-                              src={urlFor(product?.images[0]).url()}
-                              alt={"product image"}
-                              width={80}
-                              height={80}
-                              className="rounded-md group-hover:scale-105 hoverEffect h-20 w-20 object-contain"
-                            />
-                          </Link>
-                        )}
-                        <p className="line-clamp-1">{product?.name}</p>
-                      </td>
-                      <td className="p-2 capitalize hidden md:table-cell">
-                        {product?.categories && (
-                          <p className="uppercase line-clamp-1 text-xs font-medium">
-                            {product.categories.map((cat) => cat).join(", ")}
-                          </p>
-                        )}
-                      </td>
-                      <td className="p-2 capitalize hidden md:table-cell">
-                        {product?.variant}
-                      </td>
-                      <td
-                        className={`p-2 w-24 ${(product?.stock as number) > 0 ? "text-green-600" : "text-red-600"} font-medium text-sm hidden md:table-cell`}
-                      >
-                        {(product?.stock as number) > 0
-                          ? "Em Estoque"
-                          : "Fora de Estoque"}
-                      </td>
-                      <td className="p-2">
-                        <PriceFormatter amount={product?.price} />
-                      </td>
-                      <td className="p-2">
-                        <AddToCartButton product={product} className="w-full" />
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex items-center gap-2">
-            {visibleProducts < favoriteProduct?.length && (
-              <div className="my-5">
-                <Button variant="outline" onClick={loadMore}>
-                  Carregar mais
-                </Button>
-              </div>
-            )}
-            {visibleProducts > 10 && (
-              <div className="my-5">
-                <Button
-                  onClick={() => setVisibleProducts(10)}
-                  variant="outline"
-                >
-                  Carregar menos
-                </Button>
-              </div>
-            )}
-          </div>
-          {favoriteProduct?.length > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between py-4 border-b border-border">
+            <Title className="text-2xl font-semibold">Lista de favoritos</Title>
             <Button
               onClick={handleResetWishlist}
-              className={`mb-5 font-semibold ${!showLoadMore && !showLoadLess ? "mt-5" : ""}`}
-              variant="destructive"
-              size="lg"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-destructive"
             >
-              Redefinir lista de favoritos
+              Limpar tudo
             </Button>
-          )}
-        </>
+          </div>
+
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-muted/50 border-b border-border">
+                    <th className="p-4 text-left text-sm font-medium text-muted-foreground">
+                      Produto
+                    </th>
+                    <th className="p-4 text-left text-sm font-medium text-muted-foreground hidden md:table-cell">
+                      Categoria
+                    </th>
+                    <th className="p-4 text-left text-sm font-medium text-muted-foreground hidden md:table-cell">
+                      Tipo
+                    </th>
+                    <th className="p-4 text-left text-sm font-medium text-muted-foreground hidden md:table-cell">
+                      Status
+                    </th>
+                    <th className="p-4 text-left text-sm font-medium text-muted-foreground">
+                      Preço
+                    </th>
+                    <th className="p-4 text-center text-sm font-medium text-muted-foreground">
+                      Ação
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {favoriteProduct
+                    ?.slice(0, visibleProducts)
+                    ?.map((product: Product) => (
+                      <tr
+                        key={product?._id}
+                        className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
+                      >
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                removeFromFavorite(product?._id);
+                                toast.success(
+                                  "Produto removido da lista de favoritos",
+                                );
+                              }}
+                              className="p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                            >
+                              <X size={16} />
+                            </button>
+                            {product?.images && (
+                              <Link
+                                href={`/product/${product?.slug?.current}`}
+                                className="border rounded-lg overflow-hidden group"
+                              >
+                                <Image
+                                  src={urlFor(product?.images[0]).url()}
+                                  alt={product?.name || "product image"}
+                                  width={64}
+                                  height={64}
+                                  className="object-contain w-16 h-16 group-hover:scale-105 transition-transform"
+                                />
+                              </Link>
+                            )}
+                            <Link
+                              href={`/product/${product?.slug?.current}`}
+                              className="font-medium line-clamp-1 hover:text-primary transition-colors"
+                            >
+                              {product?.name}
+                            </Link>
+                          </div>
+                        </td>
+                        <td className="p-4 hidden md:table-cell">
+                          {product?.categories && (
+                            <span className="uppercase text-xs font-medium text-muted-foreground">
+                              {product.categories.map((cat) => cat).join(", ")}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-4 capitalize hidden md:table-cell text-sm">
+                          {product?.variant}
+                        </td>
+                        <td className="p-4 hidden md:table-cell">
+                          <span
+                            className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                              (product?.stock as number) > 0
+                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            }`}
+                          >
+                            {(product?.stock as number) > 0
+                              ? "Em Estoque"
+                              : "Fora de Estoque"}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <PriceFormatter amount={product?.price} />
+                        </td>
+                        <td className="p-4">
+                          <AddToCartButton
+                            product={product}
+                            className="w-full sm:w-auto"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 pt-2">
+            {showLoadMore && (
+              <Button variant="outline" onClick={loadMore}>
+                Carregar mais
+              </Button>
+            )}
+            {showLoadLess && (
+              <Button variant="outline" onClick={() => setVisibleProducts(10)}>
+                Mostrar menos
+              </Button>
+            )}
+          </div>
+        </div>
       ) : (
-        <div className="flex min-h-100 flex-col items-center justify-center space-y-6 px-4 text-center">
-          <div className="relative mb-4">
-            <div className="absolute -top-1 -right-1 h-4 w-4 animate-ping rounded-full bg-muted-foreground/20" />
+        <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-6 px-4 text-center">
+          <div className="relative">
+            <div className="absolute -top-1 -right-1 h-4 w-4 animate-ping rounded-full bg-primary/20" />
             <Heart
-              className="h-12 w-12 text-muted-foreground"
+              className="h-16 w-16 text-muted-foreground"
               strokeWidth={1.5}
             />
           </div>
@@ -155,12 +185,12 @@ const WishListProducts = () => {
             <h2 className="text-2xl font-semibold tracking-tight">
               Sua lista de favoritos está vazia
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground max-w-sm">
               Os itens adicionados à sua lista de favoritos aparecerão aqui.
             </p>
           </div>
-          <Button asChild>
-            <Link href="/shop">Continue Comprando</Link>
+          <Button asChild size="lg">
+            <Link href="/shop">Começar a comprar</Link>
           </Button>
         </div>
       )}

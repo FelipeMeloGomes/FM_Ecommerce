@@ -6,7 +6,7 @@ const SignIn = () => {
     <SignInButton mode="modal">
       <button
         type="button"
-        className="text-sm font-semibold hover:text-darkColor text-lightColor hover:cursor-pointer hoverEffect"
+        className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
       >
         Entrar
       </button>

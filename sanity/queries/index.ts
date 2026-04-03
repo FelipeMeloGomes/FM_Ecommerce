@@ -5,6 +5,7 @@ import {
   DEAL_PRODUCTS,
   MY_ORDERS_QUERY,
   PRODUCT_BY_SLUG_QUERY,
+  PRODUCTS_BY_BRAND_QUERY,
 } from "./query";
 
 const getCategories = async (quantity?: number) => {
@@ -79,6 +80,19 @@ const getBrand = async (slug: string) => {
   }
 };
 
+const getProductsByBrand = async (brandSlug: string) => {
+  try {
+    const { data } = await sanityFetch({
+      query: PRODUCTS_BY_BRAND_QUERY,
+      params: { brandSlug },
+    });
+    return data ?? [];
+  } catch (error) {
+    console.error("Error fetching products by brand:", error);
+    return [];
+  }
+};
+
 const getMyOrders = async (
   userId: string,
   isAdmin: boolean,
@@ -108,5 +122,6 @@ export {
   getDealProducts,
   getProductBySlug,
   getBrand,
+  getProductsByBrand,
   getMyOrders,
 };

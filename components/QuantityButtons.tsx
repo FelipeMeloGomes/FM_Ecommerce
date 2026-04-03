@@ -1,5 +1,5 @@
 import { Minus, Plus } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
 import useStore from "@/store";
@@ -19,7 +19,7 @@ const QuantityButtons = ({ product, className }: Props) => {
     if (itemCount > 1) {
       toast.success("Quantidade atualizada");
     } else {
-      toast.success(`${product?.name?.substring(0, 12)} Produto removido`);
+      toast.success("Produto removido");
     }
   };
 
@@ -33,17 +33,17 @@ const QuantityButtons = ({ product, className }: Props) => {
   };
 
   return (
-    <div className={cn("flex items-center gap-1 pb-1 text-base", className)}>
+    <div className={cn("flex items-center gap-1", className)}>
       <Button
         onClick={handleRemoveProduct}
         variant="outline"
         size="icon"
         disabled={itemCount === 0 || isOutOfStock}
-        className="w-6 h-6 border hover:bg-shop_dark_green/20 hoverEffect"
+        className="w-8 h-8 border-border hover:border-shop_dark_green hover:bg-shop_dark_green/5"
       >
-        <Minus />
+        <Minus className="w-4 h-4" />
       </Button>
-      <span className="font-semibold text-sm w-6 text-center text-darkColor">
+      <span className="font-semibold text-sm w-8 text-center text-foreground">
         {itemCount}
       </span>
       <Button
@@ -51,9 +51,9 @@ const QuantityButtons = ({ product, className }: Props) => {
         variant="outline"
         size="icon"
         disabled={isOutOfStock}
-        className="w-6 h-6 border hover:bg-shop_dark_green/20 hoverEffect"
+        className="w-8 h-8 border-border hover:border-shop_dark_green hover:bg-shop_dark_green/5"
       >
-        <Plus />
+        <Plus className="w-4 h-4" />
       </Button>
     </div>
   );

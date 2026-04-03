@@ -42,24 +42,23 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
   }, [selectedTab]);
 
   return (
-    <Container className="flex flex-col lg:px-0 my-10">
+    <Container className="flex flex-col lg:px-0 my-8 lg:my-12">
       <HomeTabBar selectedTab={selectedTab} onTabSelect={setSelectedTab} />
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-10 min-h-80 space-y-4 text-center bg-gray-100 rounded-lg w-full mt-10">
-          <motion.div className="flex items-center space-x-2 text-blue-600">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span>Carregando produto...</span>
-          </motion.div>
+        <div className="flex flex-col items-center justify-center py-16 min-h-[400px] space-y-4 text-center bg-muted/30 rounded-xl w-full mt-8">
+          <Loader2 className="w-8 h-8 animate-spin text-shop_orange" />
+          <p className="text-muted-foreground">Carregando produtos...</p>
         </div>
       ) : products?.length ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-10">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-8">
           {products?.map((product) => (
             <AnimatePresence key={product._id}>
               <motion.div
                 layout
-                initial={false}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
               >
                 <ProductCard key={product._id} product={product} />
               </motion.div>
@@ -67,7 +66,7 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
           ))}
         </div>
       ) : (
-        <NoProductAvailable selectedTab={selectedTab} />
+        <NoProductAvailable selectedTab={selectedTab} className="mt-8" />
       )}
     </Container>
   );

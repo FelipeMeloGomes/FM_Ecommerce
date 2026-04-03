@@ -1,14 +1,16 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { createAddress } from "@/actions/createAddress";
 import { updateAddress } from "@/actions/updateAddress";
 import { FormError } from "@/components/FormError";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,79 +60,98 @@ export default function AddressForm({ address }: AddressFormProps) {
     }
   };
 
+  const isEditing = !!address?._id;
+
   return (
-    <form
-      onSubmit={form.handleSubmit(handleSubmit)}
-      className="space-y-6 max-w-md mx-auto bg-white border rounded-md p-6"
-    >
-      <div className="space-y-2">
-        <Label htmlFor="name">Nome</Label>
-        <Input
-          id="name"
-          placeholder="Casa, Trabalho"
-          {...form.register("name")}
-        />
-        <FormError message={form.formState.errors.name?.message} />
-      </div>
+    <Card className="border-border/60">
+      <CardHeader className="bg-muted/20 border-b border-border/40">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+          <MapPin className="w-5 h-5 text-shop_orange" />
+          {isEditing ? "Editar Endereço" : "Novo Endereço"}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome do endereço</Label>
+            <Input
+              id="name"
+              placeholder="Casa, Trabalho, etc."
+              {...form.register("name")}
+            />
+            <FormError message={form.formState.errors.name?.message} />
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="address">Endereço</Label>
-        <Input
-          id="address"
-          placeholder="Rua e número"
-          {...form.register("address")}
-        />
-        <FormError message={form.formState.errors.address?.message} />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="address">Endereço</Label>
+            <Input
+              id="address"
+              placeholder="Rua e número"
+              {...form.register("address")}
+            />
+            <FormError message={form.formState.errors.address?.message} />
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="city">Cidade</Label>
-          <Input id="city" placeholder="Cidade" {...form.register("city")} />
-          <FormError message={form.formState.errors.city?.message} />
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="city">Cidade</Label>
+              <Input
+                id="city"
+                placeholder="Cidade"
+                {...form.register("city")}
+              />
+              <FormError message={form.formState.errors.city?.message} />
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="state">Estado</Label>
-          <Input
-            id="state"
-            maxLength={2}
-            placeholder="GO"
-            {...form.register("state")}
-          />
-          <FormError message={form.formState.errors.state?.message} />
-        </div>
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="state">Estado</Label>
+              <Input
+                id="state"
+                maxLength={2}
+                placeholder="GO"
+                {...form.register("state")}
+              />
+              <FormError message={form.formState.errors.state?.message} />
+            </div>
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="zip">CEP</Label>
-        <Input
-          id="zip"
-          placeholder="00000-000"
-          {...form.register("zip")}
-          onChange={(e) => form.setValue("zip", formatCep(e.target.value))}
-        />
-        <FormError message={form.formState.errors.zip?.message} />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="zip">CEP</Label>
+            <Input
+              id="zip"
+              placeholder="00000-000"
+              {...form.register("zip")}
+              onChange={(e) => form.setValue("zip", formatCep(e.target.value))}
+            />
+            <FormError message={form.formState.errors.zip?.message} />
+          </div>
 
-      <div className="flex items-center gap-2">
-        <Checkbox
-          id="default"
-          checked={form.watch("default")}
-          onCheckedChange={(checked) =>
-            form.setValue("default", checked === true)
-          }
-        />
-        <Label htmlFor="default">Definir como padrão</Label>
-      </div>
+          <div className="flex items-center gap-2.5 pt-2">
+            <Checkbox
+              id="default"
+              checked={form.watch("default")}
+              onCheckedChange={(checked) =>
+                form.setValue("default", checked === true)
+              }
+            />
+            <Label htmlFor="default" className="text-sm text-muted-foreground">
+              Definir como endereço padrão
+            </Label>
+          </div>
 
-      <Button type="submit" disabled={loading} className="w-full">
-        {loading
-          ? "Salvando..."
-          : address
-            ? "Atualizar Endereço"
-            : "Salvar Endereço"}
-      </Button>
-    </form>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-shop_dark_green hover:bg-shop_btn_dark_green"
+          >
+            {loading
+              ? "Salvando..."
+              : isEditing
+                ? "Atualizar Endereço"
+                : "Salvar Endereço"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

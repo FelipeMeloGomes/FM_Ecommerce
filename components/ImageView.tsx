@@ -29,42 +29,45 @@ const ImageView = ({ images = [], isStock }: Props) => {
   const [active, setActive] = useState(images[0]);
 
   return (
-    <div className="w-full md:w-1/2 space-y-2 md:space-y-4">
+    <div className="w-full lg:w-1/2 space-y-4">
       <AnimatePresence mode="wait">
         <motion.div
           key={active?._key}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-h-137.5 min-h-112.5 border border-darkColor/10 rounded-md group overflow-hidden"
+          transition={{ duration: 0.3 }}
+          className={`relative aspect-square bg-muted/30 rounded-xl border border-border/60 overflow-hidden ${isStock === 0 ? "opacity-60" : ""}`}
         >
           <Image
             src={urlFor(active).url()}
             alt="productImage"
-            width={700}
-            height={700}
+            fill
             priority
-            className={`w-full h-96 max-h-137.5 min-h-125 object-contain group-hover:scale-110 hoverEffect rounded-md ${isStock === 0 ? "opacity-50" : ""}`}
+            className="object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
         </motion.div>
       </AnimatePresence>
-      <div className="grid grid-cols-6 gap-2 h-20 md:h-24">
+      <div className="grid grid-cols-4 lg:grid-cols-6 gap-2">
         {images?.map((image) => (
           <button
             type="button"
             key={image?._key}
             onClick={() => setActive(image)}
-            className={`border rounded-md overflow-hidden ${active?._key === image?._key ? "border-darkColor opacity-100" : "opacity-80"}`}
+            className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+              active?._key === image?._key
+                ? "border-shop_orange ring-2 ring-shop_orange/20"
+                : "border-border/40 hover:border-shop_orange/50"
+            }`}
           >
             <Image
               src={urlFor(image).url()}
               alt={`Thumbnail ${image._key}`}
-              width={100}
-              height={100}
-              sizes="100px"
+              fill
+              sizes="80px"
               loading="lazy"
-              className="w-full h-auto object-contain"
+              className="object-cover"
             />
           </button>
         ))}

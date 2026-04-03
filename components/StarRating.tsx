@@ -6,32 +6,15 @@ interface StarRatingProps {
 
 const StarRating = ({ rating = 4 }: StarRatingProps) => {
   return (
-    <div className="flex items-center">
-      <StarIcon
-        size={14}
-        className={rating > 0 ? "text-shop_light_green" : "text-lightText"}
-        fill={rating > 0 ? "#93D991" : "#ababab"}
-      />
-      <StarIcon
-        size={14}
-        className={rating > 1 ? "text-shop_light_green" : "text-lightText"}
-        fill={rating > 1 ? "#93D991" : "#ababab"}
-      />
-      <StarIcon
-        size={14}
-        className={rating > 2 ? "text-shop_light_green" : "text-lightText"}
-        fill={rating > 2 ? "#93D991" : "#ababab"}
-      />
-      <StarIcon
-        size={14}
-        className={rating > 3 ? "text-shop_light_green" : "text-lightText"}
-        fill={rating > 3 ? "#93D991" : "#ababab"}
-      />
-      <StarIcon
-        size={14}
-        className={rating > 4 ? "text-shop_light_green" : "text-lightText"}
-        fill={rating > 4 ? "#93D991" : "#ababab"}
-      />
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <StarIcon
+          key={star}
+          size={14}
+          className={star <= rating ? "text-shop_orange" : "text-muted"}
+          fill={star <= rating ? "#fb6c08" : "none"}
+        />
+      ))}
     </div>
   );
 };

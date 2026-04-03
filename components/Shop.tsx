@@ -1,4 +1,5 @@
 "use client";
+
 import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -19,6 +20,7 @@ interface Props {
   initialBrand?: string | null;
   initialCategory?: string | null;
 }
+
 const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
   const searchParams = useSearchParams();
   const brandParams = searchParams?.get("brand") ?? initialBrand;
@@ -60,17 +62,21 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  const hasFilters =
+    selectedCategory !== null ||
+    selectedBrand !== null ||
+    selectedPrice !== null;
+
   return (
-    <div className="border-t">
-      <Container className="mt-5">
-        <div className="sticky top-0 z-10 mb-5">
-          <div className="flex items-center justify-between">
-            <Title className="text-lg uppercase tracking-wide">
-              Pegue os produtos conforme sua necessidade
+    <div className="border-t border-border">
+      <Container className="mt-6">
+        <div className="sticky top-0 z-10 mb-6 bg-background pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-border">
+            <Title className="text-xl font-semibold tracking-tight">
+              Escolha seus produtos
             </Title>
-            {(selectedCategory !== null ||
-              selectedBrand !== null ||
-              selectedPrice !== null) && (
+            {hasFilters && (
               <button
                 type="button"
                 onClick={() => {
@@ -78,50 +84,56 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
                   setSelectedBrand(null);
                   setSelectedPrice(null);
                 }}
-                className="text-shop_dark_green underline text-sm mt-2 font-medium hover:text-darkRed hoverEffect"
+                className="text-sm text-muted-foreground hover:text-foreground underline transition-colors"
               >
-                Redefinir filtros
+                Limpar filtros
               </button>
             )}
           </div>
         </div>
-        <div className="flex flex-col md:flex-row gap-5 border-t border-t-shop_dark_green/50">
-          <div className="md:sticky md:top-20 md:self-start md:h-[calc(100vh-160px)] md:overflow-y-auto md:min-w-64 pb-5 md:border-r border-r-shop_btn_dark_green/50 scrollbar-hide">
-            <CategoryList
-              categories={categories}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-            />
-            <BrandList
-              brands={brands}
-              setSelectedBrand={setSelectedBrand}
-              selectedBrand={selectedBrand}
-            />
-            <PriceList
-              setSelectedPrice={setSelectedPrice}
-              selectedPrice={selectedPrice}
-            />
-          </div>
-          <div className="flex-1 pt-5">
-            <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2 scrollbar-hide">
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          <aside className="lg:sticky lg:top-24 lg:self-start lg:h-[calc(100vh-180px)] lg:overflow-y-auto lg:min-w-72 pb-6 lg:pr-4">
+            <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
+              <CategoryList
+                categories={categories}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+              />
+              <div className="my-4 border-t border-border" />
+              <BrandList
+                brands={brands}
+                setSelectedBrand={setSelectedBrand}
+                selectedBrand={selectedBrand}
+              />
+              <div className="my-4 border-t border-border" />
+              <PriceList
+                setSelectedPrice={setSelectedPrice}
+                selectedPrice={selectedPrice}
+              />
+            </div>
+          </aside>
+
+          <main className="flex-1 min-h-0">
+            <div className="h-full overflow-y-auto pr-2 scrollbar-hide">
               {loading ? (
-                <div className="p-20 flex flex-col gap-2 items-center justify-center bg-white">
-                  <Loader2 className="w-10 h-10 text-shop_dark_green animate-spin" />
-                  <p className="font-semibold tracking-wide text-base">
-                    Produto carregando...
+                <div className="flex flex-col gap-3 items-center justify-center py-20 bg-card rounded-xl border border-border">
+                  <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                  <p className="font-medium text-muted-foreground">
+                    Carregando produtos...
                   </p>
                 </div>
               ) : products?.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                   {products?.map((product) => (
                     <ProductCard key={product?._id} product={product} />
                   ))}
                 </div>
               ) : (
-                <NoProductAvailable className="bg-white mt-0" />
+                <NoProductAvailable className="bg-card mt-0 rounded-xl border border-border" />
               )}
             </div>
-          </div>
+          </main>
         </div>
       </Container>
     </div>

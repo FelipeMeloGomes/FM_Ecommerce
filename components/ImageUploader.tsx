@@ -231,10 +231,10 @@ export function ImageUploader({
           disabled
             ? "cursor-not-allowed bg-muted/50 opacity-60"
             : "cursor-pointer",
-          !disabled && isDragging
-            ? "border-primary bg-primary/5 scale-[1.01]"
+          isDragging
+            ? "border-shop_orange bg-shop_orange/5 scale-[1.01]"
             : !disabled &&
-                "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30",
+                "border-border hover:border-shop_orange/50 hover:bg-muted/30",
           images.length > 0 && "pb-4",
         )}
       >

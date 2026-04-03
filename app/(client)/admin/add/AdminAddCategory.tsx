@@ -3,11 +3,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { FormError } from "@/components/FormError";
 import { type ImageFile, ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { apiRequest } from "@/lib/api/apiRequest";
@@ -23,6 +23,8 @@ export default function AdminAddCategory() {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateCategoryInput>({
     resolver: zodResolver(createCategorySchema),
@@ -30,6 +32,8 @@ export default function AdminAddCategory() {
       featured: false,
     },
   });
+
+  const isFeatured = watch("featured");
 
   useEffect(() => {
     return () => {
@@ -74,80 +78,99 @@ export default function AdminAddCategory() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/40 p-6">
-      <div className="max-w-3xl mx-auto space-y-6">
-        <h1 className="text-3xl font-semibold">Nova Categoria</h1>
+    <div className="min-h-screen bg-background p-6 md:p-8">
+      <div className="max-w-3xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+            Nova Categoria
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Adicione uma nova categoria ao catálogo
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações Básicas</CardTitle>
-            </CardHeader>
+          <div className="bg-card rounded-xl border border-border p-4 md:p-6 shadow-sm space-y-6">
+            <div className="border-b border-border pb-4">
+              <h2 className="text-lg font-medium text-foreground">
+                Informações Básicas
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Nome e descrição da categoria
+              </p>
+            </div>
 
-            <CardContent className="space-y-4">
-              <div>
+            <div className="space-y-4">
+              <div className="space-y-2">
                 <Input
                   placeholder="Título da categoria"
                   {...register("title")}
+                  className="h-11"
                 />
                 <FormError message={errors.title?.message} />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Textarea
                   placeholder="Descrição (opcional)"
                   {...register("description")}
                   rows={4}
+                  className="min-h-[100px]"
                 />
                 <FormError message={errors.description?.message} />
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
-                <div>
+                <div className="space-y-2">
                   <Input
                     type="number"
                     placeholder="Faixa de preço (opcional)"
                     {...register("range")}
+                    className="h-11"
                   />
                   <FormError message={errors.range?.message} />
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
+                <div className="flex items-center gap-3 pt-2">
+                  <Checkbox
                     id="featured"
-                    {...register("featured")}
-                    className="w-4 h-4 cursor-pointer"
+                    checked={isFeatured}
+                    onCheckedChange={(v) =>
+                      setValue("featured", Boolean(v), { shouldValidate: true })
+                    }
                   />
                   <label
                     htmlFor="featured"
-                    className="text-sm font-medium cursor-pointer"
+                    className="text-sm text-foreground cursor-pointer"
                   >
-                    Destaque
+                    Categoria em destaque
                   </label>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Imagem</CardTitle>
-            </CardHeader>
-
-            <CardContent>
-              <ImageUploader
-                value={image ? [image] : []}
-                onChange={(images) => setImage(images[0] || null)}
-              />
-            </CardContent>
-          </Card>
-
-          <div className="flex gap-3">
-            <Button type="submit" disabled={isSubmitting} className="flex-1">
-              {isSubmitting ? "Criando..." : "Criar Categoria"}
-            </Button>
+            </div>
           </div>
+
+          <div className="bg-card rounded-xl border border-border p-4 md:p-6 shadow-sm space-y-6">
+            <div className="border-b border-border pb-4">
+              <h2 className="text-lg font-medium text-foreground">Imagem</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Adicione uma imagem representativa
+              </p>
+            </div>
+
+            <ImageUploader
+              value={image ? [image] : []}
+              onChange={(images) => setImage(images[0] || null)}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full h-12 text-base font-medium"
+          >
+            {isSubmitting ? "Criando..." : "Criar Categoria"}
+          </Button>
         </form>
       </div>
     </div>

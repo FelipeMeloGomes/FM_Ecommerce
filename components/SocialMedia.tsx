@@ -17,29 +17,28 @@ const socialLink = [
   {
     title: "Github",
     href: "https://github.com/FelipeMeloGomes",
-    icon: <Github className="w-5 h-5" />,
+    icon: <Github className="w-4 h-4" />,
   },
   {
     title: "Linkedin",
     href: "https://www.linkedin.com/in/felipemelog/",
-    icon: <Linkedin className="w-5 h-5" />,
+    icon: <Linkedin className="w-4 h-4" />,
   },
 ];
 
 const SocialMedia = ({ className, iconClassName, tooltipClassName }: Props) => {
   return (
     <TooltipProvider>
-      <div className={cn("flex items-center gap-3.5", className)}>
+      <div className={cn("flex items-center gap-3", className)}>
         {socialLink?.map((item) => (
           <Tooltip key={item?.title}>
             <TooltipTrigger asChild>
               <Link
-                key={item?.title}
                 target="_blank"
                 rel="noopener noreferrer"
                 href={item?.href}
                 className={cn(
-                  "p-2 border rounded-full hover:text-white hover:border-shop_light_green hoverEffect",
+                  "p-2 rounded-full bg-muted hover:bg-shop_dark_green hover:text-white transition-colors",
                   iconClassName,
                 )}
               >
@@ -48,7 +47,7 @@ const SocialMedia = ({ className, iconClassName, tooltipClassName }: Props) => {
             </TooltipTrigger>
             <TooltipContent
               className={cn(
-                "bg-white text-darkColor font-semibold",
+                "bg-background text-foreground border-border",
                 tooltipClassName,
               )}
             >

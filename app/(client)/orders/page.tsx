@@ -8,8 +8,9 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import Container from "@/components/Container";
 import OrdersComponent from "@/components/OrdersComponent";
+import Title from "@/components/Title";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -48,44 +49,54 @@ async function OrdersList({
 
   if (!orderData.orders?.length) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <FileX className="h-24 w-24 text-gray-400 mb-4" />
-        <h2 className="text-2xl font-semibold text-gray-900">
+      <div className="flex flex-col items-center justify-center py-20 px-4">
+        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-6">
+          <FileX className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <h2 className="text-xl font-semibold tracking-tight">
           Nenhum pedido encontrado
         </h2>
-        <p className="mt-2 text-sm text-gray-600 text-center max-w-md">
+        <p className="mt-2 text-sm text-muted-foreground text-center max-w-md">
           Parece que você ainda não fez nenhum pedido. Comece a comprar para ver
           seus pedidos aqui!
         </p>
         <Button asChild className="mt-6">
-          <Link href="/">Navegar pelos produtos</Link>
+          <Link href="/shop">Navegar pelos produtos</Link>
         </Button>
       </div>
     );
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Lista de Pedidos</CardTitle>
+    <Card className="w-full border-border shadow-sm">
+      <CardHeader className="border-b border-border pb-4">
+        <Title className="text-xl">Lista de Pedidos</Title>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <ScrollArea>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-25 md:w-auto">
+              <TableRow className="bg-muted/50 hover:bg-muted/50">
+                <TableHead className="w-25 md:w-auto font-medium">
                   Número do Pedido
                 </TableHead>
-                <TableHead className="hidden md:table-cell">Data</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead className="hidden sm:table-cell">Email</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden sm:table-cell">
+                <TableHead className="hidden md:table-cell font-medium">
+                  Data
+                </TableHead>
+                <TableHead className="font-medium">Cliente</TableHead>
+                <TableHead className="hidden sm:table-cell font-medium">
+                  Email
+                </TableHead>
+                <TableHead className="font-medium">Total</TableHead>
+                <TableHead className="font-medium">Status</TableHead>
+                <TableHead className="hidden sm:table-cell font-medium">
                   ID Stripe
                 </TableHead>
-                {isAdmin && <TableHead className="text-center">Ação</TableHead>}
+                {isAdmin && (
+                  <TableHead className="text-center font-medium">
+                    Ação
+                  </TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <OrdersComponent orders={orderData.orders} isAdmin={isAdmin} />
@@ -94,30 +105,34 @@ async function OrdersList({
         </ScrollArea>
 
         {totalPages > 1 && (
-          <div className="flex justify-center mt-4 gap-2">
+          <div className="flex items-center justify-center gap-2 py-4 border-t border-border">
             {currentPage > 1 ? (
-              <Button asChild className="flex items-center gap-1">
+              <Button asChild variant="outline" size="sm">
                 <Link href={`/orders?page=${currentPage - 1}`}>
-                  <ChevronLeft size={16} /> Anterior
+                  <ChevronLeft size={16} />
+                  <span className="ml-1">Anterior</span>
                 </Link>
               </Button>
             ) : (
-              <Button disabled className="flex items-center gap-1">
-                <ChevronLeft size={16} /> Anterior
+              <Button disabled variant="outline" size="sm">
+                <ChevronLeft size={16} />
+                <span className="ml-1">Anterior</span>
               </Button>
             )}
-            <span className="flex items-center px-2">
-              {currentPage} / {totalPages}
+            <span className="text-sm text-muted-foreground px-3">
+              {currentPage} de {totalPages}
             </span>
             {currentPage < totalPages ? (
-              <Button asChild className="flex items-center gap-1">
+              <Button asChild variant="outline" size="sm">
                 <Link href={`/orders?page=${currentPage + 1}`}>
-                  Próximo <ChevronRight size={16} />
+                  <span className="mr-1">Próxima</span>
+                  <ChevronRight size={16} />
                 </Link>
               </Button>
             ) : (
-              <Button disabled className="flex items-center gap-1">
-                Próximo <ChevronRight size={16} />
+              <Button disabled variant="outline" size="sm">
+                <span className="mr-1">Próxima</span>
+                <ChevronRight size={16} />
               </Button>
             )}
           </div>
@@ -141,8 +156,9 @@ const OrdersPage = async ({
   const currentPage = Number(params?.page ?? "1");
 
   return (
-    <div>
-      <Container className="py-10">
+    <div className="min-h-screen bg-background">
+      <Container className="py-8">
+        <Title className="text-2xl mb-6">Meus Pedidos</Title>
         <Suspense fallback={<OrdersTableSkeleton />}>
           <OrdersList
             userId={userId}

@@ -4,33 +4,33 @@ import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { client } from "@/sanity/lib/client";
-import { PRODUCTS_BY_CATEGORY_QUERY } from "@/sanity/queries/query";
-import type { Category, Product } from "@/sanity.types";
+import { PRODUCTS_BY_BRAND_QUERY } from "@/sanity/queries/query";
+import type { Brand, Product } from "@/sanity.types";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
-import { Button } from "./ui/button";
 
 interface Props {
-  categories: Category[];
+  brands: Brand[];
   slug: string;
 }
 
-const CategoryProducts = ({ categories, slug }: Props) => {
+const BrandProducts = ({ brands, slug }: Props) => {
   const [currentSlug, setCurrentSlug] = useState(slug);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const handleCategoryChange = (newSlug: string) => {
+
+  const handleBrandChange = (newSlug: string) => {
     if (newSlug === currentSlug) return;
     setCurrentSlug(newSlug);
-    router.push(`/category/${newSlug}`, { scroll: false });
+    router.push(`/brand/${newSlug}`, { scroll: false });
   };
 
-  const fetchProducts = useCallback(async (categorySlug: string) => {
+  const fetchProducts = useCallback(async (brandSlug: string) => {
     setLoading(true);
     try {
-      const data = await client.fetch(PRODUCTS_BY_CATEGORY_QUERY, {
-        categorySlug,
+      const data = await client.fetch(PRODUCTS_BY_BRAND_QUERY, {
+        brandSlug,
       });
       setProducts(data);
     } catch (error) {
@@ -52,17 +52,15 @@ const CategoryProducts = ({ categories, slug }: Props) => {
       <div className="w-full lg:w-56 shrink-0">
         <div className="bg-card rounded-xl border border-border/60 overflow-hidden">
           <div className="p-4 border-b border-border/40 bg-muted/20">
-            <h3 className="font-semibold text-foreground">Categorias</h3>
+            <h3 className="font-semibold text-foreground">Marcas</h3>
           </div>
           <div className="flex flex-col">
-            {categories?.map((item) => (
+            {brands?.map((item) => (
               <button
                 type="button"
-                onClick={() =>
-                  handleCategoryChange(item?.slug?.current as string)
-                }
+                onClick={() => handleBrandChange(item?.slug?.current as string)}
                 key={item?._id}
-                className={`w-full text-left px-4 py-3 text-sm font-medium transition-all duration-200 border-b border-border/20 last:border-b-0 capitalize ${
+                className={`w-full text-left px-4 py-3 text-sm font-medium transition-all duration-200 border-b border-border/20 last:border-b-0 ${
                   item?.slug?.current === currentSlug
                     ? "bg-shop_orange text-white"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -107,4 +105,4 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   );
 };
 
-export default CategoryProducts;
+export default BrandProducts;

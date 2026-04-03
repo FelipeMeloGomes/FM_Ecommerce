@@ -1,53 +1,264 @@
-import { X } from "lucide-react";
+"use client";
+
+import {
+  Heart,
+  Home,
+  MapPin,
+  Moon,
+  Package,
+  Plus,
+  Settings,
+  ShoppingBag,
+  ShoppingCart,
+  Sun,
+  User,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { FC } from "react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { headerData } from "@/constants/data";
 import { useOutsideClick } from "@/hooks";
 import Logo from "./Logo";
-import SocialMedia from "./SocialMedia";
 
-interface SidebarProps {
+interface SideMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  isLoggedIn?: boolean;
+  isAdmin?: boolean;
+  ordersCount?: number;
 }
 
-const SideMenu: FC<SidebarProps> = ({ isOpen, onClose }) => {
+const SideMenu = ({
+  isOpen,
+  onClose,
+  isLoggedIn,
+  isAdmin,
+  ordersCount = 0,
+}: SideMenuProps) => {
   const pathname = usePathname();
   const sidebarRef = useOutsideClick<HTMLDivElement>(onClose);
-  return (
-    <div
-      className={`fixed inset-y-0 h-screen left-0 z-50 w-full bg-black/50 text-white/70 shadow-xl ${isOpen ? "translate-x-0" : "-translate-x-full"} hoverEffect`}
-    >
-      <div
-        ref={sidebarRef}
-        className="min-w-72 max-w-96 bg-black h-screen p-10 border-r border-r-shop_light_green flex flex-col gap-6"
-      >
-        <div className="flex items-center justify-between gap-5">
-          <Logo className="text-white" spanDesign="group-hover:text-white" />
-          <button
-            type="button"
-            onClick={onClose}
-            className="hover:text-shop_light_green hoverEffect"
-          >
-            <X />
-          </button>
-        </div>
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-        <div className="flex flex-col space-y-3.5 font-semibold tracking-wide">
-          {headerData?.map((item) => (
-            <Link
-              href={item?.href}
-              key={item?.title}
-              className={`hover:text-shop_light_green hoverEffect ${pathname === item?.href && "text-white"}`}
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const menuItems = [
+    { href: "/", label: "Início", icon: Home },
+    { href: "/shop", label: "Loja", icon: ShoppingBag },
+    { href: "/deal", label: "Promoções", icon: Package },
+  ];
+
+  const accountItems = [
+    {
+      href: "/cart",
+      label: "Carrinho",
+      icon: ShoppingCart,
+      highlight: true,
+    },
+    {
+      href: "/orders",
+      label: "Meus Pedidos",
+      icon: ShoppingBag,
+      badge: ordersCount > 0 ? ordersCount : undefined,
+    },
+    { href: "/wishlist", label: "Favoritos", icon: Heart },
+    { href: "/account/addresses", label: "Endereços", icon: MapPin },
+  ];
+
+  const adminItems = [
+    { href: "/admin/products", label: "Produtos", icon: Plus },
+    { href: "/admin/categories", label: "Categorias", icon: Plus },
+    { href: "/admin/brands", label: "Marcas", icon: Plus },
+  ];
+
+  return (
+    <>
+      <button
+        type="button"
+        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden cursor-default ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={onClose}
+        onKeyDown={(e) => e.key === "Enter" && onClose()}
+        aria-label="Fechar menu"
+      />
+      <div
+        className={`fixed inset-y-0 left-0 z-50 h-screen w-80 max-w-[85vw] transform transition-transform duration-300 ease-out md:hidden ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div
+          ref={sidebarRef}
+          className="flex h-full flex-col bg-background dark:bg-zinc-900"
+        >
+          <div className="flex items-center justify-between border-b border-border p-4">
+            <Logo
+              className="text-shop_dark_green dark:text-white"
+              spanDesign="group-hover:text-shop_dark_green"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-9 w-9"
             >
-              {item?.title}
-            </Link>
-          ))}
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            <Accordion
+              type="multiple"
+              defaultValue={["navigation"]}
+              className="w-full"
+            >
+              <AccordionItem value="navigation" className="border-border">
+                <AccordionTrigger className="px-4 py-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:no-underline">
+                  <span className="flex items-center gap-2">
+                    <Home className="w-4 h-4" />
+                    Navegação
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="px-2">
+                  <nav className="space-y-1">
+                    {menuItems.map((item) => {
+                      const isActive = pathname === item.href;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={onClose}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            isActive
+                              ? "bg-shop_dark_green text-white"
+                              : "text-foreground hover:bg-muted dark:text-zinc-200"
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </nav>
+                </AccordionContent>
+              </AccordionItem>
+
+              {isLoggedIn && (
+                <AccordionItem value="account" className="border-border">
+                  <AccordionTrigger className="px-4 py-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:no-underline">
+                    <span className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Minha Conta
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-2">
+                    <nav className="space-y-1">
+                      {accountItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={onClose}
+                            className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              isActive
+                                ? "bg-shop_dark_green text-white"
+                                : "text-foreground hover:bg-muted dark:text-zinc-200"
+                            }`}
+                          >
+                            <span className="flex items-center gap-3">
+                              <item.icon className="w-4 h-4" />
+                              {item.label}
+                            </span>
+                            {item.badge && (
+                              <span className="bg-shop_orange text-white text-xs px-2 py-0.5 rounded-full">
+                                {item.badge}
+                              </span>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </nav>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
+              {isAdmin && (
+                <AccordionItem value="admin" className="border-border">
+                  <AccordionTrigger className="px-4 py-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:no-underline">
+                    <span className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Administração
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-2">
+                    <nav className="space-y-1">
+                      {adminItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={onClose}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              isActive
+                                ? "bg-shop_dark_green text-white"
+                                : "text-foreground hover:bg-muted dark:text-zinc-200"
+                            }`}
+                          >
+                            <item.icon className="w-4 h-4" />
+                            {item.label}
+                          </Link>
+                        );
+                      })}
+                    </nav>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
+
+            <div className="p-4">
+              <Separator className="my-2" />
+              <Button
+                variant="ghost"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="w-full justify-start gap-3 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted dark:text-zinc-200"
+              >
+                {mounted && theme === "dark" ? (
+                  <>
+                    <Sun className="w-4 h-4" />
+                    Modo Claro
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-4 h-4" />
+                    Modo Escuro
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <div className="border-t border-border p-4">
+            <p className="text-xs text-center text-muted-foreground">
+              © 2024 FMShop. Todos os direitos reservados.
+            </p>
+          </div>
         </div>
-        <SocialMedia />
       </div>
-    </div>
+    </>
   );
 };
 

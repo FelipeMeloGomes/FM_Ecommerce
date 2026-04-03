@@ -22,11 +22,19 @@ export default async function Home() {
   ]);
 
   return (
-    <Container className="bg-shop-light-pink">
-      <HomeBanner />
-      <ProductGrid initialProducts={products} />
-      <HomeCategories categories={categories} />
-      <ShopByBrands />
+    <Container className="bg-shop-light-pink dark:bg-zinc-900">
+      <section className="pb-8 lg:pb-12">
+        <HomeBanner />
+      </section>
+      <section className="pb-8 lg:pb-12">
+        <ProductGrid initialProducts={products} />
+      </section>
+      <section className="pb-8 lg:pb-12">
+        <HomeCategories categories={categories} />
+      </section>
+      <section className="pb-12 lg:pb-16">
+        <ShopByBrands />
+      </section>
     </Container>
   );
 }

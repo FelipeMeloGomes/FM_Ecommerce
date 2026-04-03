@@ -9,24 +9,26 @@ interface Props {
 
 const HomeTabBar = ({ selectedTab, onTabSelect }: Props) => {
   return (
-    <div className="flex items-center flex-wrap gap-5 justify-between">
-      <div className="flex items-center gap-1.5 text-sm font-semibold">
-        <div className="flex items-center gap-1.5 md:gap-3">
-          {productType?.map((item) => (
-            <button
-              type="button"
-              onClick={() => onTabSelect(item?.title)}
-              key={item?.title}
-              className={`border border-shop_light_green/30 px-4 py-1.5 md:px-6 md:py-2 rounded-full hover:bg-shop_light_green hover:border-shop_light_green hover:text-white hoverEffect ${selectedTab === item?.title ? "bg-shop_light_green text-white border-shop_light_green" : "bg-shop_light_green/10"}`}
-            >
-              {item?.display}
-            </button>
-          ))}
-        </div>
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-2 flex-wrap">
+        {productType?.map((item) => (
+          <button
+            type="button"
+            onClick={() => onTabSelect(item?.title)}
+            key={item?.title}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              selectedTab === item?.title
+                ? "bg-shop_dark_green text-white"
+                : "bg-muted text-muted-foreground hover:bg-shop_dark_green/10 hover:text-foreground"
+            }`}
+          >
+            {item?.display}
+          </button>
+        ))}
       </div>
       <Link
         href={"/shop"}
-        className="border border-darkColor px-4 py-1 rounded-full hover:bg-shop_light_green hover:text-white hover:border-shop_light_green hoverEffect"
+        className="text-sm font-medium text-shop_orange hover:text-shop_btn_dark_green transition-colors"
       >
         Ver tudo
       </Link>

@@ -13,7 +13,7 @@ const PriceFormatter = ({ amount, className }: Props) => {
   });
   return (
     <span
-      className={twMerge("text-sm font-semibold text-darkColor", className)}
+      className={twMerge("text-base font-semibold text-foreground", className)}
     >
       {formattedPrice}
     </span>

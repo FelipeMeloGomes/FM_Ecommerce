@@ -1,14 +1,20 @@
 import Container from "./Container";
 import Logo from "./Logo";
+import SocialMedia from "./SocialMedia";
 
 const Footer = () => {
   return (
-    <footer className="bg-white border-t">
+    <footer className="bg-muted/30 border-t border-border">
       <Container>
-        <div className="py-6 border-t text-center text-sm text-gray-600">
-          <div>
-            © {new Date().getFullYear()} <Logo className="text-sm" />. Todos os
-            direitos reservados.
+        <div className="py-8 border-t border-border/40">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Logo className="text-lg" />
+              <span className="text-sm text-muted-foreground">
+                © {new Date().getFullYear()} Todos os direitos reservados.
+              </span>
+            </div>
+            <SocialMedia />
           </div>
         </div>
       </Container>

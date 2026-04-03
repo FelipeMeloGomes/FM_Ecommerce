@@ -12,6 +12,8 @@ import ImageView from "@/components/ImageView";
 import PriceView from "@/components/PriceView";
 import ProductCharacteristics from "@/components/ProductCharacteristics";
 import StarRating from "@/components/StarRating";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { getProductBySlug } from "@/sanity/queries";
 
 export const revalidate = 30;
@@ -56,78 +58,129 @@ const SingleProductPage = async ({
     return notFound();
   }
   return (
-    <Container className="flex flex-col md:flex-row gap-10 py-10">
-      {product?.images && (
-        <ImageView images={product?.images} isStock={product?.stock} />
-      )}
-      <div className="w-full md:w-1/2 flex flex-col gap-5">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold">{product?.name}</h2>
-          <p className="text-sm text-gray-600 tracking-wide">
-            {product?.description}
-          </p>
-          <div className="flex items-center gap-0.5 text-xs">
-            <StarRating />
-            <p className="font-semibold">{`(120)`}</p>
-          </div>
-        </div>
-        <div className="space-y-2 border-t border-b border-gray-200 py-5">
-          <PriceView
-            price={product?.price}
-            discount={product?.discount}
-            className="text-lg font-bold"
-          />
-          <p
-            className={`px-4 py-1.5 text-sm text-center inline-block font-semibold rounded-lg ${product?.stock === 0 ? "bg-red-100 text-red-600" : "text-green-600 bg-green-100"}`}
-          >
-            {(product?.stock as number) > 0 ? "Em estoque" : "Sem estoque"}
-          </p>
-        </div>
-        <div className="flex items-center gap-2.5 lg:gap-3">
-          <AddToCartButton product={product} />
-          <FavoriteButton showProduct={true} product={product} />
-        </div>
-        <ProductCharacteristics product={product} />
-        <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-b-gray-200 py-5 -mt-2">
-          <div className="flex items-center gap-2 text-sm text-black hover:text-red-600 hoverEffect">
-            <RxBorderSplit className="text-lg" />
-            <p>Comparar cores</p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-black hover:text-red-600 hoverEffect">
-            <FaRegQuestionCircle className="text-lg" />
-            <p>Faça uma pergunta</p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-black hover:text-red-600 hoverEffect">
-            <TbTruckDelivery className="text-lg" />
-            <p>Entrega e Devolução</p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-black hover:text-red-600 hoverEffect">
-            <FiShare2 className="text-lg" />
-            <p>Compartilhar</p>
-          </div>
-        </div>
-        <div className="flex flex-col">
-          <div className="border border-lightColor/25 border-b-0 p-3 flex items-center gap-2.5">
-            <Truck size={30} className="text-shop_orange" />
-            <div>
-              <p className="text-base font-semibold text-black">
-                Entrega Grátis
-              </p>
-              <p className="text-sm text-gray-500 underline underline-offset-2">
-                Digite seu CEP para ver a disponibilidade de entrega.
+    <Container>
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 py-8 lg:py-12">
+        {product?.images && (
+          <ImageView images={product?.images} isStock={product?.stock} />
+        )}
+        <div className="w-full lg:w-1/2 flex flex-col gap-6 lg:gap-8">
+          <div className="space-y-4">
+            <Badge
+              variant="secondary"
+              className="w-fit bg-shop_light_pink text-shop_dark_green font-medium text-xs uppercase tracking-wider"
+            >
+              {product?.variant}
+            </Badge>
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground tracking-tight leading-tight">
+              {product?.name}
+            </h2>
+            <p className="text-base text-muted-foreground leading-relaxed max-w-xl">
+              {product?.description}
+            </p>
+            <div className="flex items-center gap-3 pt-2">
+              <StarRating />
+              <p className="text-sm font-semibold text-muted-foreground">
+                (120 avaliações)
               </p>
             </div>
           </div>
-          <div className="border border-lightColor/25 p-3 flex items-center gap-2.5">
-            <CornerDownLeft size={30} className="text-shop_orange" />
-            <div>
-              <p className="text-base font-semibold text-black">
-                Devolução do Pedido
-              </p>
-              <p className="text-sm text-gray-500 ">
-                Devoluções grátis em até 30 dias.{" "}
-                <span className="underline underline-offset-2">Detalhes</span>
-              </p>
+
+          <Card className="border-border/60 bg-card/50">
+            <CardContent className="p-6 space-y-4">
+              <PriceView
+                price={product?.price}
+                discount={product?.discount}
+                className="text-2xl font-bold"
+              />
+              <div className="flex items-center gap-3">
+                <span
+                  className={`px-4 py-2 text-sm font-semibold rounded-lg ${
+                    product?.stock === 0
+                      ? "bg-destructive/10 text-destructive"
+                      : "bg-emerald-100 text-emerald-700"
+                  }`}
+                >
+                  {(product?.stock as number) > 0
+                    ? "✓ Em estoque"
+                    : "✗ Sem estoque"}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {product?.stock} unidades disponíveis
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex items-center gap-3">
+            <AddToCartButton product={product} className="flex-1" />
+            <FavoriteButton showProduct={true} product={product} />
+          </div>
+
+          <ProductCharacteristics product={product} />
+
+          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border/60">
+            <button
+              type="button"
+              className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
+            >
+              <RxBorderSplit className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
+              <span className="font-medium">Comparar cores</span>
+            </button>
+            <button
+              type="button"
+              className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
+            >
+              <FaRegQuestionCircle className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
+              <span className="font-medium">Faça uma pergunta</span>
+            </button>
+            <button
+              type="button"
+              className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
+            >
+              <TbTruckDelivery className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
+              <span className="font-medium">Entrega e Devolução</span>
+            </button>
+            <button
+              type="button"
+              className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
+            >
+              <FiShare2 className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
+              <span className="font-medium">Compartilhar</span>
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-0 rounded-xl overflow-hidden border border-border/60">
+            <div className="p-4 flex items-start gap-4 bg-shop_light_pink/30 border-b border-border/40">
+              <div className="p-2.5 rounded-full bg-shop_orange/10">
+                <Truck size={24} className="text-shop_orange" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-base font-semibold text-foreground">
+                  Entrega Grátis
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Digite seu CEP para ver a disponibilidade de entrega.
+                </p>
+              </div>
+            </div>
+            <div className="p-4 flex items-start gap-4">
+              <div className="p-2.5 rounded-full bg-shop_orange/10">
+                <CornerDownLeft size={24} className="text-shop_orange" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-base font-semibold text-foreground">
+                  Devolução do Pedido
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Devoluções grátis em até 30 dias.{" "}
+                  <button
+                    type="button"
+                    className="text-shop_orange hover:underline underline-offset-2 font-medium"
+                  >
+                    Detalhes
+                  </button>
+                </p>
+              </div>
             </div>
           </div>
         </div>

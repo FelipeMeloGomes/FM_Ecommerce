@@ -7,23 +7,26 @@ const HeaderMenu = () => {
   const pathname = usePathname();
 
   return (
-    <div className="hidden md:inline-flex w-1/3 items-center justify-center gap-7 text-sm capitalize font-semibold text-lightColor">
+    <nav className="hidden md:flex items-center justify-center gap-6 text-sm font-medium">
       {headerData?.map((item) => (
         <Link
           key={item?.title}
           href={item?.href}
-          className={`hover:text-shop_light_green hoverEffect relative group ${pathname === item?.href && "text-shop_light_green"}`}
+          className={`relative py-2 transition-colors ${
+            pathname === item?.href
+              ? "text-shop_dark_green"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
         >
           {item?.title}
           <span
-            className={`absolute -bottom-0.5 left-1/2 w-0 h-0.5 bg-shop_light_green group-hover:w-1/2 hoverEffect group-hover:left-0 ${pathname === item?.href && "w-1/2"}`}
-          />
-          <span
-            className={`absolute -bottom-0.5 right-1/2 w-0 h-0.5 bg-shop_light_green group-hover:w-1/2 hoverEffect group-hover:right-0 ${pathname === item?.href && "w-1/2"}`}
+            className={`absolute -bottom-0 left-0 w-full h-0.5 bg-shop_dark_green transition-transform origin-left ${
+              pathname === item?.href ? "scale-x-100" : "scale-x-0"
+            }`}
           />
         </Link>
       ))}
-    </div>
+    </nav>
   );
 };
 

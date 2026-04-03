@@ -5,6 +5,8 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import useStore from "@/store";
 
 interface SuccessPageContentProps {
@@ -42,72 +44,96 @@ const SuccessPageContent = ({
   }, [countdown, router]);
 
   return (
-    <div className="py-5 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center mx-4">
+    <div className="min-h-screen bg-gradient-to-br from-shop_light_pink/30 via-background to-shop_light_pink/20 flex items-center justify-center p-4 lg:p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white rounded-2xl flex flex-col gap-8 shadow-2xl p-6 max-w-xl w-full text-center"
+        className="w-full max-w-lg"
       >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-          className="w-20 h-20 bg-black rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
-        >
-          <Check className="text-white w-10 h-10" />
-        </motion.div>
+        <Card className="border-border/60 shadow-2xl overflow-hidden">
+          <CardContent className="p-0">
+            <div className="bg-shop_dark_green p-8 text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-shop_dark_green to-shop_btn_dark_green opacity-90" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="relative w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl"
+              >
+                <Check className="text-shop_dark_green w-12 h-12" />
+              </motion.div>
+              <h1 className="relative text-3xl lg:text-4xl font-bold text-white mb-2">
+                Pedido confirmado!
+              </h1>
+              <p className="text-white/80 text-lg">Obrigado pela sua compra</p>
+            </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Pedido confirmado!
-        </h1>
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-sm text-gray-500">
-            Redirecionando para seus pedidos em
-          </p>
-          <span className="text-3xl font-bold text-black">{countdown}s</span>
-          <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-            <motion.div
-              className="bg-black h-1.5 rounded-full"
-              initial={{ width: "100%" }}
-              animate={{ width: "0%" }}
-              transition={{ duration: REDIRECT_SECONDS, ease: "linear" }}
-            />
-          </div>
-        </div>
-        <div className="space-y-4 mb-4 text-left">
-          <p className="text-gray-700">
-            obrigado pela sua compra. Estamos processando seu pedido e ele será
-            enviado em breve.
-          </p>
-          <p className="text-gray-700">
-            Número do Pedido:{" "}
-            <span className="text-black font-semibold">{orderNumber}</span>
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link
-            href="/"
-            className="flex items-center justify-center px-4 py-3 font-semibold bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 shadow-md"
-          >
-            <Home className="w-5 h-5 mr-2" />
-            Home
-          </Link>
-          <Link
-            href="/orders"
-            className="flex items-center justify-center px-4 py-3 font-semibold bg-lightGreen text-black border border-lightGreen rounded-lg hover:bg-gray-100 transition-all duration-300 shadow-md"
-          >
-            <Package className="w-5 h-5 mr-2" />
-            Pedidos
-          </Link>
-          <Link
-            href="/"
-            className="flex items-center justify-center px-4 py-3 font-semibold bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 shadow-md"
-          >
-            <ShoppingBag className="w-5 h-5 mr-2" />
-            Shop
-          </Link>
-        </div>
+            <div className="p-6 lg:p-8 space-y-6">
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-muted-foreground">
+                  Redirecionando para seus pedidos em
+                </p>
+                <span className="text-4xl font-bold text-shop_dark_green">
+                  {countdown}s
+                </span>
+                <div className="w-full bg-muted rounded-full h-2 mt-1 overflow-hidden">
+                  <motion.div
+                    className="bg-shop_orange h-full rounded-full"
+                    initial={{ width: "100%" }}
+                    animate={{ width: "0%" }}
+                    transition={{ duration: REDIRECT_SECONDS, ease: "linear" }}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-muted/30 rounded-xl p-4 space-y-3 border border-border/40">
+                <p className="text-muted-foreground text-center">
+                  Estamos processando seu pedido e ele será enviado em breve.
+                </p>
+                <div className="flex items-center justify-center gap-2 pt-2 border-t border-border/30">
+                  <span className="text-muted-foreground">
+                    Número do Pedido:
+                  </span>
+                  <span className="font-semibold text-foreground">
+                    {orderNumber}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Button
+                  asChild
+                  className="bg-shop_dark_green hover:bg-shop_btn_dark_green"
+                >
+                  <Link href="/">
+                    <Home className="w-4 h-4 mr-2" />
+                    Home
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="border-shop_orange text-shop_orange hover:bg-shop_orange hover:text-white"
+                >
+                  <Link href="/orders">
+                    <Package className="w-4 h-4 mr-2" />
+                    Pedidos
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  className="bg-shop_dark_green hover:bg-shop_btn_dark_green"
+                >
+                  <Link href="/">
+                    <ShoppingBag className="w-4 h-4 mr-2" />
+                    Shop
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
     </div>
   );

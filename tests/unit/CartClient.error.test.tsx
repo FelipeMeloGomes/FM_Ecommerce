@@ -96,10 +96,11 @@ vi.mock("@/actions/deleteAddress", () => ({
   deleteAddress: vi.fn(async () => {}),
 }));
 
-vi.mock("react-hot-toast", () => ({
-  default: { error: vi.fn(), success: vi.fn() },
-  error: vi.fn(),
-  success: vi.fn(),
+vi.mock("sonner", () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
 }));
 
 let container: HTMLDivElement;
@@ -137,7 +138,7 @@ afterEach(() => {
 
 describe("CartClient — tratamento de erro no checkout", () => {
   it("exibe toast de erro e não redireciona quando checkout falha", async () => {
-    const { default: toast } = await import("react-hot-toast");
+    const { toast } = await import("sonner");
     const { performCheckout } = await import(
       "@/app/(client)/cart/checkoutLogic"
     );

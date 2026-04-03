@@ -1,6 +1,5 @@
 "use client";
 import { Heart } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import type { Product } from "@/sanity.types";
@@ -22,7 +21,7 @@ const FavoriteButton = ({
     setExistingProduct(availableItem || null);
   }, [product, favoriteProduct]);
 
-  const handleFavorite = (e: React.MouseEvent<HTMLSpanElement>) => {
+  const handleFavorite = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (product?._id) {
       addToFavorite(product).then(() => {
@@ -37,12 +36,12 @@ const FavoriteButton = ({
   return (
     <>
       {!showProduct ? (
-        <Link href={"/wishlist"} className="group relative">
+        <>
           <Heart className="w-5 h-5 hover:text-shop_light_green hoverEffect" />
           <span className="absolute -top-1 -right-1 bg-shop_dark_green text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
             {favoriteProduct?.length ? favoriteProduct?.length : 0}
           </span>
-        </Link>
+        </>
       ) : (
         <button
           type="button"

@@ -15,27 +15,27 @@ const CategoryList = ({
   setSelectedCategory,
 }: Props) => {
   return (
-    <div className="w-full bg-white p-5">
-      <Title className="text-base font-black">Categoria Produtos</Title>
+    <div className="w-full bg-card border border-border/60 p-5 rounded-xl">
+      <Title className="text-base font-bold">Categorias</Title>
 
       <RadioGroup
         value={selectedCategory || ""}
         onValueChange={(value) => setSelectedCategory(value || null)}
-        className="mt-2 space-y-1"
+        className="mt-3 space-y-2"
       >
         {categories?.map((category) => (
-          <div key={category._id} className="flex items-center space-x-2">
+          <div key={category._id} className="flex items-center gap-2">
             <RadioGroupItem
               value={category?.slug?.current as string}
               id={category?.slug?.current}
-              className="rounded-sm"
+              className="rounded"
             />
             <Label
               htmlFor={category?.slug?.current}
               className={
                 selectedCategory === category?.slug?.current
-                  ? "font-semibold text-shop_dark_green"
-                  : "font-normal"
+                  ? "font-semibold text-shop_dark_green cursor-pointer"
+                  : "text-muted-foreground cursor-pointer"
               }
             >
               {category?.title}
@@ -47,7 +47,7 @@ const CategoryList = ({
         <button
           type="button"
           onClick={() => setSelectedCategory(null)}
-          className="text-sm font-medium mt-2 underline underline-offset-2 decoration-1 hover:text-shop_dark_green hoverEffect text-left"
+          className="text-sm font-medium mt-3 text-shop_orange hover:text-shop_btn_dark_green transition-colors"
         >
           Redefinir seleção
         </button>

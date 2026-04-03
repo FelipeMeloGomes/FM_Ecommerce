@@ -5,7 +5,7 @@ import { Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { confirmToast } from "@/helpers/confirmToast";
 import { apiRequest } from "@/lib/api/apiRequest";
 import type { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
@@ -114,8 +114,8 @@ const OrdersComponent = ({
                       transition: { duration: 0.2 },
                     }}
                     layout
-                    className={`cursor-pointer hover:bg-gray-100 h-12 border-b transition-colors ${
-                      selectedIds.has(order._id) ? "bg-red-50" : ""
+                    className={`cursor-pointer hover:bg-muted/50 border-b transition-colors ${
+                      selectedIds.has(order._id) ? "bg-destructive/10" : ""
                     }`}
                     onClick={() => setSelectedOrder(order)}
                   >
@@ -133,16 +133,16 @@ const OrdersComponent = ({
                     <TableCell>
                       <PriceFormatter
                         amount={order?.totalPrice}
-                        className="text-black font-medium"
+                        className="font-semibold text-foreground"
                       />
                     </TableCell>
                     <TableCell>
                       {order?.status && (
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
                             order.status === "paid"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-yellow-100 text-yellow-700"
                           }`}
                         >
                           {order.status.charAt(0).toUpperCase() +

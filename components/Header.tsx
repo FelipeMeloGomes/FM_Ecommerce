@@ -10,6 +10,7 @@ import HeaderMenu from "./HeaderMenu";
 import Logo from "./Logo";
 import MobileMenu from "./MobileMenu";
 import SignIn from "./SignIn";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Header = async () => {
   const user = await currentUser();
@@ -23,36 +24,53 @@ const Header = async () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 py-5 bg-white/70 backdrop-blur-md">
-      <Container className="flex items-center justify-between text-lightColor">
-        <div className="w-auto md:w-1/3 flex items-center gap-2.5 justify-start md:gap-0">
-          <MobileMenu />
+    <header className="sticky top-0 z-50 py-3 md:py-4 bg-background/80 backdrop-blur-lg border-b border-border/40">
+      <Container className="flex items-center justify-between">
+        <div className="flex items-center gap-2 md:gap-3">
+          <MobileMenu
+            user={!!user}
+            isAdmin={isAdmin}
+            ordersCount={ordersData?.total ?? 0}
+          />
           <Logo />
         </div>
         <HeaderMenu />
-        <div className="w-auto md:w-1/3 flex items-center justify-end gap-5">
-          <CartIcon />
-          <FavoriteButton />
+        <div className="flex items-center justify-end gap-1 md:gap-4">
+          <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
+            <Link
+              href={"/cart"}
+              className="relative p-2 rounded-lg hover:bg-muted transition-colors"
+            >
+              <CartIcon />
+            </Link>
+            <Link
+              href={"/wishlist"}
+              className="relative p-2 rounded-lg hover:bg-muted transition-colors"
+            >
+              <FavoriteButton />
+            </Link>
 
-          {user && (
-            <Link
-              href={"/orders"}
-              className="group relative hover:text-shop_light_green hoverEffect"
-            >
-              <Logs />
-              <span className="absolute -top-1 -right-1 bg-shop_btn_dark_green text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
-                {ordersData?.total ?? 0}
-              </span>
-            </Link>
-          )}
-          {isAdmin && (
-            <Link
-              href="/admin/products"
-              className="group relative hover:text-shop_light_green hoverEffect"
-            >
-              <Plus />
-            </Link>
-          )}
+            {user && (
+              <Link
+                href={"/orders"}
+                className="p-2 rounded-lg hover:bg-muted transition-colors group relative"
+              >
+                <Logs className="w-5 h-5 text-muted-foreground group-hover:text-shop_dark_green transition-colors" />
+                <span className="absolute -top-1 -right-1 bg-shop_dark_green text-white h-5 w-5 rounded-full text-xs font-semibold flex items-center justify-center">
+                  {ordersData?.total ?? 0}
+                </span>
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                href="/admin/products"
+                className="p-2 rounded-lg hover:bg-muted transition-colors group"
+              >
+                <Plus className="w-5 h-5 text-muted-foreground group-hover:text-shop_dark_green transition-colors" />
+              </Link>
+            )}
+          </div>
 
           <ClerkLoaded>
             <SignedIn>

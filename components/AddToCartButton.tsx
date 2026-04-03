@@ -1,7 +1,7 @@
 "use client";
 import { ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
 import useStore from "@/store";
@@ -27,42 +27,40 @@ const AddToCartButton = ({ product, className }: Props) => {
   const handleAddToCart = () => {
     if ((product?.stock as number) > itemCount) {
       addItem(product);
-      toast.success(
-        `${product?.name?.substring(0, 12)}... adicionado ao carrinho com sucesso!`,
-      );
+      toast.success(`${product?.name?.substring(0, 20)}... adicionado!`);
     } else {
-      toast.error("Não é possível adicionar mais do que o estoque disponível");
+      toast.error("Estoque insuficiente");
     }
   };
 
   if (!isMounted) {
     return (
-      <div className="w-full h-12 flex items-center">
-        <Button
-          disabled={isOutOfStock}
-          className={cn(
-            "w-full bg-shop_dark_green/80 text-lightBg shadow-none border border-shop_dark_green/80 font-semibold tracking-wide text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect",
-            className,
-          )}
-        >
-          <ShoppingBag /> {isOutOfStock ? "Esgotado" : "Comprar"}
-        </Button>
-      </div>
+      <Button
+        disabled={isOutOfStock}
+        className={cn(
+          "w-full bg-shop_dark_green hover:bg-shop_btn_dark_green font-semibold",
+          className,
+        )}
+      >
+        <ShoppingBag className="w-4 h-4 mr-2" />
+        {isOutOfStock ? "Esgotado" : "Comprar"}
+      </Button>
     );
   }
 
   return (
-    <div className="w-full h-12 flex items-center">
+    <div className="w-full">
       {itemCount ? (
-        <div className="text-sm w-full">
+        <div className="space-y-2 p-3 rounded-lg bg-muted/50">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-darkColor/80">Quantidade</span>
+            <span className="text-sm text-muted-foreground">Quantidade</span>
             <QuantityButtons product={product} />
           </div>
-          <div className="flex items-center justify-between border-t pt-1">
-            <span className="text-xs font-semibold">Subtotal</span>
+          <div className="flex items-center justify-between pt-2 border-t border-border/40">
+            <span className="text-sm font-semibold">Subtotal</span>
             <PriceFormatter
               amount={product?.price ? product?.price * itemCount : 0}
+              className="font-bold text-shop_dark_green"
             />
           </div>
         </div>
@@ -71,11 +69,12 @@ const AddToCartButton = ({ product, className }: Props) => {
           onClick={handleAddToCart}
           disabled={isOutOfStock}
           className={cn(
-            "w-full bg-shop_dark_green/80 text-lightBg shadow-none border border-shop_dark_green/80 font-semibold tracking-wide text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect",
+            "w-full bg-shop_dark_green hover:bg-shop_btn_dark_green font-semibold",
             className,
           )}
         >
-          <ShoppingBag /> {isOutOfStock ? "Esgotado" : "Comprar"}
+          <ShoppingBag className="w-4 h-4 mr-2" />
+          {isOutOfStock ? "Esgotado" : "Comprar"}
         </Button>
       )}
     </div>

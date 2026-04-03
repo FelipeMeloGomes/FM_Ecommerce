@@ -25,88 +25,93 @@ const AddressSection = ({
 
   if (!addresses.length) {
     return (
-      <div className="bg-white rounded-md mt-5 p-6 border text-center">
-        <p className="text-gray-600 mb-4">
+      <div className="bg-card border border-border/60 rounded-xl p-6 text-center">
+        <p className="text-muted-foreground mb-4">
           Você ainda não possui um endereço cadastrado.
         </p>
         <Link href="/account/addresses">
-          <Button className="rounded-full">Cadastrar Endereço</Button>
+          <Button className="bg-shop_dark_green hover:bg-shop_btn_dark_green">
+            Cadastrar Endereço
+          </Button>
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="mt-5">
-      <Card>
-        <CardHeader>
-          <CardTitle>Endereço de Entrega</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <RadioGroup
-            value={selectedAddressId ?? ""}
-            onValueChange={(value) => onSelectAddress(value)}
-            className="space-y-3"
-          >
-            {addresses.map((address) => (
-              <div
-                key={address._id}
-                className="flex items-center justify-between rounded-md border p-3 hover:bg-muted/30"
-              >
-                <div className="flex items-start gap-2 flex-1">
-                  <RadioGroupItem
-                    value={address._id}
-                    id={`address-${address._id}`}
-                  />
-                  <Label
-                    htmlFor={`address-${address._id}`}
-                    className="grid gap-1 cursor-pointer"
-                  >
-                    <span className="font-medium">
-                      {address.name} {address.default && "(Padrão)"}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      {address.address}, {address.city}, {address.state}{" "}
-                      {address.zip}
-                    </span>
-                  </Label>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push("/account/addresses")}
-                  >
-                    Novo
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      router.push(`/account/addresses?edit=${address._id}`)
-                    }
-                  >
-                    Editar
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-                    onClick={() => onDeleteAddress(address._id)}
-                  >
-                    Apagar
-                  </Button>
-                </div>
+    <Card className="border-border/60">
+      <CardHeader className="bg-muted/20 border-b border-border/40">
+        <CardTitle>Endereço de Entrega</CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 space-y-3">
+        <RadioGroup
+          value={selectedAddressId ?? ""}
+          onValueChange={(value) => onSelectAddress(value)}
+          className="space-y-3"
+        >
+          {addresses.map((address) => (
+            <div
+              key={address._id}
+              className="flex items-center justify-between rounded-lg border border-border/40 p-4 hover:bg-muted/30 transition-colors"
+            >
+              <div className="flex items-start gap-3 flex-1">
+                <RadioGroupItem
+                  value={address._id}
+                  id={`address-${address._id}`}
+                />
+                <Label
+                  htmlFor={`address-${address._id}`}
+                  className="grid gap-1 cursor-pointer"
+                >
+                  <span className="font-medium flex items-center gap-2">
+                    {address.name}
+                    {address.default && (
+                      <span className="text-xs bg-shop_orange/10 text-shop_orange px-2 py-0.5 rounded-full">
+                        Padrão
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {address.address}, {address.city}, {address.state} -{" "}
+                    {address.zip}
+                  </span>
+                </Label>
               </div>
-            ))}
-          </RadioGroup>
-        </CardContent>
-      </Card>
-    </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push("/account/addresses")}
+                >
+                  Novo
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    router.push(`/account/addresses?edit=${address._id}`)
+                  }
+                >
+                  Editar
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="border-destructive/30 text-destructive hover:bg-destructive hover:text-white"
+                  onClick={() => onDeleteAddress(address._id)}
+                >
+                  Apagar
+                </Button>
+              </div>
+            </div>
+          ))}
+        </RadioGroup>
+      </CardContent>
+    </Card>
   );
 };
 

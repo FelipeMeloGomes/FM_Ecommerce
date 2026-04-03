@@ -1,10 +1,10 @@
 "use client";
 
 import { useAuth, useUser } from "@clerk/nextjs";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { createCheckoutSession } from "@/actions/createCheckoutSession";
 import { deleteAddress } from "@/actions/deleteAddress";
 import Container from "@/components/Container";
@@ -82,75 +82,82 @@ const CartClient = ({ addresses }: CartClientProps) => {
   };
 
   return (
-    <div className="bg-gray-50 pb-52 md:pb-10">
+    <div className="bg-background min-h-screen pb-52 md:pb-10">
       {isSignedIn ? (
         <Container>
           {groupedItems?.length ? (
-            <>
-              <div className="flex items-center gap-2 py-5">
-                <ShoppingBag className="text-darkColor" />
-                <Title>Carrinho de compras</Title>
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 py-5">
+                <ShoppingBag className="w-6 h-6 text-foreground" />
+                <Title className="text-2xl font-semibold">
+                  Carrinho de compras
+                </Title>
               </div>
-              <div className="grid lg:grid-cols-3 md:gap-8">
-                <div className="lg:col-span-2 rounded-lg">
-                  <div className="border bg-white rounded-md">
+
+              <div className="grid lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-4">
+                  <div className="bg-card rounded-xl border border-border overflow-hidden">
                     <CartItemsList items={groupedItems} />
-                    <Button
-                      onClick={handleResetCart}
-                      className="m-5 font-semibold"
-                      variant="destructive"
-                    >
-                      Limpar Carrinho
-                    </Button>
+                    <div className="p-4 border-t border-border flex justify-end">
+                      <Button
+                        onClick={handleResetCart}
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Limpar Carrinho
+                      </Button>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <div className="lg:col-span-1">
-                    <div className="hidden md:inline-block">
-                      <OrderSummary
-                        subtotal={getSubTotalPrice()}
-                        discount={getSubTotalPrice() - getTotalPrice()}
-                        total={getTotalPrice()}
-                        loading={loading}
-                        selectedAddressId={selectedAddress?._id}
-                        onCheckout={handleCheckout}
-                      />
-                    </div>
-                    <AddressSection
-                      addresses={addresses}
-                      selectedAddressId={selectedAddress?._id}
-                      onSelectAddress={(value) => {
-                        const address = addresses.find(
-                          (addr) => addr._id === value,
-                        );
-                        if (address) setSelectedAddress(address);
-                      }}
-                      onDeleteAddress={(id) => {
-                        confirmToast({
-                          message:
-                            "Tem certeza que deseja excluir este endereço?",
-                          onConfirm: async () => {
-                            await deleteAddress(id);
-                            router.refresh();
-                            toast.success("Endereço removido com sucesso!");
-                          },
-                        });
-                      }}
+
+                <div className="space-y-4">
+                  <OrderSummary
+                    subtotal={getSubTotalPrice()}
+                    discount={getSubTotalPrice() - getTotalPrice()}
+                    total={getTotalPrice()}
+                    loading={loading}
+                    selectedAddressId={selectedAddress?._id}
+                    onCheckout={handleCheckout}
+                  />
+
+                  <AddressSection
+                    addresses={addresses}
+                    selectedAddressId={selectedAddress?._id}
+                    onSelectAddress={(value) => {
+                      const address = addresses.find(
+                        (addr) => addr._id === value,
+                      );
+                      if (address) setSelectedAddress(address);
+                    }}
+                    onDeleteAddress={(id) => {
+                      confirmToast({
+                        message:
+                          "Tem certeza que deseja excluir este endereço?",
+                        onConfirm: async () => {
+                          await deleteAddress(id);
+                          router.refresh();
+                          toast.success("Endereço removido com sucesso!");
+                        },
+                      });
+                    }}
+                  />
+
+                  <Card className="bg-card border-border">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base font-medium">
+                        Calcular Frete
+                      </CardTitle>
+                    </CardHeader>
+                    <ShippingCalculator
+                      cartItems={groupedItems}
+                      selectedShipping={shipping}
+                      onSelectShipping={setShipping}
                     />
-                    <div className="bg-white rounded-md mt-5">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Calcular Frete</CardTitle>
-                        </CardHeader>
-                        <ShippingCalculator
-                          cartItems={groupedItems}
-                          selectedShipping={shipping}
-                          onSelectShipping={setShipping}
-                        />
-                      </Card>
-                    </div>
-                  </div>
+                  </Card>
                 </div>
+
                 <MobileOrderSummary
                   subtotal={getSubTotalPrice()}
                   discount={getSubTotalPrice() - getTotalPrice()}
@@ -159,7 +166,7 @@ const CartClient = ({ addresses }: CartClientProps) => {
                   onCheckout={handleCheckout}
                 />
               </div>
-            </>
+            </div>
           ) : (
             <EmptyCart />
           )}

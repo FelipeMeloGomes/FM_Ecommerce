@@ -3,77 +3,78 @@ import Image from "next/image";
 import Link from "next/link";
 import { urlFor } from "@/sanity/lib/image";
 import { getAllBrands } from "@/sanity/queries";
+import type { Brand } from "@/sanity.types";
 import Title from "./Title";
 
 const extraData = [
   {
     title: "Entrega Grátis",
     description: "Frete grátis para compras acima de R$100",
-    icon: <Truck size={45} />,
+    icon: <Truck size={40} />,
   },
   {
     title: "Devolução Grátis",
-    description: "Frete grátis para devoluções acima de R$100",
-    icon: <GitCompareArrows size={45} />,
+    description: "Frete grátis para devoluções",
+    icon: <GitCompareArrows size={40} />,
   },
   {
     title: "Suporte ao Cliente",
     description: "Atendimento amigável 24/7",
-    icon: <Headset size={45} />,
+    icon: <Headset size={40} />,
   },
   {
     title: "Garantia de Reembolso",
     description: "Qualidade verificada pela nossa equipe",
-    icon: <ShieldCheck size={45} />,
+    icon: <ShieldCheck size={40} />,
   },
 ];
 
 const ShopByBrands = async () => {
   const brands = await getAllBrands();
   return (
-    <div className="mb-10 lg:mb-20 bg-shop_light_bg p-5 lg:p-7 rounded-md">
-      <div className="flex items-center gap-5 justify-between mb-10">
+    <div className="bg-muted/30 border border-border/60 rounded-xl p-6 lg:p-8">
+      <div className="flex items-center justify-between mb-8">
         <Title>Comprar por Marcas</Title>
         <Link
           href={"/shop"}
-          className="text-sm font-semibold tracking-wide hover:text-shop_btn_dark_green hoverEffect"
+          className="text-sm font-semibold text-shop_orange hover:text-shop_btn_dark_green transition-colors"
         >
           Ver tudo
         </Link>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2.5">
-        {brands?.map((brand) => (
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        {brands?.map((brand: Brand) => (
           <Link
             key={brand?._id}
             href={{ pathname: "/shop", query: { brand: brand?.slug?.current } }}
-            className="bg-white w-34 h-24 flex items-center justify-center rounded-md overflow-hidden hover:shadow-lg shadow-shop_dark_green/20 hoverEffect"
+            className="aspect-square flex items-center justify-center rounded-xl bg-card border border-border/40 hover:border-shop_orange hover:shadow-lg hover:shadow-shop_orange/10 transition-all"
           >
             {brand?.image && (
               <Image
                 src={urlFor(brand?.image).url()}
                 alt="brandImage"
-                width={250}
-                height={250}
-                className="w-32 h-20 object-contain"
+                width={100}
+                height={100}
+                className="w-20 h-14 object-contain"
               />
             )}
           </Link>
         ))}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-16 p-2 shadow-sm hover:shadow-shop_light_green/20 py-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
         {extraData?.map((item) => (
           <div
             key={item.title}
-            className="flex items-center gap-3 group text-lightColor hover:text-shop_light_green"
+            className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/40 hover:border-shop_orange/30 transition-colors"
           >
-            <span className="inline-flex scale-100 group-hover:scale-90 hoverEffect">
+            <span className="p-2.5 rounded-full bg-shop_orange/10 text-shop_orange">
               {item?.icon}
             </span>
-            <div className="text-sm">
-              <p className="text-darkColor/80 font-bold capitalize">
-                {item?.title}
+            <div>
+              <p className="font-semibold text-foreground">{item?.title}</p>
+              <p className="text-sm text-muted-foreground">
+                {item?.description}
               </p>
-              <p className="text-lightColor">{item?.description}</p>
             </div>
           </div>
         ))}

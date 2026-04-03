@@ -3,11 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { FormError } from "@/components/FormError";
 import { type ImageFile, ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { MultiSelect } from "@/components/ui/multi-select";
@@ -100,193 +99,247 @@ export default function AdminAddProducts({ categories, brands }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-muted/40 p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
-        <h1 className="text-3xl font-semibold">Novo Produto</h1>
+    <div className="min-h-screen bg-background p-6 md:p-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+            Novo Produto
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Preencha os dados do produto
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações Básicas</CardTitle>
-            </CardHeader>
+          <div className="bg-card rounded-xl border border-border p-4 md:p-6 shadow-sm space-y-6">
+            <div className="border-b border-border pb-4">
+              <h2 className="text-lg font-medium text-foreground">
+                Informações Básicas
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Nome e descrição do produto
+              </p>
+            </div>
 
-            <CardContent className="grid md:grid-cols-2 gap-4">
-              <div>
-                <Input placeholder="Nome do produto" {...register("name")} />
-                <FormError message={errors.name?.message} />
+            <div className="grid gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Input
+                    placeholder="Nome do produto"
+                    {...register("name")}
+                    className="h-11"
+                  />
+                  <FormError message={errors.name?.message} />
+                </div>
               </div>
 
-              <div className="md:col-span-2">
+              <div className="space-y-2">
                 <Textarea
                   placeholder="Descrição"
                   {...register("description")}
+                  className="min-h-[120px]"
                 />
                 <FormError message={errors.description?.message} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Imagens</CardTitle>
-            </CardHeader>
+          <div className="bg-card rounded-xl border border-border p-4 md:p-6 shadow-sm space-y-6">
+            <div className="border-b border-border pb-4">
+              <h2 className="text-lg font-medium text-foreground">Imagens</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Adicione imagens do produto
+              </p>
+            </div>
 
-            <CardContent>
-              <ImageUploader value={images} onChange={setImages} />
-            </CardContent>
-          </Card>
+            <ImageUploader value={images} onChange={setImages} />
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Preço & Estoque</CardTitle>
-            </CardHeader>
+          <div className="bg-card rounded-xl border border-border p-4 md:p-6 shadow-sm space-y-6">
+            <div className="border-b border-border pb-4">
+              <h2 className="text-lg font-medium text-foreground">
+                Preço & Estoque
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Valores e disponibilidade
+              </p>
+            </div>
 
-            <CardContent className="grid md:grid-cols-3 gap-4">
-              <div>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="space-y-2">
                 <Input
                   type="number"
                   placeholder="Preço"
                   {...register("price")}
+                  className="h-11"
                 />
                 <FormError message={errors.price?.message} />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Input
                   type="number"
                   placeholder="Desconto"
                   {...register("discount")}
+                  className="h-11"
                 />
                 <FormError message={errors.discount?.message} />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Input
                   type="number"
                   placeholder="Estoque"
                   {...register("stock")}
+                  className="h-11"
                 />
                 <FormError message={errors.stock?.message} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Dimensões</CardTitle>
-            </CardHeader>
+          <div className="bg-card rounded-xl border border-border p-4 md:p-6 shadow-sm space-y-6">
+            <div className="border-b border-border pb-4">
+              <h2 className="text-lg font-medium text-foreground">Dimensões</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Peso e dimensões para entrega
+              </p>
+            </div>
 
-            <CardContent className="grid md:grid-cols-4 gap-4">
-              <div>
+            <div className="grid md:grid-cols-4 gap-4">
+              <div className="space-y-2">
                 <Input
                   type="number"
-                  placeholder="Peso"
+                  placeholder="Peso (kg)"
                   {...register("weight")}
+                  className="h-11"
                 />
                 <FormError message={errors.weight?.message} />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Input
                   type="number"
-                  placeholder="Largura"
+                  placeholder="Largura (cm)"
                   {...register("width")}
+                  className="h-11"
                 />
                 <FormError message={errors.width?.message} />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Input
                   type="number"
-                  placeholder="Altura"
+                  placeholder="Altura (cm)"
                   {...register("height")}
+                  className="h-11"
                 />
                 <FormError message={errors.height?.message} />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Input
                   type="number"
-                  placeholder="Comprimento"
+                  placeholder="Comprimento (cm)"
                   {...register("length")}
+                  className="h-11"
                 />
                 <FormError message={errors.length?.message} />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Organização</CardTitle>
-            </CardHeader>
+          <div className="bg-card rounded-xl border border-border p-4 md:p-6 shadow-sm space-y-6">
+            <div className="border-b border-border pb-4">
+              <h2 className="text-lg font-medium text-foreground">
+                Organização
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Categorização e visibilidade
+              </p>
+            </div>
 
-            <CardContent className="grid md:grid-cols-2 gap-6">
-              <Select onValueChange={(v) => setValue("status", v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Select onValueChange={(v) => setValue("status", v)}>
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
 
-                <SelectContent>
-                  <SelectItem value="new">New</SelectItem>
-                  <SelectItem value="hot">Hot</SelectItem>
-                  <SelectItem value="sale">Sale</SelectItem>
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    <SelectItem value="new">New</SelectItem>
+                    <SelectItem value="hot">Hot</SelectItem>
+                    <SelectItem value="sale">Sale</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Select onValueChange={(v) => setValue("variant", v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Tipo do Produto" />
-                </SelectTrigger>
+              <div className="space-y-2">
+                <Select onValueChange={(v) => setValue("variant", v)}>
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="Tipo do Produto" />
+                  </SelectTrigger>
 
-                <SelectContent>
-                  <SelectItem value="gadget">Gadget</SelectItem>
-                  <SelectItem value="appliances">Appliances</SelectItem>
-                  <SelectItem value="refrigerators">Refrigerators</SelectItem>
-                  <SelectItem value="others">Others</SelectItem>
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    <SelectItem value="gadget">Gadget</SelectItem>
+                    <SelectItem value="appliances">Appliances</SelectItem>
+                    <SelectItem value="refrigerators">Refrigerators</SelectItem>
+                    <SelectItem value="others">Others</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <MultiSelect
-                options={categories}
-                value={categoriesSelected}
-                onChange={(v) => setValue("categories", v)}
-                placeholder="Categorias"
-              />
+              <div className="md:col-span-2 space-y-2">
+                <MultiSelect
+                  options={categories}
+                  value={categoriesSelected}
+                  onChange={(v) => setValue("categories", v)}
+                  placeholder="Selecione as categorias"
+                />
+                <FormError message={errors.categories?.message} />
+              </div>
 
-              <Select
-                defaultValue={brands[0]?._id}
-                onValueChange={(v) => setValue("brand", v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Marca" />
-                </SelectTrigger>
+              <div className="space-y-2">
+                <Select
+                  defaultValue={brands[0]?._id}
+                  onValueChange={(v) => setValue("brand", v)}
+                >
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="Marca" />
+                  </SelectTrigger>
 
-                <SelectContent>
-                  {brands.map((brand) => (
-                    <SelectItem key={brand._id} value={brand._id ?? ""}>
-                      {brand.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    {brands.map((brand) => (
+                      <SelectItem key={brand._id} value={brand._id ?? ""}>
+                        {brand.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <div className="flex items-center space-x-2 md:col-span-2">
+              <div className="flex items-center space-x-2">
                 <Checkbox
                   id="isFeatured"
                   checked={isFeatured}
                   onCheckedChange={(v) => setValue("isFeatured", Boolean(v))}
                 />
 
-                <label htmlFor="isFeatured" className="text-sm">
+                <label
+                  htmlFor="isFeatured"
+                  className="text-sm text-foreground cursor-pointer"
+                >
                   Produto em destaque
                 </label>
               </div>
+            </div>
+          </div>
 
-              <FormError message={errors.categories?.message} />
-            </CardContent>
-          </Card>
-
-          <Button type="submit" disabled={isSubmitting} className="w-full h-12">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full h-12 text-base font-medium"
+          >
             {isSubmitting ? "Criando..." : "Criar Produto"}
           </Button>
         </form>

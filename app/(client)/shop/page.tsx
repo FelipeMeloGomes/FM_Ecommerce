@@ -12,7 +12,7 @@ export default async function ShopPage({ searchParams }: Props) {
   const categories = await getCategories();
   const brands = await getAllBrands();
   return (
-    <div className="bg-white">
+    <div>
       <Shop
         categories={categories}
         brands={brands}

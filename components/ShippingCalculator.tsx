@@ -63,22 +63,23 @@ export function ShippingCalculator({
   }, [onSelectShipping]);
 
   return (
-    <div className="space-y-4 p-4 md:p-5">
-      <div className="space-y-2">
-        <Label className="text-sm">CEP</Label>
+    <div className="space-y-4 p-4 bg-card border border-border/60 rounded-xl">
+      <div className="space-y-3">
+        <Label className="text-sm font-medium">CEP de entrega</Label>
         <div className="flex gap-2">
           <Input
             value={cep}
             onChange={(e) => handleChange(e.target.value)}
             placeholder="00000-000"
+            className="flex-1"
           />
           <Button
             type="button"
             onClick={handleCalculate}
             disabled={loading}
-            className="shrink-0"
+            className="bg-shop_dark_green hover:bg-shop_btn_dark_green shrink-0"
           >
-            {loading ? "Calculando..." : "Calcular"}
+            {loading ? "..." : "Calcular"}
           </Button>
         </div>
         {error && <p className="text-destructive text-sm">{error}</p>}
@@ -96,9 +97,9 @@ export function ShippingCalculator({
           {quotes.map((q) => (
             <div
               key={q.service}
-              className="flex items-center justify-between rounded-md border p-3 hover:bg-muted/30"
+              className="flex items-center justify-between rounded-lg border border-border/40 p-3 hover:bg-muted/30 transition-colors"
             >
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-3">
                 <RadioGroupItem id={`ship-${q.service}`} value={q.service} />
                 <Label
                   htmlFor={`ship-${q.service}`}

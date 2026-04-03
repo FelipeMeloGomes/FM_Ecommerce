@@ -8,11 +8,12 @@ import PriceView from "./PriceView";
 import ProductSideMenu from "./ProductSideMenu";
 import StarRating from "./StarRating";
 import Title from "./Title";
+import { Badge } from "./ui/badge";
 
 const ProductCard = ({ product }: { product: Product }) => {
   return (
-    <div className="text-sm border rounded-md border-darkBlue/20 group bg-white">
-      <div className="relative group overflow-hidden bg-shop_light_bg">
+    <div className="group relative bg-card border border-border/60 rounded-xl overflow-hidden hover:shadow-xl hover:shadow-shop_orange/10 transition-all duration-300">
+      <div className="relative aspect-square bg-muted/20 overflow-hidden">
         {product?.images && (
           <Link href={`/product/${product?.slug?.current}`}>
             <Image
@@ -21,58 +22,56 @@ const ProductCard = ({ product }: { product: Product }) => {
               width={500}
               height={500}
               priority
-              className={`w-full h-64 object-contain overflow-hidden transition-transform bg-shop_light_bg duration-500 
-              ${product?.stock !== 0 ? "group-hover:scale-105" : "opacity-50"}`}
+              className={`w-full h-full object-contain transition-transform duration-500 
+              ${product?.stock !== 0 ? "group-hover:scale-105" : "opacity-50 grayscale"}`}
             />
           </Link>
         )}
         <ProductSideMenu product={product} />
         {product?.status === "sale" ? (
-          <p className="absolute top-2 left-2 z-10 text-xs border border-darkColor/50 px-2 rounded-full group-hover:border-lightGreen hover:text-shop_dark_green hoverEffect">
+          <Badge className="absolute top-3 left-3 bg-destructive/90 text-white text-xs font-medium">
             Promoção!
-          </p>
+          </Badge>
         ) : (
           <Link
             href={"/deal"}
-            className="absolute top-2 left-2 z-10 border border-shop_orange/50 p-1 rounded-full group-hover:border-shop_orange hover:text-shop_dark_green hoverEffect"
+            className="absolute top-3 left-3 p-1.5 rounded-full bg-shop_orange/90 hover:bg-shop_orange transition-colors"
           >
-            <Flame
-              size={18}
-              fill="#fb6c08"
-              className="text-shop_orange/50 group-hover:text-shop_orange hoverEffect"
-            />
+            <Flame size={16} className="text-white" />
           </Link>
         )}
       </div>
-      <div className="p-3 flex flex-col gap-2">
+      <div className="p-4 flex flex-col gap-3">
         {product?.categories && (
-          <p className="uppercase line-clamp-1 text-xs font-medium text-lightText">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider line-clamp-1">
             {product.categories.map((cat) => cat).join(", ")}
           </p>
         )}
-        <Title className="text-sm line-clamp-1">{product?.name}</Title>
+        <Title className="text-base line-clamp-2 leading-tight">
+          {product?.name}
+        </Title>
         <div className="flex items-center gap-2">
-          <div className="flex items-center">
-            <StarRating rating={4} />
-          </div>
-          <p className="text-lightText text-xs tracking-wide">5 Avaliações</p>
+          <StarRating rating={4} />
+          <p className="text-xs text-muted-foreground">(5)</p>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <p className="font-medium">Em Estoque</p>
-          <p
-            className={`${product?.stock === 0 ? "text-red-600" : "text-shop_dark_green/80 font-semibold"}`}
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">Estoque:</span>
+          <span
+            className={`font-semibold ${product?.stock === 0 ? "text-destructive" : "text-emerald-600"}`}
           >
-            {(product?.stock as number) > 0 ? product?.stock : "Indisponível"}
-          </p>
+            {(product?.stock as number) > 0
+              ? `${product?.stock} unidades`
+              : "Indisponível"}
+          </span>
         </div>
 
         <PriceView
           price={product?.price}
           discount={product?.discount}
-          className="text-sm"
+          className="text-base"
         />
-        <AddToCartButton product={product} className="w-36 rounded-full" />
+        <AddToCartButton product={product} className="w-full rounded-lg" />
       </div>
     </div>
   );

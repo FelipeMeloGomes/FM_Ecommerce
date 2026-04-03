@@ -59,31 +59,64 @@ export const AdminPagination = memo(function AdminPagination({
   }
 
   return (
-    <nav className="flex items-center justify-center gap-1">
+    <nav
+      className="
+        flex items-center justify-center gap-1
+        py-4 px-2
+        mt-6
+        border-t border-border/50
+      "
+      aria-label="Paginação"
+    >
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="gap-1 px-2.5"
+        className="
+          h-9 px-3 gap-1.5
+          text-muted-foreground hover:text-foreground
+          hover:bg-muted
+          disabled:hover:bg-transparent disabled:hover:text-muted-foreground
+          transition-all duration-200
+          rounded-md
+        "
       >
-        <ChevronLeft className="h-4 w-4" />
-        <span className="hidden sm:block">Anterior</span>
+        <ChevronLeft className="w-4 h-4" />
+        <span className="hidden sm:inline text-sm font-medium">Anterior</span>
       </Button>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 mx-1">
         {pageNumbers.map((page, index) =>
           page === "ellipsis" ? (
-            <span key={`ellipsis-${index}`} className="px-2">
+            <span
+              key={`ellipsis-${index}`}
+              className="px-2 text-muted-foreground text-sm select-none"
+            >
               ...
             </span>
           ) : (
             <Button
               key={page}
-              variant={page === currentPage ? "outline" : "ghost"}
+              variant="ghost"
               size="sm"
               onClick={() => onPageChange(page)}
-              className={`h-8 w-8 p-0 ${page === currentPage ? "border-2 border-primary" : ""}`}
+              className={`
+                h-9 w-9 p-0 text-sm font-medium
+                transition-all duration-200 rounded-md
+                ${
+                  page === currentPage
+                    ? `
+                    bg-primary/10 text-primary
+                    border border-primary/20
+                    hover:bg-primary/20
+                    `
+                    : `
+                    text-muted-foreground hover:text-foreground
+                    hover:bg-muted
+                    `
+                }
+              `}
             >
               {page}
             </Button>
@@ -92,14 +125,21 @@ export const AdminPagination = memo(function AdminPagination({
       </div>
 
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="gap-1 px-2.5"
+        className="
+          h-9 px-3 gap-1.5
+          text-muted-foreground hover:text-foreground
+          hover:bg-muted
+          disabled:hover:bg-transparent disabled:hover:text-muted-foreground
+          transition-all duration-200
+          rounded-md
+        "
       >
-        <span className="hidden sm:block">Proxima</span>
-        <ChevronRight className="h-4 w-4" />
+        <span className="hidden sm:inline text-sm font-medium">Próxima</span>
+        <ChevronRight className="w-4 h-4" />
       </Button>
     </nav>
   );
