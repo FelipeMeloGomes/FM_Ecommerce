@@ -1,9 +1,8 @@
 "use client";
 import { Heart } from "lucide-react";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useWishlist } from "@/hooks/useWishlist";
 import type { Product } from "@/sanity.types";
-import useStore from "@/store";
 
 const FavoriteButton = ({
   showProduct = false,
@@ -12,7 +11,7 @@ const FavoriteButton = ({
   showProduct?: boolean;
   product?: Product | null | undefined;
 }) => {
-  const { favoriteProduct, addToFavorite } = useStore();
+  const { favoriteProduct, addToFavorite } = useWishlist();
   const [existingProduct, setExistingProduct] = useState<Product | null>(null);
   useEffect(() => {
     const availableItem = favoriteProduct.find(
@@ -24,13 +23,7 @@ const FavoriteButton = ({
   const handleFavorite = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (product?._id) {
-      addToFavorite(product).then(() => {
-        toast.success(
-          existingProduct
-            ? "Produto removido com sucesso!"
-            : "Produto adicionado com sucesso!",
-        );
-      });
+      addToFavorite(product);
     }
   };
   return (

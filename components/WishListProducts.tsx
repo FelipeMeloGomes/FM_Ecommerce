@@ -6,9 +6,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { confirmToast } from "@/helpers/confirmToast";
+import { useWishlist } from "@/hooks/useWishlist";
 import { urlFor } from "@/sanity/lib/image";
 import type { Product } from "@/sanity.types";
-import useStore from "@/store";
 import AddToCartButton from "./AddToCartButton";
 import Container from "./Container";
 import PriceFormatter from "./PriceFormatter";
@@ -17,7 +17,19 @@ import { Button } from "./ui/button";
 
 const WishListProducts = () => {
   const [visibleProducts, setVisibleProducts] = useState(7);
-  const { favoriteProduct, removeFromFavorite, resetFavorite } = useStore();
+  const { favoriteProduct, removeFromFavorite, resetFavorite, isLoading } =
+    useWishlist();
+
+  if (isLoading) {
+    return (
+      <Container>
+        <div className="flex justify-center py-20">
+          <div className="animate-spin h-8 w-8 rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </Container>
+    );
+  }
+
   const loadMore = () => {
     setVisibleProducts((prev) => Math.min(prev + 5, favoriteProduct.length));
   };
