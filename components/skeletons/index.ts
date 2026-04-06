@@ -5,3 +5,4 @@ export { OrdersTableSkeleton } from "./OrdersTableSkeleton";
 export { ProductCardSkeleton } from "./ProductCardSkeleton";
 export { ProductDetailSkeleton } from "./ProductDetailSkeleton";
 export { ProductGridSkeleton } from "./ProductGridSkeleton";
+export { WishlistTableSkeleton } from "./WishlistTableSkeleton";

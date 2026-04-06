@@ -1,12 +1,11 @@
 "use client";
 
-import { Trash } from "lucide-react";
+import { Heart, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { toast } from "sonner";
 import PriceFormatter from "@/components/PriceFormatter";
-import ProductSideMenu from "@/components/ProductSideMenu";
 import QuantityButtons from "@/components/QuantityButtons";
 import {
   Tooltip,
@@ -15,6 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { confirmToast } from "@/helpers/confirmToast";
+import { cn } from "@/lib/utils";
 import { urlFor } from "@/sanity/lib/image";
 import useStore, { type CartItem } from "@/store";
 
@@ -73,10 +73,36 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <ProductSideMenu
-                          product={product}
-                          className="relative"
-                        />
+                        <button
+                          type="button"
+                          className="mt-1"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (product?._id) {
+                              useStore
+                                .getState()
+                                .addToFavorite(product)
+                                .then(() => {
+                                  toast.success(
+                                    "Produto adicionado aos favoritos!",
+                                  );
+                                });
+                            }
+                          }}
+                        >
+                          <Heart
+                            className={cn(
+                              "w-5 h-5 transition-colors",
+                              useStore
+                                .getState()
+                                .favoriteProduct?.some(
+                                  (item) => item?._id === product?._id,
+                                )
+                                ? "fill-shop_dark_green text-shop_dark_green"
+                                : "text-muted-foreground hover:text-shop_dark_green",
+                            )}
+                          />
+                        </button>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="font-medium">Adicionar aos favoritos</p>
@@ -84,8 +110,10 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                     </Tooltip>
 
                     <Tooltip>
-                      <TooltipTrigger>
-                        <Trash
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="mt-1"
                           onClick={() => {
                             confirmToast({
                               message: "Deseja remover este produto?",
@@ -95,8 +123,9 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                               },
                             });
                           }}
-                          className="w-5 h-5 text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
-                        />
+                        >
+                          <Trash className="w-5 h-5 text-muted-foreground hover:text-destructive transition-colors" />
+                        </button>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="font-medium">Remover produto</p>

@@ -12,8 +12,10 @@ import type { Product } from "@/sanity.types";
 import AddToCartButton from "./AddToCartButton";
 import Container from "./Container";
 import PriceFormatter from "./PriceFormatter";
+import { WishlistTableSkeleton } from "./skeletons/WishlistTableSkeleton";
 import Title from "./Title";
 import { Button } from "./ui/button";
+import { Table, TableBody, TableCell, TableRow } from "./ui/table";
 
 const WishListProducts = () => {
   const [visibleProducts, setVisibleProducts] = useState(7);
@@ -23,9 +25,7 @@ const WishListProducts = () => {
   if (isLoading) {
     return (
       <Container>
-        <div className="flex justify-center py-20">
-          <div className="animate-spin h-8 w-8 rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <WishlistTableSkeleton />
       </Container>
     );
   }
@@ -64,111 +64,109 @@ const WishListProducts = () => {
           </div>
 
           <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-muted/50 border-b border-border">
-                    <th className="p-4 text-left text-sm font-medium text-muted-foreground">
-                      Produto
-                    </th>
-                    <th className="p-4 text-left text-sm font-medium text-muted-foreground hidden md:table-cell">
-                      Categoria
-                    </th>
-                    <th className="p-4 text-left text-sm font-medium text-muted-foreground hidden md:table-cell">
-                      Tipo
-                    </th>
-                    <th className="p-4 text-left text-sm font-medium text-muted-foreground hidden md:table-cell">
-                      Status
-                    </th>
-                    <th className="p-4 text-left text-sm font-medium text-muted-foreground">
-                      Preço
-                    </th>
-                    <th className="p-4 text-center text-sm font-medium text-muted-foreground">
-                      Ação
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {favoriteProduct
-                    ?.slice(0, visibleProducts)
-                    ?.map((product: Product) => (
-                      <tr
-                        key={product?._id}
-                        className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
-                      >
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                removeFromFavorite(product?._id);
-                                toast.success(
-                                  "Produto removido da lista de favoritos",
-                                );
-                              }}
-                              className="p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                            >
-                              <X size={16} />
-                            </button>
-                            {product?.images && (
-                              <Link
-                                href={`/product/${product?.slug?.current}`}
-                                className="border rounded-lg overflow-hidden group"
-                              >
-                                <Image
-                                  src={urlFor(product?.images[0]).url()}
-                                  alt={product?.name || "product image"}
-                                  width={64}
-                                  height={64}
-                                  className="object-contain w-16 h-16 group-hover:scale-105 transition-transform"
-                                />
-                              </Link>
-                            )}
+            <Table>
+              <TableBody>
+                <TableRow className="bg-muted/50 border-b border-border">
+                  <TableCell className="p-4 text-left text-sm font-medium text-muted-foreground">
+                    Produto
+                  </TableCell>
+                  <TableCell className="p-4 text-left text-sm font-medium text-muted-foreground hidden md:table-cell">
+                    Categoria
+                  </TableCell>
+                  <TableCell className="p-4 text-left text-sm font-medium text-muted-foreground hidden md:table-cell">
+                    Tipo
+                  </TableCell>
+                  <TableCell className="p-4 text-left text-sm font-medium text-muted-foreground">
+                    Status
+                  </TableCell>
+                  <TableCell className="p-4 text-left text-sm font-medium text-muted-foreground">
+                    Preço
+                  </TableCell>
+                  <TableCell className="p-4 text-center text-sm font-medium text-muted-foreground">
+                    Ação
+                  </TableCell>
+                </TableRow>
+                {favoriteProduct
+                  ?.slice(0, visibleProducts)
+                  ?.map((product: Product) => (
+                    <TableRow
+                      key={product?._id}
+                      className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
+                    >
+                      <TableCell className="p-4">
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              removeFromFavorite(product?._id);
+                              toast.success(
+                                "Produto removido da lista de favoritos",
+                              );
+                            }}
+                            className="p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                          >
+                            <X size={16} />
+                          </button>
+                          {product?.images && (
                             <Link
                               href={`/product/${product?.slug?.current}`}
-                              className="font-medium line-clamp-1 hover:text-primary transition-colors"
+                              className="border rounded-lg overflow-hidden group"
                             >
-                              {product?.name}
+                              <Image
+                                src={urlFor(product?.images[0]).url()}
+                                alt={product?.name || "product image"}
+                                width={64}
+                                height={64}
+                                className="object-contain w-16 h-16 group-hover:scale-105 transition-transform"
+                              />
                             </Link>
-                          </div>
-                        </td>
-                        <td className="p-4 hidden md:table-cell">
-                          {product?.categories && (
-                            <span className="uppercase text-xs font-medium text-muted-foreground">
-                              {product.categories.map((cat) => cat).join(", ")}
-                            </span>
                           )}
-                        </td>
-                        <td className="p-4 capitalize hidden md:table-cell text-sm">
-                          {product?.variant}
-                        </td>
-                        <td className="p-4 hidden md:table-cell">
-                          <span
-                            className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                              (product?.stock as number) > 0
-                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                            }`}
+                          <Link
+                            href={`/product/${product?.slug?.current}`}
+                            className="font-medium line-clamp-1 hover:text-primary transition-colors"
                           >
-                            {(product?.stock as number) > 0
-                              ? "Em Estoque"
-                              : "Fora de Estoque"}
+                            {product?.name}
+                          </Link>
+                        </div>
+                      </TableCell>
+                      <TableCell className="p-4 hidden md:table-cell">
+                        {product?.categories && (
+                          <span className="uppercase text-xs font-medium text-muted-foreground">
+                            {product.categories
+                              .map((cat) => (cat as { title?: string }).title)
+                              .join(", ")}
                           </span>
-                        </td>
-                        <td className="p-4">
-                          <PriceFormatter amount={product?.price} />
-                        </td>
-                        <td className="p-4">
-                          <AddToCartButton
-                            product={product}
-                            className="w-full sm:w-auto"
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="p-4 capitalize hidden md:table-cell text-sm">
+                        {product?.variant}
+                      </TableCell>
+                      <TableCell className="p-4">
+                        <span
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${
+                            (product?.stock as number) > 0
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                          }`}
+                        >
+                          {(product?.stock as number) > 0
+                            ? "Em Estoque"
+                            : "Fora de Estoque"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="p-4">
+                        <PriceFormatter amount={product?.price} />
+                      </TableCell>
+                      <TableCell className="p-4">
+                        <AddToCartButton
+                          product={product}
+                          className="w-full sm:w-auto"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
           </div>
 
           <div className="flex items-center justify-center gap-3 pt-2">

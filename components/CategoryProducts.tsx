@@ -1,5 +1,4 @@
 "use client";
-import { Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -8,6 +7,7 @@ import { PRODUCTS_BY_CATEGORY_QUERY } from "@/sanity/queries/query";
 import type { Category, Product } from "@/sanity.types";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
+import { ProductCardSkeleton } from "./skeletons/ProductCardSkeleton";
 
 interface Props {
   categories: Category[];
@@ -75,11 +75,8 @@ const CategoryProducts = ({ categories, slug }: Props) => {
       </div>
       <div className="flex-1 min-h-[400px]">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 min-h-80 space-y-4 text-center bg-muted/30 rounded-xl w-full border border-dashed border-border">
-            <div className="flex items-center gap-2 text-shop_orange">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Carregando produtos...</span>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            <ProductCardSkeleton count={8} />
           </div>
         ) : products?.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">

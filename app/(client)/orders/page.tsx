@@ -8,28 +8,13 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import Container from "@/components/Container";
 import OrdersComponent from "@/components/OrdersComponent";
+import { OrdersTableSkeleton } from "@/components/skeletons/OrdersTableSkeleton";
 import Title from "@/components/Title";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getMyOrders } from "@/sanity/queries";
-
-function OrdersTableSkeleton() {
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <Skeleton className="h-6 w-40" />
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {["row-1", "row-2", "row-3", "row-4", "row-5"].map((key) => (
-          <Skeleton key={key} className="h-12 w-full" />
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
 
 async function OrdersList({
   userId,
