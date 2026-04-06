@@ -8,7 +8,6 @@ import { PRODUCTS_BY_CATEGORY_QUERY } from "@/sanity/queries/query";
 import type { Category, Product } from "@/sanity.types";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
-import { Button } from "./ui/button";
 
 interface Props {
   categories: Category[];

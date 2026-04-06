@@ -68,7 +68,7 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
               <p className="font-medium">{order?.invoice?.number}</p>
             </div>
           </div>
-          {order?.invoice && order?.invoice?.hosted_invoice_url && (
+          {order?.invoice?.hosted_invoice_url && (
             <Button
               asChild
               className="w-full mt-2 bg-shop_dark_green hover:bg-shop_btn_dark_green"

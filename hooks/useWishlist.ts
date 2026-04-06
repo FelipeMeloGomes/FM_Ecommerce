@@ -102,7 +102,7 @@ export function useWishlist(): UseWishlistReturn {
         await addToWishlist(product._id);
         toast.success("Produto adicionado aos favoritos!");
       }
-    } catch (error) {
+    } catch (_error) {
       setFavoriteProduct((prev) => {
         if (isAlreadyFavorite) {
           return [...prev, product];
@@ -121,7 +121,7 @@ export function useWishlist(): UseWishlistReturn {
     try {
       await removeFromWishlist(productId);
       toast.success("Produto removido dos favoritos!");
-    } catch (error) {
+    } catch (_error) {
       if (product) {
         setFavoriteProduct((prev) => [...prev, product]);
       }
@@ -136,7 +136,7 @@ export function useWishlist(): UseWishlistReturn {
     try {
       await resetWishlist();
       toast.success("Lista de favoritos limpa!");
-    } catch (error) {
+    } catch (_error) {
       setFavoriteProduct(previousProducts);
       toast.error("Erro ao limpar favoritos");
     }

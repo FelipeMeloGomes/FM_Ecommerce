@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { headerData } from "@/constants/data";
 import { useOutsideClick } from "@/hooks";
 import Logo from "./Logo";
 
