@@ -93,6 +93,15 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Filtros por categoria e marca
 - Páginas dedicadas por marca/categoria
 
+### 💖 Wishlist (Lista de Desejos)
+
+- Adicionar/remover produtos favoritos
+- Persistência híbrida: Sanity CMS para usuários logados (via Clerk)
+- localStorage para usuários não logados
+- Migração automática de localStorage para banco ao fazer login
+- Server Actions para operações CRUD (getWishlist, addToWishlist, removeFromWishlist, resetWishlist)
+- Schema `wishlistType` no Sanity com campo `clerkUserId` para identificar usuário
+
 ### 🛒 Carrinho de Compras
 
 - Adicionar/remover produtos
@@ -100,6 +109,7 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Cálculo de subtotal e total
 - Persistência local (localStorage via Zustand)
 - Remoção de itens
+- Skeleton de carregamento
 
 ### 💳 Checkout e Pagamentos
 
@@ -202,6 +212,7 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Extração de componentes skeleton reutilizáveis em `components/skeletons/`
 - Uso de shadcn/ui `Skeleton` para estados de carregamento
 - Arquivos loading.tsx simplificados nas rotas
+- Skeletons para: ProductCard, ProductGrid, DealHero, WishlistTable, Cart, Orders, Admin (products, brands, categories), Account Addresses
 
 ### Prevenção de Hydration Mismatch
 
@@ -221,6 +232,12 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Biome configurado com regras de lint
 - Correção automática de formatação
 - Imports organizados automaticamente
+
+### Limpeza de Dependências
+
+- Remoção de pacotes não utilizados: `react-hot-toast`, `react-icons`, `dayjs`
+- Substituição de `react-icons` por `lucide-react`
+- Substituição de `react-hot-toast` por `sonner`
 
 ## ⚙️ Configurações de Ambiente
 
