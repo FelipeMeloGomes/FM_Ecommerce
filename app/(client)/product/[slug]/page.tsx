@@ -1,10 +1,6 @@
-import { CornerDownLeft, Truck } from "lucide-react";
+import { CornerDownLeft, HelpCircle, Share2, Split, Truck } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FaRegQuestionCircle } from "react-icons/fa";
-import { FiShare2 } from "react-icons/fi";
-import { RxBorderSplit } from "react-icons/rx";
-import { TbTruckDelivery } from "react-icons/tb";
 import AddToCartButton from "@/components/AddToCartButton";
 import Container from "@/components/Container";
 import FavoriteButton from "@/components/FavoriteButton";
@@ -123,28 +119,28 @@ const SingleProductPage = async ({
               type="button"
               className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
             >
-              <RxBorderSplit className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
+              <Split className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
               <span className="font-medium">Comparar cores</span>
             </button>
             <button
               type="button"
               className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
             >
-              <FaRegQuestionCircle className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
+              <HelpCircle className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
               <span className="font-medium">Faça uma pergunta</span>
             </button>
             <button
               type="button"
               className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
             >
-              <TbTruckDelivery className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
+              <Truck className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
               <span className="font-medium">Entrega e Devolução</span>
             </button>
             <button
               type="button"
               className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
             >
-              <FiShare2 className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
+              <Share2 className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
               <span className="font-medium">Compartilhar</span>
             </button>
           </div>
