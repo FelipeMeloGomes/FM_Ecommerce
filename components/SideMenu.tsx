@@ -28,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useOutsideClick } from "@/hooks";
+import useStore from "@/store";
 import Logo from "./Logo";
 
 interface SideMenuProps {
@@ -49,6 +50,10 @@ const SideMenu = ({
   const sidebarRef = useOutsideClick<HTMLDivElement>(onClose);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const cartItemsCount = useStore((state) =>
+    state.items.reduce((total, item) => total + item.quantity, 0),
+  );
+  const wishlistCount = useStore((state) => state.favoriteProduct.length);
 
   useEffect(() => {
     setMounted(true);
@@ -66,6 +71,7 @@ const SideMenu = ({
       label: "Carrinho",
       icon: ShoppingCart,
       highlight: true,
+      badge: cartItemsCount > 0 ? cartItemsCount : undefined,
     },
     {
       href: "/orders",
@@ -73,7 +79,12 @@ const SideMenu = ({
       icon: ShoppingBag,
       badge: ordersCount > 0 ? ordersCount : undefined,
     },
-    { href: "/wishlist", label: "Favoritos", icon: Heart },
+    {
+      href: "/wishlist",
+      label: "Favoritos",
+      icon: Heart,
+      badge: wishlistCount > 0 ? wishlistCount : undefined,
+    },
     { href: "/account/addresses", label: "Endereços", icon: MapPin },
   ];
 

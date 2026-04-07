@@ -30,6 +30,7 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
       try {
         const response = await client.fetch(PRODUCTS_BY_VARIANT_QUERY, {
           variant: selectedTab.toLowerCase(),
+          limit: 100,
         });
         setProducts(response);
       } catch (error) {
