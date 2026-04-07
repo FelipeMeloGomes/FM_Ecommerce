@@ -64,6 +64,8 @@ export default function AdminQuestionsList({
   const [loadingAnswer, setLoadingAnswer] = useState<string | null>(null);
   const [confirmOverwrite, setConfirmOverwrite] = useState<string | null>(null);
   const router = useRouter();
+  // Track which question was just saved to allow input clearing without losing editor context
+  const [justSavedFor, setJustSavedFor] = useState<string | null>(null);
 
   const filteredQuestions = useMemo(() => {
     if (!query.trim()) return initialQuestions;
@@ -132,6 +134,10 @@ export default function AdminQuestionsList({
         delete next[questionId];
         return next;
       });
+      // Mark this question as just-saved to clear input in UI and avoid preserving old content
+      setJustSavedFor(questionId);
+      // Clear the flag on next microtask to reset state for subsequent edits
+      setTimeout(() => setJustSavedFor(null), 0);
       router.refresh();
     } catch (error) {
       toast.error(
@@ -206,7 +212,13 @@ export default function AdminQuestionsList({
         <div className="space-y-3">
           {paginatedQuestions.map((question) => {
             const isExpanded = expandedQuestions.has(question._id);
-            const currentAnswer = answerText[question._id] || "";
+            // Determine current input value: draft if exists, otherwise show existing answer unless just-saved
+            const hasDraft = Object.hasOwn(answerText, question._id);
+            const currentAnswer = hasDraft
+              ? answerText[question._id]
+              : justSavedFor === question._id
+                ? ""
+                : (question.answer ?? "");
             return (
               <div
                 key={question._id}
