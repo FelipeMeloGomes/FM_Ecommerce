@@ -126,7 +126,12 @@ export default function AdminQuestionsList({
     try {
       await answerQuestion(questionId, answer);
       toast.success("Resposta enviada com sucesso!");
-      setAnswerText((prev) => ({ ...prev, [questionId]: "" }));
+      // Clear draft for this question and remove any stale value
+      setAnswerText((prev) => {
+        const next = { ...prev };
+        delete next[questionId];
+        return next;
+      });
       router.refresh();
     } catch (error) {
       toast.error(
