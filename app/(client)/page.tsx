@@ -10,9 +10,13 @@ import { PRODUCTS_BY_VARIANT_QUERY } from "@/sanity/queries/query";
 export const revalidate = 60;
 
 const DEFAULT_VARIANT = "gadget";
+const HOME_PRODUCTS_LIMIT = 20;
 
 async function getProducts(variant: string) {
-  return client.fetch(PRODUCTS_BY_VARIANT_QUERY, { variant });
+  return client.fetch(PRODUCTS_BY_VARIANT_QUERY, {
+    variant,
+    limit: HOME_PRODUCTS_LIMIT,
+  });
 }
 
 export default async function Home() {

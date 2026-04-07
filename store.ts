@@ -18,6 +18,7 @@ interface StoreState {
   resetCart: () => void;
   getTotalPrice: () => number;
   getSubTotalPrice: () => number;
+  getItemsTotal: () => number;
   getItemCount: (productId: string) => number;
   getGroupedItems: () => CartItem[];
   //   // favorite
@@ -88,6 +89,12 @@ const useStore = create<StoreState>()(
           const discountedPrice = price + discount;
           return total + discountedPrice * item.quantity;
         }, 0);
+      },
+      getItemsTotal: () => {
+        return get().items.reduce(
+          (total, item) => total + (item.product.price ?? 0) * item.quantity,
+          0,
+        );
       },
       getItemCount: (productId) => {
         const item = get().items.find((item) => item.product._id === productId);

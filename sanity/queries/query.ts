@@ -74,7 +74,7 @@ const PRODUCTS_BY_CATEGORY_QUERY = `
 
 const PRODUCTS_BY_VARIANT_QUERY = `
   *[_type == "product" && variant == $variant] 
-  | order(name asc){
+  | order(name asc) [0...$limit]{
     ...,
     "categories": categories[]->title
   }

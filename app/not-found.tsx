@@ -22,13 +22,13 @@ const NotFoundPage = () => {
               href="/"
               className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-semibold rounded-md text-white bg-shop_dark_green/80 hover:bg-shop_dark_green focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-shop_orange hoverEffect"
             >
-              Ir para a página inicial do FMShopcart
+              Ir para a página inicial do FMShop
             </Link>
             <Link
-              href="/help"
+              href="/shop"
               className="w-full flex items-center justify-center px-4 py-2 border border-border text-sm font-semibold rounded-md text-foreground bg-background hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-shop_dark_green"
             >
-              Ajuda
+              Ver produtos
             </Link>
           </div>
         </div>
