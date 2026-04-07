@@ -2,6 +2,7 @@ import { ClerkLoaded, SignedIn, UserButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getMyOrders } from "@/sanity/queries";
 import Container from "./Container";
+import HeaderMenu from "./HeaderMenu";
 import Logo from "./Logo";
 import MobileMenu from "./MobileMenu";
 import SignIn from "./SignIn";
@@ -30,6 +31,7 @@ const Header = async () => {
           />
           <Logo />
         </div>
+        <HeaderMenu />
 
         <ClerkLoaded>
           <SignedIn>
