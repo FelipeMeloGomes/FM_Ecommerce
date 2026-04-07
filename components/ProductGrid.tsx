@@ -20,9 +20,10 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
   const [selectedTab, setSelectedTab] = useState(productType[0]?.title || "");
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [loading, setLoading] = useState(false);
+  const defaultTab = productType[0]?.title || "";
 
   useEffect(() => {
-    if (selectedTab === productType[0]?.title) return;
+    if (selectedTab === defaultTab) return;
 
     const fetchData = async () => {
       setLoading(true);
@@ -38,8 +39,10 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
       }
     };
 
-    fetchData();
-  }, [selectedTab]);
+    const debounceTimer = setTimeout(fetchData, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [selectedTab, defaultTab]);
 
   return (
     <Container className="flex flex-col lg:px-0 my-8 lg:my-12">

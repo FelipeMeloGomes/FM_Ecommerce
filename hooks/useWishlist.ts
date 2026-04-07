@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   addToWishlist,
@@ -22,63 +22,69 @@ export function useWishlist(): UseWishlistReturn {
   const [favoriteProduct, setFavoriteProduct] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const migrateLocalStorage = useCallback(
-    async (currentProducts: Product[]) => {
-      if (typeof window === "undefined") return;
-
-      try {
-        const stored = localStorage.getItem("cart-store");
-        if (!stored) return;
-
-        const parsed = JSON.parse(stored);
-        const localFavorites = parsed?.state?.favoriteProduct as
-          | Product[]
-          | undefined;
-
-        if (localFavorites && localFavorites.length > 0) {
-          const existingIds = new Set(currentProducts.map((p) => p._id));
-
-          for (const product of localFavorites) {
-            if (product._id && !existingIds.has(product._id)) {
-              try {
-                await addToWishlist(product._id);
-              } catch (error) {
-                console.error("Error migrating product:", product._id, error);
-              }
-            }
-          }
-
-          const newState = { ...parsed };
-          newState.state = { ...parsed.state, favoriteProduct: [] };
-          localStorage.setItem("cart-store", JSON.stringify(newState));
-
-          const updatedProducts = await getWishlist();
-          setFavoriteProduct(updatedProducts);
-
-          toast.success("Favoritos migraodos com sucesso!");
-        }
-      } catch (error) {
-        console.error("Error migrating localStorage:", error);
-      }
-    },
-    [],
-  );
-
   useEffect(() => {
+    let cancelled = false;
+
     const loadWishlist = async () => {
       try {
         const products = await getWishlist();
+
+        if (cancelled) return;
+
         setFavoriteProduct(products);
-        migrateLocalStorage(products);
+
+        if (typeof window !== "undefined") {
+          try {
+            const stored = localStorage.getItem("cart-store");
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              const localFavorites = parsed?.state?.favoriteProduct as
+                | Product[]
+                | undefined;
+
+              if (
+                localFavorites &&
+                localFavorites.length > 0 &&
+                products.length > 0
+              ) {
+                const existingIds = new Set(
+                  products.map((p: Product) => p._id),
+                );
+
+                for (const product of localFavorites) {
+                  if (product._id && !existingIds.has(product._id)) {
+                    try {
+                      await addToWishlist(product._id);
+                    } catch {
+                      // Silent fail for migration
+                    }
+                  }
+                }
+
+                const newState = { ...parsed };
+                newState.state = { ...parsed.state, favoriteProduct: [] };
+                localStorage.setItem("cart-store", JSON.stringify(newState));
+              }
+            }
+          } catch {
+            // Silent fail for localStorage
+          }
+        }
       } catch (error) {
         console.error("Error loading wishlist:", error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadWishlist();
-  }, [migrateLocalStorage]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const addToFavorite = async (product: Product) => {
     if (!product._id) return;
