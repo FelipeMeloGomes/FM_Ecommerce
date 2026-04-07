@@ -24,13 +24,12 @@ const ProductSideMenu = ({
   const handleFavorite = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (product?._id) {
-      addToFavorite(product).then(() => {
-        toast.success(
-          existingProduct
-            ? "Produto removido dos favoritos!"
-            : "Produto adicionado aos favoritos!",
-        );
-      });
+      addToFavorite(product);
+      toast.success(
+        existingProduct
+          ? "Produto removido dos favoritos!"
+          : "Produto adicionado aos favoritos!",
+      );
     }
   };
   return (
