@@ -16,19 +16,17 @@ const MobileMenu = ({ user, isAdmin, ordersCount = 0 }: MobileMenuProps) => {
       <button
         type="button"
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="p-2 hover:bg-muted rounded-lg transition-colors md:hidden"
+        className="p-2 hover:bg-muted rounded-lg transition-colors"
       >
         <AlignLeft className="w-6 h-6" />
       </button>
-      <div className="md:hidden">
-        <SideMenu
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          isLoggedIn={user}
-          isAdmin={isAdmin}
-          ordersCount={ordersCount}
-        />
-      </div>
+      <SideMenu
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        isLoggedIn={user}
+        isAdmin={isAdmin}
+        ordersCount={ordersCount}
+      />
     </>
   );
 };
