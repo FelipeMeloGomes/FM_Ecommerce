@@ -1,8 +1,8 @@
 "use client";
 import { Heart } from "lucide-react";
+import { useWishlist } from "@/hooks/useWishlist";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
-import { useWishlist } from "@/hooks/useWishlist";
 
 const ProductSideMenu = ({
   product,

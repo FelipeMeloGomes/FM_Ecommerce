@@ -21,7 +21,6 @@ export const wishlistType = defineType({
         {
           type: "reference",
           to: [{ type: "product" }],
-          weak: true,
         },
       ],
     }),

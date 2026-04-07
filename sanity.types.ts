@@ -147,7 +147,14 @@ export type Order = {
     price?: number;
     estimatedDays?: number;
   };
-  status?: "pending" | "processing" | "paid" | "shipped" | "out_for_delivery" | "delivered" | "cancelled";
+  status?:
+    | "pending"
+    | "processing"
+    | "paid"
+    | "shipped"
+    | "out_for_delivery"
+    | "delivered"
+    | "cancelled";
   orderDate?: string;
 };
 
@@ -348,7 +355,25 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type AllSanitySchemaTypes = Review | SanityImageCrop | SanityImageHotspot | Wishlist | Address | Order | Product | Brand | Slug | Category | SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageMetadata | SanityFileAsset | SanityAssetSourceData | SanityImageAsset | Geopoint;
+export type AllSanitySchemaTypes =
+  | Review
+  | SanityImageCrop
+  | SanityImageHotspot
+  | Wishlist
+  | Address
+  | Order
+  | Product
+  | Brand
+  | Slug
+  | Category
+  | SanityImagePaletteSwatch
+  | SanityImagePalette
+  | SanityImageDimensions
+  | SanityImageMetadata
+  | SanityFileAsset
+  | SanityAssetSourceData
+  | SanityImageAsset
+  | Geopoint;
 export declare const internalGroqTypeReferenceTo: unique symbol;
 // Source: ./sanity/queries/query.ts
 // Variable: BRANDS_QUERY
@@ -607,7 +632,14 @@ export type MY_ORDERS_QUERYResult = {
       price?: number;
       estimatedDays?: number;
     };
-    status?: "cancelled" | "delivered" | "out_for_delivery" | "paid" | "pending" | "processing" | "shipped";
+    status?:
+      | "cancelled"
+      | "delivered"
+      | "out_for_delivery"
+      | "paid"
+      | "pending"
+      | "processing"
+      | "shipped";
     orderDate?: string;
   }>;
   total: number;
@@ -637,10 +669,10 @@ declare module "@sanity/client" {
   interface SanityQueries {
     "*[_type=='brand'] | order(name asc) ": BRANDS_QUERYResult;
     "*[_type == 'product' && status == 'hot'] | order(name asc){\n    ...,\"categories\": categories[]->title\n  }": DEAL_PRODUCTSResult;
-    "*[_type == \"product\" && slug.current == $slug] | order(name asc) [0]": PRODUCT_BY_SLUG_QUERYResult;
-    "*[_type == \"product\" && slug.current == $slug]{\n  \"brandName\": brand->title\n  }": BRAND_QUERYResult;
-    "*[_type == \"product\" && brand->slug.current == $brandSlug] | order(name asc){\n    ...,\n    \"categories\": categories[]->{_id, title, slug}\n  }": PRODUCTS_BY_BRAND_QUERYResult;
-    "\n{\n  \"orders\": *[\n    _type == \"order\" &&\n    ($isAdmin == true || clerkUserId == $userId)\n  ] | order(orderDate desc) [$start...$end]{\n    ...,\n    products[]{\n      ...,\n      product->\n    }\n  },\n\n  \"total\": count(*[\n    _type == \"order\" &&\n    ($isAdmin == true || clerkUserId == $userId)\n  ])\n}\n": MY_ORDERS_QUERYResult;
-    "\n  *[_type == \"address\" && clerkUserId == $userId]\n  | order(createdAt desc)\n": GET_ADDRESSES_QUERYResult;
+    '*[_type == "product" && slug.current == $slug] | order(name asc) [0]': PRODUCT_BY_SLUG_QUERYResult;
+    '*[_type == "product" && slug.current == $slug]{\n  "brandName": brand->title\n  }': BRAND_QUERYResult;
+    '*[_type == "product" && brand->slug.current == $brandSlug] | order(name asc){\n    ...,\n    "categories": categories[]->{_id, title, slug}\n  }': PRODUCTS_BY_BRAND_QUERYResult;
+    '\n{\n  "orders": *[\n    _type == "order" &&\n    ($isAdmin == true || clerkUserId == $userId)\n  ] | order(orderDate desc) [$start...$end]{\n    ...,\n    products[]{\n      ...,\n      product->\n    }\n  },\n\n  "total": count(*[\n    _type == "order" &&\n    ($isAdmin == true || clerkUserId == $userId)\n  ])\n}\n': MY_ORDERS_QUERYResult;
+    '\n  *[_type == "address" && clerkUserId == $userId]\n  | order(createdAt desc)\n': GET_ADDRESSES_QUERYResult;
   }
 }
