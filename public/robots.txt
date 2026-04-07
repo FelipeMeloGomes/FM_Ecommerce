@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /shop
+Allow: /product/
+Allow: /category/
+Allow: /brand/
+Allow: /deal
+
+Disallow: /admin/
+Disallow: /api/
+Disallow: /cart
+Disallow: /account/
+Disallow: /studio/
+
+Sitemap: https://www.fmshop.com.br/sitemap.xml

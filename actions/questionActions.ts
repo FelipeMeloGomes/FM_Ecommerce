@@ -4,6 +4,30 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { client } from "@/sanity/lib/client";
 import { writeClient } from "@/sanity/lib/writeClient";
 
+const RATE_LIMIT_WINDOW = 60 * 1000;
+const RATE_LIMIT_MAX = 5;
+const questionRateLimit = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const limit = questionRateLimit.get(userId);
+
+  if (!limit || now > limit.resetAt) {
+    questionRateLimit.set(userId, {
+      count: 1,
+      resetAt: now + RATE_LIMIT_WINDOW,
+    });
+    return true;
+  }
+
+  if (limit.count >= RATE_LIMIT_MAX) {
+    return false;
+  }
+
+  limit.count++;
+  return true;
+}
+
 export async function sendProductQuestion(
   productId: string,
   productName: string,
@@ -13,6 +37,12 @@ export async function sendProductQuestion(
 
   if (!userId) {
     throw new Error("Unauthorized");
+  }
+
+  if (!checkRateLimit(userId)) {
+    throw new Error(
+      "Muitas tentativas. Aguarde um momento antes de enviar outra pergunta.",
+    );
   }
 
   const user = await currentUser();

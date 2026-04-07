@@ -62,6 +62,7 @@ export default function AdminQuestionsList({
   );
   const [answerText, setAnswerText] = useState<Record<string, string>>({});
   const [loadingAnswer, setLoadingAnswer] = useState<string | null>(null);
+  const [confirmOverwrite, setConfirmOverwrite] = useState<string | null>(null);
   const router = useRouter();
 
   const filteredQuestions = useMemo(() => {
@@ -108,7 +109,19 @@ export default function AdminQuestionsList({
       return;
     }
 
+    const existingQuestion = initialQuestions.find((q) => q._id === questionId);
+
+    if (existingQuestion?.answer && answer !== existingQuestion.answer) {
+      setConfirmOverwrite(questionId);
+      return;
+    }
+
+    await submitAnswer(questionId, answer);
+  };
+
+  const submitAnswer = async (questionId: string, answer: string) => {
     setLoadingAnswer(questionId);
+    setConfirmOverwrite(null);
 
     try {
       await answerQuestion(questionId, answer);
@@ -276,23 +289,49 @@ export default function AdminQuestionsList({
                         rows={3}
                         className="resize-none"
                       />
-                      <div className="flex justify-end">
-                        <Button
-                          onClick={() => handleAnswer(question._id)}
-                          disabled={
-                            loadingAnswer === question._id ||
-                            !currentAnswer.trim() ||
-                            currentAnswer.trim().length < 10
-                          }
-                          size="sm"
-                          className="bg-shop_dark_green hover:bg-shop_btn_dark_green"
-                        >
-                          {loadingAnswer === question._id
-                            ? "Enviando..."
-                            : question.answer
-                              ? "Atualizar resposta"
-                              : "Enviar resposta"}
-                        </Button>
+                      <div className="flex justify-end gap-2">
+                        {confirmOverwrite === question._id && (
+                          <div className="flex items-center gap-2 text-sm text-amber-600 mr-2">
+                            <span>Substituir resposta existente?</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setConfirmOverwrite(null)}
+                            >
+                              Não
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                submitAnswer(
+                                  question._id,
+                                  answerText[question._id] || "",
+                                )
+                              }
+                              disabled={loadingAnswer === question._id}
+                            >
+                              Sim
+                            </Button>
+                          </div>
+                        )}
+                        {!confirmOverwrite && (
+                          <Button
+                            onClick={() => handleAnswer(question._id)}
+                            disabled={
+                              loadingAnswer === question._id ||
+                              !currentAnswer.trim() ||
+                              currentAnswer.trim().length < 10
+                            }
+                            size="sm"
+                            className="bg-shop_dark_green hover:bg-shop_btn_dark_green"
+                          >
+                            {loadingAnswer === question._id
+                              ? "Enviando..."
+                              : question.answer
+                                ? "Atualizar resposta"
+                                : "Enviar resposta"}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>

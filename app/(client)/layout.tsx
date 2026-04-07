@@ -4,11 +4,29 @@ import Header from "@/components/Header";
 
 export const metadata: Metadata = {
   title: {
-    template: "FMShop",
+    template: "%s | FMShop",
     default: "FMShop",
   },
   description:
-    "FMShop loja online, seu ponto único para todas as suas necessidades",
+    "FMShop loja online, seu ponto único para todas as suas necessidades de eletrônicos e eletrodomésticos",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://www.fmshop.com.br",
+    siteName: "FMShop",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "FMShop - Loja de Eletrônicos",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
