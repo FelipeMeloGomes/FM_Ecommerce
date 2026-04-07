@@ -225,9 +225,10 @@ export async function updateReview(
         keepImageIds.includes(img.asset?._ref || ""),
     );
 
-    const newImages = hasNewImages
-      ? await uploadReviewImages(Array.from(input.images!))
-      : [];
+    const newImages =
+      hasNewImages && input.images
+        ? await uploadReviewImages(Array.from(input.images))
+        : [];
 
     updateData.images = [...imagesToKeep, ...newImages];
   }

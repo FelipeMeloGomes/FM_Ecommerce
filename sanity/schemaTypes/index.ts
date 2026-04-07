@@ -3,6 +3,7 @@ import { addressType } from "./addressType";
 import { brandType } from "./brandTypes";
 import { categoryType } from "./categoryType";
 import { orderType } from "./orderType";
+import { productQuestionType } from "./productQuestionType";
 import { productType } from "./productType";
 import { reviewType } from "./reviewType";
 import { wishlistType } from "./wishlistType";
@@ -16,5 +17,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     addressType,
     wishlistType,
     reviewType,
+    productQuestionType,
   ],
 };

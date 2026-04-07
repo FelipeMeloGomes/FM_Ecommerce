@@ -49,12 +49,10 @@ export function ReviewImagesGallery({
     <>
       <div className="flex flex-wrap gap-3">
         {images.map((image, idx) => (
-          <div
+          <button
+            type="button"
             key={image.id}
             onClick={() => setSelectedIndex(idx)}
-            onKeyDown={(e) => e.key === "Enter" && setSelectedIndex(idx)}
-            role="button"
-            tabIndex={0}
             className={cn(
               "relative rounded-xl overflow-hidden border-2 border-border/50",
               "transition-all duration-300 ease-out",
@@ -84,7 +82,7 @@ export function ReviewImagesGallery({
                 <X className="h-3 w-3" />
               </button>
             )}
-          </div>
+          </button>
         ))}
       </div>
 
@@ -128,6 +126,7 @@ export function ReviewImagesGallery({
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
               {images.map((_, idx) => (
                 <button
+                  type="button"
                   key={idx}
                   onClick={() => setSelectedIndex(idx)}
                   className={cn(
@@ -141,6 +140,7 @@ export function ReviewImagesGallery({
             </div>
 
             <button
+              type="button"
               onClick={() => setSelectedIndex(null)}
               className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"
             >
@@ -148,7 +148,7 @@ export function ReviewImagesGallery({
             </button>
 
             <div className="absolute top-4 left-4 text-white/80 text-sm font-medium">
-              {selectedIndex! + 1} / {images.length}
+              {(selectedIndex ?? 0) + 1} / {images.length}
             </div>
           </div>
         </DialogContent>
@@ -275,7 +275,7 @@ export function ReviewImagesList({ images }: ReviewImagesListProps) {
             </button>
 
             <div className="absolute top-4 left-4 text-white/80 text-sm font-medium">
-              {selectedIndex! + 1} / {images.length}
+              {(selectedIndex ?? 0) + 1} / {images.length}
             </div>
           </div>
         </DialogContent>

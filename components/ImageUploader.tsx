@@ -222,10 +222,10 @@ export function ImageUploader({
       <button
         type="button"
         disabled={disabled}
-        onClick={() => inputRef.current?.click()}
-        onDragOver={disabled ? undefined : handleDragOver}
-        onDragLeave={disabled ? undefined : handleDragLeave}
-        onDrop={disabled ? undefined : handleDrop}
+        onClick={() => !disabled && inputRef.current?.click()}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         className={cn(
           "relative flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed p-6 transition-all duration-200 w-full",
           disabled

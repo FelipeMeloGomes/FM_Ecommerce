@@ -58,9 +58,10 @@ export function ShippingCalculator({
   };
 
   useEffect(() => {
-    onSelectShipping(null);
-    setQuotes([]);
-  }, [onSelectShipping]);
+    if (cartItems.length > 0 && !selectedShipping) {
+      setQuotes([]);
+    }
+  }, [cartItems.length, selectedShipping]);
 
   return (
     <div className="space-y-4 p-4 bg-card border border-border/60 rounded-xl">

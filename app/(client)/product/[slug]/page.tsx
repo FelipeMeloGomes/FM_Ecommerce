@@ -1,7 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
-import { CornerDownLeft, HelpCircle, Share2, Split, Truck } from "lucide-react";
+import { CornerDownLeft, Truck } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getProductQuestions } from "@/actions/questionActions";
 import {
   getProductRating,
   getProductReviews,
@@ -12,11 +13,13 @@ import Container from "@/components/Container";
 import FavoriteButton from "@/components/FavoriteButton";
 import ImageView from "@/components/ImageView";
 import PriceView from "@/components/PriceView";
+import { ProductActions } from "@/components/ProductActions";
 import ProductCharacteristics from "@/components/ProductCharacteristics";
 import StarRating from "@/components/StarRating";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getProductBySlug } from "@/sanity/queries";
+import QuestionsSection from "./QuestionsSection";
 import ReviewSection from "./ReviewSection";
 
 export const revalidate = 30;
@@ -63,10 +66,11 @@ const SingleProductPage = async ({
     return notFound();
   }
 
-  const [reviews, ratingData, purchaseData] = await Promise.all([
+  const [reviews, ratingData, purchaseData, questions] = await Promise.all([
     getProductReviews(product._id),
     getProductRating(product._id),
     userId ? verifyPurchase(userId, product._id) : { hasPurchased: false },
+    getProductQuestions(product._id),
   ]);
 
   const hasPurchased = purchaseData.hasPurchased;
@@ -133,36 +137,7 @@ const SingleProductPage = async ({
 
           <ProductCharacteristics product={product} />
 
-          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border/60">
-            <button
-              type="button"
-              className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
-            >
-              <Split className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Comparar cores</span>
-            </button>
-            <button
-              type="button"
-              className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
-            >
-              <HelpCircle className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Faça uma pergunta</span>
-            </button>
-            <button
-              type="button"
-              className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
-            >
-              <Truck className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Entrega e Devolução</span>
-            </button>
-            <button
-              type="button"
-              className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
-            >
-              <Share2 className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Compartilhar</span>
-            </button>
-          </div>
+          <ProductActions product={product} userId={userId} />
 
           <div className="flex flex-col gap-0 rounded-xl overflow-hidden border border-border/60">
             <div className="p-4 flex items-start gap-4 bg-shop_light_pink/30 border-b border-border/40">
@@ -205,6 +180,13 @@ const SingleProductPage = async ({
             hasPurchased={hasPurchased}
             reviews={reviews}
             ratingData={ratingData}
+          />
+
+          <QuestionsSection
+            productId={product._id}
+            productName={product.name || ""}
+            userId={userId}
+            questions={questions}
           />
         </div>
       </div>
