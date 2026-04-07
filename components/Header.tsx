@@ -12,6 +12,8 @@ import MobileMenu from "./MobileMenu";
 import SignIn from "./SignIn";
 import { ThemeToggle } from "./ThemeToggle";
 
+export const revalidate = 60;
+
 const Header = async () => {
   const user = await currentUser();
   const { userId } = await auth();
