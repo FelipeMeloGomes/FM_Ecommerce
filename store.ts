@@ -22,7 +22,7 @@ interface StoreState {
   getGroupedItems: () => CartItem[];
   //   // favorite
   favoriteProduct: Product[];
-  addToFavorite: (product: Product) => Promise<void>;
+  addToFavorite: (product: Product) => void;
   removeFromFavorite: (productId: string) => void;
   resetFavorite: () => void;
 }
@@ -95,20 +95,15 @@ const useStore = create<StoreState>()(
       },
       getGroupedItems: () => get().items,
       addToFavorite: (product: Product) => {
-        return new Promise<void>((resolve) => {
-          set((state: StoreState) => {
-            const isFavorite = state.favoriteProduct.some(
-              (item) => item._id === product._id,
-            );
-            return {
-              favoriteProduct: isFavorite
-                ? state.favoriteProduct.filter(
-                    (item) => item._id !== product._id,
-                  )
-                : [...state.favoriteProduct, { ...product }],
-            };
-          });
-          resolve();
+        set((state: StoreState) => {
+          const isFavorite = state.favoriteProduct.some(
+            (item) => item._id === product._id,
+          );
+          return {
+            favoriteProduct: isFavorite
+              ? state.favoriteProduct.filter((item) => item._id !== product._id)
+              : [...state.favoriteProduct, { ...product }],
+          };
         });
       },
       removeFromFavorite: (productId: string) => {

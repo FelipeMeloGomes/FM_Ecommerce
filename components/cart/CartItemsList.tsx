@@ -23,12 +23,17 @@ interface CartItemsListProps {
 }
 
 const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
-  const { deleteCartProduct, getItemCount } = useStore();
+  const { deleteCartProduct, addToFavorite, favoriteProduct } = useStore();
 
   return (
     <>
       {items.map(({ product }) => {
-        const itemCount = getItemCount(product?._id);
+        const itemCount = product
+          ? useStore.getState().getItemCount(product._id)
+          : 0;
+        const isFavorite = product
+          ? favoriteProduct?.some((item) => item?._id === product._id)
+          : false;
 
         return (
           <div
@@ -79,25 +84,17 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                           onClick={(e) => {
                             e.preventDefault();
                             if (product?._id) {
-                              useStore
-                                .getState()
-                                .addToFavorite(product)
-                                .then(() => {
-                                  toast.success(
-                                    "Produto adicionado aos favoritos!",
-                                  );
-                                });
+                              addToFavorite(product);
+                              toast.success(
+                                "Produto adicionado aos favoritos!",
+                              );
                             }
                           }}
                         >
                           <Heart
                             className={cn(
                               "w-5 h-5 transition-colors",
-                              useStore
-                                .getState()
-                                .favoriteProduct?.some(
-                                  (item) => item?._id === product?._id,
-                                )
+                              isFavorite
                                 ? "fill-shop_dark_green text-shop_dark_green"
                                 : "text-muted-foreground hover:text-shop_dark_green",
                             )}

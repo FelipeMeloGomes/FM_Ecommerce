@@ -10,7 +10,12 @@ import StarRating from "./StarRating";
 import Title from "./Title";
 import { Badge } from "./ui/badge";
 
-const ProductCard = ({ product }: { product: Product }) => {
+interface ProductWithRating extends Product {
+  rating?: number;
+  reviewCount?: number;
+}
+
+const ProductCard = ({ product }: { product: ProductWithRating }) => {
   return (
     <div className="group relative bg-card border border-border/60 rounded-xl overflow-hidden hover:shadow-xl hover:shadow-shop_orange/10 transition-all duration-300">
       <div className="relative aspect-square bg-muted/20 overflow-hidden">
@@ -51,8 +56,14 @@ const ProductCard = ({ product }: { product: Product }) => {
           {product?.name}
         </Title>
         <div className="flex items-center gap-2">
-          <StarRating rating={4} />
-          <p className="text-xs text-muted-foreground">(5)</p>
+          <StarRating rating={product?.rating ?? 0} />
+          {product?.reviewCount !== undefined && product?.reviewCount > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              ({product?.reviewCount})
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">(0)</p>
+          )}
         </div>
 
         <div className="flex items-center gap-2 text-sm">
