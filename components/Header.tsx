@@ -1,6 +1,6 @@
 import { ClerkLoaded, SignedIn, UserButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { Logs, Plus } from "lucide-react";
+import { Logs, MessageCircleQuestion, Plus } from "lucide-react";
 import Link from "next/link";
 import { getMyOrders } from "@/sanity/queries";
 import CartIcon from "./CartIcon";
@@ -62,6 +62,15 @@ const Header = async () => {
                 <span className="absolute -top-1 -right-1 bg-shop_dark_green text-white h-5 w-5 rounded-full text-xs font-semibold flex items-center justify-center">
                   {ordersData?.total ?? 0}
                 </span>
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                href="/admin/questions"
+                className="p-2 rounded-lg hover:bg-muted transition-colors group"
+                aria-label="Perguntas"
+              >
+                <MessageCircleQuestion className="w-5 h-5 text-muted-foreground group-hover:text-shop_dark_green transition-colors" />
               </Link>
             )}
             {isAdmin && (

@@ -4,6 +4,7 @@ import {
   Heart,
   Home,
   MapPin,
+  MessageCircleQuestion,
   Moon,
   Package,
   Plus,
@@ -80,6 +81,11 @@ const SideMenu = ({
     { href: "/admin/products", label: "Produtos", icon: Plus },
     { href: "/admin/categories", label: "Categorias", icon: Plus },
     { href: "/admin/brands", label: "Marcas", icon: Plus },
+    {
+      href: "/admin/questions",
+      label: "Perguntas",
+      icon: MessageCircleQuestion,
+    },
   ];
 
   return (
