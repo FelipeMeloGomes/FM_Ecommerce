@@ -64,8 +64,6 @@ export default function AdminQuestionsList({
   const [loadingAnswer, setLoadingAnswer] = useState<string | null>(null);
   const [confirmOverwrite, setConfirmOverwrite] = useState<string | null>(null);
   const router = useRouter();
-  // Track which question was just saved to allow input clearing without losing editor context
-  const [justSavedFor, setJustSavedFor] = useState<string | null>(null);
 
   const filteredQuestions = useMemo(() => {
     if (!query.trim()) return initialQuestions;
@@ -100,6 +98,11 @@ export default function AdminQuestionsList({
       newExpanded.delete(id);
     } else {
       newExpanded.add(id);
+      // Initialize draft with existing answer when expanding
+      const question = initialQuestions.find((q) => q._id === id);
+      if (question?.answer && !Object.hasOwn(answerText, id)) {
+        setAnswerText((prev) => ({ ...prev, [id]: question.answer ?? "" }));
+      }
     }
     setExpandedQuestions(newExpanded);
   };
@@ -128,16 +131,12 @@ export default function AdminQuestionsList({
     try {
       await answerQuestion(questionId, answer);
       toast.success("Resposta enviada com sucesso!");
-      // Clear draft for this question and remove any stale value
+      // Clear draft for this question
       setAnswerText((prev) => {
         const next = { ...prev };
         delete next[questionId];
         return next;
       });
-      // Mark this question as just-saved to clear input in UI and avoid preserving old content
-      setJustSavedFor(questionId);
-      // Clear the flag on next microtask to reset state for subsequent edits
-      setTimeout(() => setJustSavedFor(null), 0);
       router.refresh();
     } catch (error) {
       toast.error(
@@ -212,13 +211,7 @@ export default function AdminQuestionsList({
         <div className="space-y-3">
           {paginatedQuestions.map((question) => {
             const isExpanded = expandedQuestions.has(question._id);
-            // Determine current input value: draft if exists, otherwise show existing answer unless just-saved
-            const hasDraft = Object.hasOwn(answerText, question._id);
-            const currentAnswer = hasDraft
-              ? answerText[question._id]
-              : justSavedFor === question._id
-                ? ""
-                : (question.answer ?? "");
+            const currentAnswer = answerText[question._id] ?? "";
             return (
               <div
                 key={question._id}
@@ -295,7 +288,7 @@ export default function AdminQuestionsList({
                       </label>
                       <Textarea
                         id={`answer-${question._id}`}
-                        value={currentAnswer || question.answer || ""}
+                        value={currentAnswer}
                         onChange={(e) =>
                           setAnswerText((prev) => ({
                             ...prev,
