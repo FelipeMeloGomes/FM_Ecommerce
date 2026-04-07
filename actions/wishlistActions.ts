@@ -80,22 +80,32 @@ export async function addToWishlist(productId: string) {
       console.log("[Wishlist] Items:", items, "Has product:", hasProduct);
 
       if (!hasProduct) {
+        const newItem = {
+          _type: "reference" as const,
+          _ref: productId,
+          _weak: true,
+          _key: crypto.randomUUID(),
+        };
         const result = await writeClient
           .patch(existingWishlist._id)
           .setIfMissing({ items: [] })
-          .append("items", [
-            { _type: "reference", _ref: productId, _weak: true },
-          ])
+          .append("items", [newItem])
           .set({ updatedAt: new Date().toISOString() })
           .commit();
 
         console.log("[Wishlist] Patch result:", result);
       }
     } else {
+      const newItem = {
+        _type: "reference" as const,
+        _ref: productId,
+        _weak: true,
+        _key: crypto.randomUUID(),
+      };
       const result = await writeClient.create({
         _type: "wishlist",
         clerkUserId,
-        items: [{ _type: "reference", _ref: productId, _weak: true }],
+        items: [newItem],
       });
 
       console.log("[Wishlist] Create result:", result);
@@ -133,10 +143,11 @@ export async function removeFromWishlist(productId: string) {
     if (existingWishlist) {
       const items = (existingWishlist.items || [])
         .filter((item: { _ref: string }) => item._ref !== productId)
-        .map((item: { _ref: string }) => ({
-          _type: "reference",
+        .map((item: { _ref: string; _key?: string }) => ({
+          _type: "reference" as const,
           _ref: item._ref,
           _weak: true,
+          _key: item._key || crypto.randomUUID(),
         }));
 
       await writeClient
@@ -170,9 +181,15 @@ export async function resetWishlist() {
     });
 
     if (existingWishlist) {
+      const emptyItems: Array<{
+        _type: "reference";
+        _ref: string;
+        _weak: boolean;
+        _key: string;
+      }> = [];
       await writeClient
         .patch(existingWishlist._id)
-        .set({ items: [], updatedAt: new Date().toISOString() })
+        .set({ items: emptyItems, updatedAt: new Date().toISOString() })
         .commit();
     }
 
