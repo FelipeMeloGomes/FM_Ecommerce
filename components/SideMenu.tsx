@@ -92,7 +92,7 @@ const SideMenu = ({
     <>
       <button
         type="button"
-        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden cursor-default ${
+        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 cursor-default ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -100,7 +100,7 @@ const SideMenu = ({
         aria-label="Fechar menu"
       />
       <div
-        className={`fixed inset-y-0 left-0 z-50 h-screen w-80 max-w-[85vw] transform transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 h-screen w-80 max-w-[85vw] transform transition-transform duration-300 ease-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
