@@ -83,7 +83,6 @@ export async function addToWishlist(productId: string) {
         const newItem = {
           _type: "reference" as const,
           _ref: productId,
-          _weak: true,
           _key: crypto.randomUUID(),
         };
         const result = await writeClient
@@ -99,7 +98,6 @@ export async function addToWishlist(productId: string) {
       const newItem = {
         _type: "reference" as const,
         _ref: productId,
-        _weak: true,
         _key: crypto.randomUUID(),
       };
       const result = await writeClient.create({
@@ -146,7 +144,6 @@ export async function removeFromWishlist(productId: string) {
         .map((item: { _ref: string; _key?: string }) => ({
           _type: "reference" as const,
           _ref: item._ref,
-          _weak: true,
           _key: item._key || crypto.randomUUID(),
         }));
 
@@ -184,7 +181,6 @@ export async function resetWishlist() {
       const emptyItems: Array<{
         _type: "reference";
         _ref: string;
-        _weak: boolean;
         _key: string;
       }> = [];
       await writeClient
