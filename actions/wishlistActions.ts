@@ -43,20 +43,13 @@ export async function getWishlist() {
 }
 
 export async function addToWishlist(productId: string) {
-  console.log("[Wishlist] ========== START addToWishlist ==========");
-  console.log("[Wishlist] productId received:", productId);
-
   const user = await currentUser();
-  console.log("[Wishlist] user object:", user);
-  console.log("[Wishlist] user id:", user?.id);
 
   if (!user) {
-    console.log("[Wishlist] User not authenticated - throwing error");
     throw new Error("Unauthorized");
   }
 
   const clerkUserId = user.id;
-  console.log("[Wishlist] Using clerkUserId:", clerkUserId);
 
   try {
     const wishlistQuery = `*[_type == "wishlist" && clerkUserId == $clerkUserId][0]{
@@ -69,15 +62,11 @@ export async function addToWishlist(productId: string) {
       clerkUserId,
     });
 
-    console.log("[Wishlist] Existing wishlist:", existingWishlist);
-
     if (existingWishlist) {
       const items = existingWishlist.items || [];
       const hasProduct = items.some(
         (item: { _ref: string }) => item._ref === productId,
       );
-
-      console.log("[Wishlist] Items:", items, "Has product:", hasProduct);
 
       if (!hasProduct) {
         const newItem = {
@@ -85,14 +74,12 @@ export async function addToWishlist(productId: string) {
           _ref: productId,
           _key: crypto.randomUUID(),
         };
-        const result = await writeClient
+        await writeClient
           .patch(existingWishlist._id)
           .setIfMissing({ items: [] })
           .append("items", [newItem])
           .set({ updatedAt: new Date().toISOString() })
           .commit();
-
-        console.log("[Wishlist] Patch result:", result);
       }
     } else {
       const newItem = {
@@ -100,20 +87,18 @@ export async function addToWishlist(productId: string) {
         _ref: productId,
         _key: crypto.randomUUID(),
       };
-      const result = await writeClient.create({
+      await writeClient.create({
         _type: "wishlist",
         clerkUserId,
         items: [newItem],
       });
-
-      console.log("[Wishlist] Create result:", result);
     }
 
     revalidatePath("/wishlist");
     revalidatePath("/product");
     return { success: true };
   } catch (error) {
-    console.error("[Wishlist] Error adding to wishlist:", error);
+    console.error("Error adding to wishlist:", error);
     throw new Error("Failed to add to wishlist");
   }
 }
