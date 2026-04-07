@@ -118,3 +118,30 @@ export async function getProductQuestions(productId: string) {
     return [];
   }
 }
+
+export async function answerQuestion(questionId: string, answer: string) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  if (!answer.trim() || answer.trim().length < 10) {
+    throw new Error("Resposta deve ter no mínimo 10 caracteres");
+  }
+
+  const existingQuestion = await client.fetch(
+    `*[_type == "productQuestion" && _id == $questionId][0]`,
+    { questionId },
+  );
+
+  if (!existingQuestion) {
+    throw new Error("Pergunta não encontrada");
+  }
+
+  await writeClient
+    .patch(questionId)
+    .set({ answer: answer.trim(), answered: true })
+    .commit();
+  return { success: true };
+}
