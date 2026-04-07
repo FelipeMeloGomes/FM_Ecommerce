@@ -1,6 +1,12 @@
+import { auth } from "@clerk/nextjs/server";
 import { CornerDownLeft, HelpCircle, Share2, Split, Truck } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import {
+  getProductRating,
+  getProductReviews,
+  verifyPurchase,
+} from "@/actions/reviewActions";
 import AddToCartButton from "@/components/AddToCartButton";
 import Container from "@/components/Container";
 import FavoriteButton from "@/components/FavoriteButton";
@@ -11,6 +17,7 @@ import StarRating from "@/components/StarRating";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getProductBySlug } from "@/sanity/queries";
+import ReviewSection from "./ReviewSection";
 
 export const revalidate = 30;
 
@@ -50,9 +57,20 @@ const SingleProductPage = async ({
 }) => {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
+  const { userId } = await auth();
+
   if (!product) {
     return notFound();
   }
+
+  const [reviews, ratingData, purchaseData] = await Promise.all([
+    getProductReviews(product._id),
+    getProductRating(product._id),
+    userId ? verifyPurchase(userId, product._id) : { hasPurchased: false },
+  ]);
+
+  const hasPurchased = purchaseData.hasPurchased;
+
   return (
     <Container>
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 py-8 lg:py-12">
@@ -74,9 +92,10 @@ const SingleProductPage = async ({
               {product?.description}
             </p>
             <div className="flex items-center gap-3 pt-2">
-              <StarRating />
+              <StarRating rating={Math.round(ratingData.average)} />
               <p className="text-sm font-semibold text-muted-foreground">
-                (120 avaliações)
+                ({ratingData.count}{" "}
+                {ratingData.count === 1 ? "avaliação" : "avaliações"})
               </p>
             </div>
           </div>
@@ -179,6 +198,14 @@ const SingleProductPage = async ({
               </div>
             </div>
           </div>
+
+          <ReviewSection
+            productId={product._id}
+            userId={userId}
+            hasPurchased={hasPurchased}
+            reviews={reviews}
+            ratingData={ratingData}
+          />
         </div>
       </div>
     </Container>
