@@ -52,7 +52,12 @@ export async function addToWishlist(productId: string) {
   const clerkUserId = user.id;
 
   try {
-    const wishlistQuery = `*[_type == "wishlist" && clerkUserId == $clerkUserId][0]`;
+    const wishlistQuery = `*[_type == "wishlist" && clerkUserId == $clerkUserId][0]{
+      _id,
+      items[]{
+        _ref
+      }
+    }`;
     const existingWishlist = await writeClient.fetch(wishlistQuery, {
       clerkUserId,
     });
@@ -67,7 +72,9 @@ export async function addToWishlist(productId: string) {
         await writeClient
           .patch(existingWishlist._id)
           .setIfMissing({ items: [] })
-          .append("items", [{ _type: "reference", _ref: productId }])
+          .append("items", [
+            { _type: "reference", _ref: productId, _weak: true },
+          ])
           .set({ updatedAt: new Date().toISOString() })
           .commit();
       }
@@ -75,7 +82,7 @@ export async function addToWishlist(productId: string) {
       await writeClient.create({
         _type: "wishlist",
         clerkUserId,
-        items: [{ _type: "reference", _ref: productId }],
+        items: [{ _type: "reference", _ref: productId, _weak: true }],
       });
     }
 
