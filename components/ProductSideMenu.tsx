@@ -1,10 +1,8 @@
 "use client";
 import { Heart } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
-import useStore from "@/store";
+import { useWishlist } from "@/hooks/useWishlist";
 
 const ProductSideMenu = ({
   product,
@@ -13,39 +11,32 @@ const ProductSideMenu = ({
   product: Product;
   className?: string;
 }) => {
-  const { favoriteProduct, addToFavorite } = useStore();
-  const [existingProduct, setExistingProduct] = useState<Product | null>(null);
-  useEffect(() => {
-    const availableProduct = favoriteProduct?.find(
-      (item) => item?._id === product?._id,
-    );
-    setExistingProduct(availableProduct || null);
-  }, [product, favoriteProduct]);
+  const { favoriteProduct, addToFavorite, isLoading } = useWishlist();
+
+  const isFavorite = favoriteProduct.some((item) => item?._id === product?._id);
+
   const handleFavorite = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (product?._id) {
+    if (product?._id && !isLoading) {
       addToFavorite(product);
-      toast.success(
-        existingProduct
-          ? "Produto removido dos favoritos!"
-          : "Produto adicionado aos favoritos!",
-      );
     }
   };
+
   return (
     <div className={cn("absolute top-3 right-3", className)}>
       <button
         type="button"
         onClick={handleFavorite}
-        aria-pressed={!!existingProduct}
+        disabled={isLoading}
+        aria-pressed={isFavorite}
         className={cn(
           "p-2.5 rounded-full transition-all",
-          existingProduct
+          isFavorite
             ? "bg-shop_dark_green text-white"
             : "bg-background/80 text-muted-foreground hover:bg-shop_dark_green hover:text-white border border-border",
         )}
       >
-        <Heart size={16} fill={existingProduct ? "currentColor" : "none"} />
+        <Heart size={16} fill={isFavorite ? "currentColor" : "none"} />
       </button>
     </div>
   );

@@ -89,9 +89,16 @@ export function useWishlist(): UseWishlistReturn {
   const addToFavorite = async (product: Product) => {
     if (!product._id) return;
 
+    console.log(
+      "[useWishlist] addToFavorite called with product:",
+      product._id,
+    );
+
     const isAlreadyFavorite = favoriteProduct.some(
       (p) => p._id === product._id,
     );
+
+    console.log("[useWishlist] Is already favorite:", isAlreadyFavorite);
 
     setFavoriteProduct((prev) => {
       if (isAlreadyFavorite) {
@@ -102,13 +109,16 @@ export function useWishlist(): UseWishlistReturn {
 
     try {
       if (isAlreadyFavorite) {
+        console.log("[useWishlist] Calling removeFromWishlist...");
         await removeFromWishlist(product._id);
         toast.success("Produto removido dos favoritos!");
       } else {
+        console.log("[useWishlist] Calling addToWishlist...");
         await addToWishlist(product._id);
         toast.success("Produto adicionado aos favoritos!");
       }
     } catch (_error) {
+      console.log("[useWishlist] Error caught, reverting state");
       setFavoriteProduct((prev) => {
         if (isAlreadyFavorite) {
           return [...prev, product];
