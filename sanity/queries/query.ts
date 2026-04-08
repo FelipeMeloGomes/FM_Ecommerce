@@ -60,7 +60,9 @@ const SHOP_PRODUCTS_QUERY = `
   ] 
   | order(name asc) {
     ...,
-    "categories": categories[]->title
+    "categories": categories[]->title,
+    "rating": *[_type == "review" && product._ref == ^._id].rating,
+    "reviewCount": count(*[_type == "review" && product._ref == ^._id])
   }
 `;
 
@@ -68,7 +70,9 @@ const PRODUCTS_BY_CATEGORY_QUERY = `
   *[_type == "product" && references(*[_type == "category" && slug.current == $categorySlug]._id)]
   | order(name asc){
     ...,
-    "categories": categories[]->title
+    "categories": categories[]->title,
+    "rating": *[_type == "review" && product._ref == ^._id].rating,
+    "reviewCount": count(*[_type == "review" && product._ref == ^._id])
   }
 `;
 
@@ -76,7 +80,9 @@ const PRODUCTS_BY_VARIANT_QUERY = `
   *[_type == "product" && variant == $variant] 
   | order(name asc) [0...$limit]{
     ...,
-    "categories": categories[]->title
+    "categories": categories[]->title,
+    "rating": *[_type == "review" && product._ref == ^._id].rating,
+    "reviewCount": count(*[_type == "review" && product._ref == ^._id])
   }
 `;
 

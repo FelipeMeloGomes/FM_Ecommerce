@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import type { Product } from "@/core/products/Product";
 import { confirmToast } from "@/helpers/confirmToast";
 import { apiRequest } from "@/lib/api/apiRequest";
+import { normalizeString } from "@/lib/string";
 import { urlFor } from "@/sanity/lib/image";
 
 interface AdminProductsListProps {
@@ -20,13 +21,6 @@ interface AdminProductsListProps {
 
 const PAGE_SIZE = 10;
 
-function normalize(str: string) {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
 export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
   const [query, setQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,11 +28,11 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
 
   const filteredProducts = useMemo(() => {
     if (!query.trim()) return initialProducts;
-    const q = normalize(query);
+    const q = normalizeString(query);
     return initialProducts.filter(
       (p) =>
-        normalize(p.name).includes(q) ||
-        normalize(p.description ?? "").includes(q),
+        normalizeString(p.name).includes(q) ||
+        normalizeString(p.description ?? "").includes(q),
     );
   }, [initialProducts, query]);
 

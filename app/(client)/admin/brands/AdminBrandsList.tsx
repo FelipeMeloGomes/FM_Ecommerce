@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import type { Brand } from "@/core/brands/Brand";
 import { confirmToast } from "@/helpers/confirmToast";
 import { apiRequest } from "@/lib/api/apiRequest";
+import { normalizeString } from "@/lib/string";
 import { urlFor } from "@/sanity/lib/image";
 
 interface AdminBrandsListProps {
@@ -19,13 +20,6 @@ interface AdminBrandsListProps {
 }
 
 const PAGE_SIZE = 10;
-
-function normalize(str: string) {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
 
 export default function AdminBrandsList({
   initialBrands,
@@ -36,11 +30,11 @@ export default function AdminBrandsList({
 
   const filteredBrands = useMemo(() => {
     if (!query.trim()) return initialBrands;
-    const q = normalize(query);
+    const q = normalizeString(query);
     return initialBrands.filter(
       (b) =>
-        normalize(b.title).includes(q) ||
-        normalize(b.description ?? "").includes(q),
+        normalizeString(b.title).includes(q) ||
+        normalizeString(b.description ?? "").includes(q),
     );
   }, [initialBrands, query]);
 

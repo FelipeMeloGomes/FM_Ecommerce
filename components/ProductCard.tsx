@@ -9,6 +9,7 @@ import ProductSideMenu from "./ProductSideMenu";
 import StarRating from "./StarRating";
 import Title from "./Title";
 import { Badge } from "./ui/badge";
+import { StockBadge } from "./ui/stock-badge";
 
 interface ProductWithRating extends Product {
   rating?: number;
@@ -16,6 +17,11 @@ interface ProductWithRating extends Product {
 }
 
 const ProductCard = ({ product }: { product: ProductWithRating }) => {
+  const averageRating = Array.isArray(product?.rating)
+    ? product.rating.reduce((a: number, b: number) => a + b, 0) /
+      product.rating.length
+    : (product?.rating ?? 0);
+
   return (
     <div className="group relative bg-card border border-border/60 rounded-xl overflow-hidden hover:shadow-xl hover:shadow-shop_orange/10 transition-all duration-300">
       <div className="relative aspect-square bg-muted/20 overflow-hidden">
@@ -56,7 +62,7 @@ const ProductCard = ({ product }: { product: ProductWithRating }) => {
           {product?.name}
         </Title>
         <div className="flex items-center gap-2">
-          <StarRating rating={product?.rating ?? 0} />
+          <StarRating rating={averageRating} />
           {product?.reviewCount !== undefined && product?.reviewCount > 0 ? (
             <p className="text-xs text-muted-foreground">
               ({product?.reviewCount})
@@ -66,16 +72,7 @@ const ProductCard = ({ product }: { product: ProductWithRating }) => {
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">Estoque:</span>
-          <span
-            className={`font-semibold ${product?.stock === 0 ? "text-destructive" : "text-emerald-600"}`}
-          >
-            {(product?.stock as number) > 0
-              ? `${product?.stock} unidades`
-              : "Indisponível"}
-          </span>
-        </div>
+        <StockBadge stock={product?.stock} />
 
         <PriceView
           price={product?.price}

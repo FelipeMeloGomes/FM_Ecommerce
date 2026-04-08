@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { normalizeString } from "@/lib/string";
 
 interface Question {
   _id: string;
@@ -34,13 +35,6 @@ interface AdminQuestionsListProps {
 }
 
 const PAGE_SIZE = 10;
-
-function normalize(str: string) {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("pt-BR", {
@@ -67,12 +61,12 @@ export default function AdminQuestionsList({
 
   const filteredQuestions = useMemo(() => {
     if (!query.trim()) return initialQuestions;
-    const q = normalize(query);
+    const q = normalizeString(query);
     return initialQuestions.filter(
       (question) =>
-        normalize(question.question).includes(q) ||
-        normalize(question.customerName).includes(q) ||
-        normalize(question.productName).includes(q),
+        normalizeString(question.question).includes(q) ||
+        normalizeString(question.customerName).includes(q) ||
+        normalizeString(question.productName).includes(q),
     );
   }, [initialQuestions, query]);
 

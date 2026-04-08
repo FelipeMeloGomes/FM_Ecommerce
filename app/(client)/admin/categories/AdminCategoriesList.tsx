@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import type { Category } from "@/core/categories/Category";
 import { confirmToast } from "@/helpers/confirmToast";
 import { apiRequest } from "@/lib/api/apiRequest";
+import { normalizeString } from "@/lib/string";
 import { urlFor } from "@/sanity/lib/image";
 
 interface AdminCategoriesListProps {
@@ -19,13 +20,6 @@ interface AdminCategoriesListProps {
 }
 
 const PAGE_SIZE = 10;
-
-function normalize(str: string) {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
 
 export default function AdminCategoriesList({
   initialCategories,
@@ -36,11 +30,11 @@ export default function AdminCategoriesList({
 
   const filteredCategories = useMemo(() => {
     if (!query.trim()) return initialCategories;
-    const q = normalize(query);
+    const q = normalizeString(query);
     return initialCategories.filter(
       (c) =>
-        normalize(c.title).includes(q) ||
-        normalize(c.description ?? "").includes(q),
+        normalizeString(c.title).includes(q) ||
+        normalizeString(c.description ?? "").includes(q),
     );
   }, [initialCategories, query]);
 
