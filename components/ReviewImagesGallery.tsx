@@ -49,10 +49,13 @@ export function ReviewImagesGallery({
     <>
       <div className="flex flex-wrap gap-3">
         {images.map((image, idx) => (
-          <button
-            type="button"
+          // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+          <div
+            role="button"
+            tabIndex={0}
             key={image.id}
             onClick={() => setSelectedIndex(idx)}
+            onKeyDown={(e) => e.key === "Enter" && setSelectedIndex(idx)}
             className={cn(
               "relative rounded-xl overflow-hidden border-2 border-border/50",
               "transition-all duration-300 ease-out",
@@ -71,18 +74,25 @@ export function ReviewImagesGallery({
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             {editable && (
-              <button
-                type="button"
+              <span
+                role="button"
+                tabIndex={0}
                 onClick={(e) => {
                   e.stopPropagation();
                   onChange?.(images.filter((_, i) => i !== idx));
                 }}
-                className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/80"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.stopPropagation();
+                    onChange?.(images.filter((_, i) => i !== idx));
+                  }
+                }}
+                className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/80 cursor-pointer"
               >
                 <X className="h-3 w-3" />
-              </button>
+              </span>
             )}
-          </button>
+          </div>
         ))}
       </div>
 
