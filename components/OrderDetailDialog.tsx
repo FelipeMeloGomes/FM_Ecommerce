@@ -1,7 +1,7 @@
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 import Image from "next/image";
 import Link from "next/link";
 import { urlFor } from "@/sanity/lib/image";
-import type { MY_ORDERS_QUERYResult } from "@/sanity.types";
 import PriceFormatter from "./PriceFormatter";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
@@ -14,8 +14,35 @@ import {
   TableRow,
 } from "./ui/table";
 
+interface OrderProductItem {
+  _key?: string;
+  product?: {
+    name?: string;
+    images?: SanityImageSource[];
+    price?: number;
+  };
+  quantity?: number;
+}
+
 interface OrderDetailsDialogProps {
-  order: MY_ORDERS_QUERYResult["orders"][number] | null;
+  order: {
+    orderNumber?: string;
+    customerName?: string;
+    email?: string;
+    orderDate?: string;
+    status?: string;
+    invoice?: {
+      number?: string;
+      hosted_invoice_url?: string;
+    };
+    products?: OrderProductItem[];
+    amountDiscount?: number;
+    shipping?: {
+      method?: string;
+      price?: number;
+    };
+    totalPrice?: number;
+  } | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -88,33 +115,31 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {order.products?.map(
-              (
-                item: MY_ORDERS_QUERYResult["orders"][number]["products"][number],
-              ) => (
-                <TableRow key={item._key}>
-                  <TableCell className="flex items-center gap-3">
-                    {item?.product?.images && (
-                      <Image
-                        src={urlFor(item.product.images[0] as any).url()}
-                        alt="productImage"
-                        width={50}
-                        height={50}
-                        className="rounded-md border object-cover"
-                      />
-                    )}
-                    <span className="font-medium">{item?.product?.name}</span>
-                  </TableCell>
-                  <TableCell>{item?.quantity}</TableCell>
-                  <TableCell>
-                    <PriceFormatter
-                      amount={item?.product?.price}
-                      className="font-semibold"
+            {order.products?.map((item: OrderProductItem) => (
+              <TableRow key={item._key}>
+                <TableCell className="flex items-center gap-3">
+                  {item?.product?.images?.[0] && (
+                    <Image
+                      src={urlFor(
+                        item.product.images[0] as SanityImageSource,
+                      ).url()}
+                      alt="productImage"
+                      width={50}
+                      height={50}
+                      className="rounded-md border object-cover"
                     />
-                  </TableCell>
-                </TableRow>
-              ),
-            )}
+                  )}
+                  <span className="font-medium">{item?.product?.name}</span>
+                </TableCell>
+                <TableCell>{item?.quantity}</TableCell>
+                <TableCell>
+                  <PriceFormatter
+                    amount={item?.product?.price}
+                    className="font-semibold"
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
         <div className="flex justify-end">
