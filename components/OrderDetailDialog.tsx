@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { urlFor } from "@/sanity/lib/image";
-import type { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
+import type { MY_ORDERS_QUERYResult } from "@/sanity.types";
 import PriceFormatter from "./PriceFormatter";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
@@ -15,7 +15,7 @@ import {
 } from "./ui/table";
 
 interface OrderDetailsDialogProps {
-  order: MY_ORDERS_QUERY_RESULT["orders"][number] | null;
+  order: MY_ORDERS_QUERYResult["orders"][number] | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -88,29 +88,33 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {order.products?.map((item) => (
-              <TableRow key={item._key}>
-                <TableCell className="flex items-center gap-3">
-                  {item?.product?.images && (
-                    <Image
-                      src={urlFor(item?.product?.images[0]).url()}
-                      alt="productImage"
-                      width={50}
-                      height={50}
-                      className="rounded-md border object-cover"
+            {order.products?.map(
+              (
+                item: MY_ORDERS_QUERYResult["orders"][number]["products"][number],
+              ) => (
+                <TableRow key={item._key}>
+                  <TableCell className="flex items-center gap-3">
+                    {item?.product?.images && (
+                      <Image
+                        src={urlFor(item.product.images[0] as any).url()}
+                        alt="productImage"
+                        width={50}
+                        height={50}
+                        className="rounded-md border object-cover"
+                      />
+                    )}
+                    <span className="font-medium">{item?.product?.name}</span>
+                  </TableCell>
+                  <TableCell>{item?.quantity}</TableCell>
+                  <TableCell>
+                    <PriceFormatter
+                      amount={item?.product?.price}
+                      className="font-semibold"
                     />
-                  )}
-                  <span className="font-medium">{item?.product?.name}</span>
-                </TableCell>
-                <TableCell>{item?.quantity}</TableCell>
-                <TableCell>
-                  <PriceFormatter
-                    amount={item?.product?.price}
-                    className="font-semibold"
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                </TableRow>
+              ),
+            )}
           </TableBody>
         </Table>
         <div className="flex justify-end">

@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { client } from "@/sanity/lib/client";
 import { SHOP_PRODUCTS_QUERY } from "@/sanity/queries/query";
-import type { BRANDS_QUERY_RESULT, Category, Product } from "@/sanity.types";
+import type { BRANDS_QUERYResult, Category, Product } from "@/sanity.types";
 import Container from "./Container";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
@@ -16,7 +16,7 @@ import Title from "./Title";
 
 interface Props {
   categories: Category[];
-  brands: BRANDS_QUERY_RESULT;
+  brands: BRANDS_QUERYResult;
   initialBrand?: string | null;
   initialCategory?: string | null;
 }

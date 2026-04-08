@@ -41,7 +41,11 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
     setLoading(true);
     try {
       const files =
-        images.length > 0 ? images.map((img) => img.file) : undefined;
+        images.length > 0
+          ? images
+              .map((img) => img.file)
+              .filter((f): f is File => f !== undefined)
+          : undefined;
 
       await createReview({
         productId,
