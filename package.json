@@ -9,8 +9,8 @@
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "typegen": "sanity schema extract && sanity typegen generate",
-    "test": "vitest run --environment jsdom",
-    "test:watch": "vitest --environment jsdom"
+    "test": "bunx vitest run --environment jsdom",
+    "test:watch": "bunx vitest --environment jsdom"
   },
   "dependencies": {
     "@clerk/localizations": "^4.3.0",
