@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 interface Props {
   categories: Category[];
   selectedCategory?: string | null;
-  setSelectedCategory: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedCategory: (value: string | null) => void;
 }
 
 const CategoryList = ({
@@ -23,25 +23,38 @@ const CategoryList = ({
         onValueChange={(value) => setSelectedCategory(value || null)}
         className="mt-3 space-y-2"
       >
-        {categories?.map((category) => (
-          <div key={category._id} className="flex items-center gap-2">
-            <RadioGroupItem
-              value={category?.slug?.current as string}
-              id={category?.slug?.current}
-              className="rounded"
-            />
-            <Label
-              htmlFor={category?.slug?.current}
-              className={
-                selectedCategory === category?.slug?.current
-                  ? "font-semibold text-shop_dark_green cursor-pointer"
-                  : "text-muted-foreground cursor-pointer"
-              }
+        {categories?.map((category) => {
+          const slug = category?.slug?.current as string;
+          const isSelected = selectedCategory === slug;
+          return (
+            <div
+              key={category._id}
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={0}
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => setSelectedCategory(slug)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedCategory(slug);
+                }
+              }}
             >
-              {category?.title}
-            </Label>
-          </div>
-        ))}
+              <RadioGroupItem value={slug} id={slug} className="rounded" />
+              <Label
+                htmlFor={slug}
+                className={
+                  isSelected
+                    ? "font-semibold text-shop_dark_green cursor-pointer"
+                    : "text-muted-foreground cursor-pointer"
+                }
+              >
+                {category?.title}
+              </Label>
+            </div>
+          );
+        })}
       </RadioGroup>
       {selectedCategory && (
         <button

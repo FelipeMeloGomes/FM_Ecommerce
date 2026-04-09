@@ -51,6 +51,11 @@ export function ReviewImagesGallery({
     setSelectedIndex(idx);
   }, []);
 
+  const handleSelectIndexWrapper = useCallback(
+    (idx: number) => () => handleSelectIndex(idx),
+    [handleSelectIndex],
+  );
+
   const handleRemoveImage = useCallback(
     (e: React.MouseEvent, idx: number) => {
       e.stopPropagation();
@@ -79,8 +84,10 @@ export function ReviewImagesGallery({
             role="button"
             tabIndex={0}
             key={image.id}
-            onClick={() => handleSelectIndex(idx)}
-            onKeyDown={(e) => e.key === "Enter" && handleSelectIndex(idx)}
+            onClick={handleSelectIndexWrapper(idx)}
+            onKeyDown={(e) =>
+              e.key === "Enter" && handleSelectIndexWrapper(idx)()
+            }
             className={cn(
               "relative rounded-xl overflow-hidden border-2 border-border/50",
               "transition-all duration-300 ease-out",
@@ -152,7 +159,7 @@ export function ReviewImagesGallery({
                 <button
                   type="button"
                   key={idx}
-                  onClick={() => handleSelectIndex(idx)}
+                  onClick={handleSelectIndexWrapper(idx)}
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
                     idx === selectedIndex
@@ -215,6 +222,11 @@ export function ReviewImagesList({ images }: ReviewImagesListProps) {
     setSelectedIndex(idx);
   }, []);
 
+  const handleSelectIndexWrapper = useCallback(
+    (idx: number) => () => handleSelectIndex(idx),
+    [handleSelectIndex],
+  );
+
   const imageUrls = useMemo(
     () => images.map((img) => urlFor(img).url()),
     [images],
@@ -231,7 +243,7 @@ export function ReviewImagesList({ images }: ReviewImagesListProps) {
             <button
               key={idx}
               type="button"
-              onClick={() => handleSelectIndex(idx)}
+              onClick={handleSelectIndexWrapper(idx)}
               className="relative rounded-xl overflow-hidden border-2 border-border/50 transition-all duration-300 ease-out hover:border-shop_orange hover:shadow-lg hover:shadow-shop_orange/20 hover:scale-105 group cursor-pointer"
               style={{ width: 140, height: 140 }}
             >
@@ -289,7 +301,7 @@ export function ReviewImagesList({ images }: ReviewImagesListProps) {
                 <button
                   type="button"
                   key={idx}
-                  onClick={() => handleSelectIndex(idx)}
+                  onClick={handleSelectIndexWrapper(idx)}
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
                     idx === selectedIndex

@@ -84,6 +84,11 @@ export default function AdminCategoriesList({
     [router],
   );
 
+  const handleDeleteCategory = useCallback(
+    (id: string | undefined) => () => handleDelete(id),
+    [handleDelete],
+  );
+
   return (
     <div className="min-h-screen bg-background p-6 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -205,7 +210,7 @@ export default function AdminCategoriesList({
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(category._id)}
+                          onClick={handleDeleteCategory(category._id)}
                           className="
                             h-9 w-9
                             text-muted-foreground hover:text-destructive

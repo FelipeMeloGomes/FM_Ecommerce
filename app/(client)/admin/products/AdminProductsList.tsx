@@ -79,6 +79,11 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
     [router],
   );
 
+  const handleDeleteProduct = useCallback(
+    (id: string | undefined) => () => handleDelete(id),
+    [handleDelete],
+  );
+
   return (
     <div className="min-h-screen bg-background p-6 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -224,7 +229,7 @@ export function AdminProductsList({ initialProducts }: AdminProductsListProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(product._id)}
+                          onClick={handleDeleteProduct(product._id)}
                           className="
                             h-9 w-9
                             text-muted-foreground hover:text-destructive

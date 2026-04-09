@@ -167,6 +167,42 @@ export default function AdminQuestionsList({
     setConfirmOverwrite(questionId);
   }, []);
 
+  const handleClearQuery = useCallback(
+    () => handleQueryChange(""),
+    [handleQueryChange],
+  );
+
+  const handleToggleQuestionWrapper = useCallback(
+    (id: string) => () => toggleQuestion(id),
+    [toggleQuestion],
+  );
+
+  const handleConfirmOverwriteNull = useCallback(
+    () => handleConfirmOverwrite(null),
+    [handleConfirmOverwrite],
+  );
+
+  const handleAnswerQuestion = useCallback(
+    (id: string) => () => handleAnswer(id),
+    [handleAnswer],
+  );
+
+  const handleAnswerTextChange = useCallback(
+    (questionId: string) => (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setAnswerText((prev) => ({
+        ...prev,
+        [questionId]: e.target.value,
+      }));
+    },
+    [],
+  );
+
+  const handleQueryChangeEvent = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      handleQueryChange(e.target.value),
+    [handleQueryChange],
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -199,14 +235,14 @@ export default function AdminQuestionsList({
           <Input
             type="text"
             value={query}
-            onChange={(e) => handleQueryChange(e.target.value)}
+            onChange={handleQueryChangeEvent}
             placeholder="Buscar por pergunta, cliente ou produto..."
             className="h-11 pl-10 pr-10 bg-background border-input text-foreground placeholder:text-muted-foreground rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring hover:border-border"
           />
           {query && (
             <button
               type="button"
-              onClick={() => handleQueryChange("")}
+              onClick={handleClearQuery}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-150 p-0.5 rounded-md hover:bg-muted"
               aria-label="Limpar busca"
             >
@@ -237,7 +273,7 @@ export default function AdminQuestionsList({
               >
                 <button
                   type="button"
-                  onClick={() => toggleQuestion(question._id)}
+                  onClick={handleToggleQuestionWrapper(question._id)}
                   className="w-full text-left p-4 hover:bg-muted/20 transition-colors"
                 >
                   <div className="flex items-start gap-3">
@@ -307,12 +343,7 @@ export default function AdminQuestionsList({
                       <Textarea
                         id={`answer-${question._id}`}
                         value={currentAnswer}
-                        onChange={(e) =>
-                          setAnswerText((prev) => ({
-                            ...prev,
-                            [question._id]: e.target.value,
-                          }))
-                        }
+                        onChange={handleAnswerTextChange(question._id)}
                         placeholder="Digite sua resposta..."
                         rows={3}
                         className="resize-none"
@@ -324,7 +355,7 @@ export default function AdminQuestionsList({
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleConfirmOverwrite(null)}
+                              onClick={handleConfirmOverwriteNull}
                             >
                               Não
                             </Button>
@@ -344,7 +375,7 @@ export default function AdminQuestionsList({
                         )}
                         {!confirmOverwrite && (
                           <Button
-                            onClick={() => handleAnswer(question._id)}
+                            onClick={handleAnswerQuestion(question._id)}
                             disabled={
                               loadingAnswer === question._id ||
                               !currentAnswer.trim() ||

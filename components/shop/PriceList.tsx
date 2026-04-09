@@ -12,7 +12,7 @@ const priceArray = [
 
 interface Props {
   selectedPrice?: string | null;
-  setSelectedPrice: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedPrice: (value: string | null) => void;
 }
 const PriceList = ({ selectedPrice, setSelectedPrice }: Props) => {
   return (
@@ -23,25 +23,41 @@ const PriceList = ({ selectedPrice, setSelectedPrice }: Props) => {
         value={selectedPrice || ""}
         onValueChange={(value) => setSelectedPrice(value || null)}
       >
-        {priceArray?.map((price) => (
-          <div key={price.value} className="flex items-center gap-2">
-            <RadioGroupItem
-              value={price.value}
-              id={price.value}
-              className="rounded"
-            />
-            <Label
-              htmlFor={price.value}
-              className={
-                selectedPrice === price.value
-                  ? "font-semibold text-shop_dark_green cursor-pointer"
-                  : "text-muted-foreground cursor-pointer"
-              }
+        {priceArray?.map((price) => {
+          const isSelected = selectedPrice === price.value;
+          return (
+            <div
+              key={price.value}
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={0}
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => setSelectedPrice(price.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedPrice(price.value);
+                }
+              }}
             >
-              {price.title}
-            </Label>
-          </div>
-        ))}
+              <RadioGroupItem
+                value={price.value}
+                id={price.value}
+                className="rounded"
+              />
+              <Label
+                htmlFor={price.value}
+                className={
+                  isSelected
+                    ? "font-semibold text-shop_dark_green cursor-pointer"
+                    : "text-muted-foreground cursor-pointer"
+                }
+              >
+                {price.title}
+              </Label>
+            </div>
+          );
+        })}
       </RadioGroup>
       {selectedPrice && (
         <button

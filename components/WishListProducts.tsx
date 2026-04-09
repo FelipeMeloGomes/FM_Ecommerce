@@ -30,6 +30,11 @@ const WishListProducts = () => {
     [removeFromFavorite],
   );
 
+  const handleRemoveFavorite = useCallback(
+    (productId?: string) => () => handleRemoveFromFavorite(productId),
+    [handleRemoveFromFavorite],
+  );
+
   const handleResetWishlist = useCallback(() => {
     confirmToast({
       message: "Tem certeza que deseja limpar sua lista de favoritos?",
@@ -113,9 +118,7 @@ const WishListProducts = () => {
                         <div className="flex items-center gap-3">
                           <button
                             type="button"
-                            onClick={() =>
-                              handleRemoveFromFavorite(product?._id)
-                            }
+                            onClick={handleRemoveFavorite(product?._id)}
                             className="p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                           >
                             <X size={16} />

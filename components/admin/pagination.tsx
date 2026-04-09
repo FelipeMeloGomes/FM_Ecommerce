@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 
 interface AdminPaginationProps {
@@ -15,6 +15,11 @@ export const AdminPagination = memo(function AdminPagination({
   totalPages,
   onPageChange,
 }: AdminPaginationProps) {
+  const handlePageChangeWrapper = useCallback(
+    (page: number) => () => onPageChange(page),
+    [onPageChange],
+  );
+
   const pageNumbers = useMemo(() => {
     if (totalPages <= 1) {
       return [];
@@ -71,7 +76,7 @@ export const AdminPagination = memo(function AdminPagination({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onPageChange(currentPage - 1)}
+        onClick={handlePageChangeWrapper(currentPage - 1)}
         disabled={currentPage === 1}
         className="
           h-9 px-3 gap-1.5
@@ -100,7 +105,7 @@ export const AdminPagination = memo(function AdminPagination({
               key={page}
               variant="ghost"
               size="sm"
-              onClick={() => onPageChange(page)}
+              onClick={handlePageChangeWrapper(page)}
               className={`
                 h-9 w-9 p-0 text-sm font-medium
                 transition-all duration-200 rounded-md
@@ -127,7 +132,7 @@ export const AdminPagination = memo(function AdminPagination({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onPageChange(currentPage + 1)}
+        onClick={handlePageChangeWrapper(currentPage + 1)}
         disabled={currentPage === totalPages}
         className="
           h-9 px-3 gap-1.5

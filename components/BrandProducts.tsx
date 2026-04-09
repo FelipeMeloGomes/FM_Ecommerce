@@ -53,6 +53,11 @@ const BrandProducts = ({ brands, slug }: Props) => {
     [currentSlug, router],
   );
 
+  const handleBrandClick = useCallback(
+    (slug: string) => () => handleBrandChange(slug),
+    [handleBrandChange],
+  );
+
   const isLoading = loading || isPending;
 
   return (
@@ -66,7 +71,7 @@ const BrandProducts = ({ brands, slug }: Props) => {
             {brands?.map((item) => (
               <button
                 type="button"
-                onClick={() => handleBrandChange(item?.slug?.current as string)}
+                onClick={handleBrandClick(item?.slug?.current as string)}
                 key={item?._id}
                 className={`w-full text-left px-4 py-3 text-sm font-medium transition-all duration-200 border-b border-border/20 last:border-b-0 ${
                   item?.slug?.current === currentSlug

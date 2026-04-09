@@ -53,6 +53,11 @@ const CategoryProducts = ({ categories, slug }: Props) => {
     [currentSlug, router],
   );
 
+  const handleCategoryClick = useCallback(
+    (slug: string) => () => handleCategoryChange(slug),
+    [handleCategoryChange],
+  );
+
   const isLoading = loading || isPending;
 
   return (
@@ -66,9 +71,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
             {categories?.map((item) => (
               <button
                 type="button"
-                onClick={() =>
-                  handleCategoryChange(item?.slug?.current as string)
-                }
+                onClick={handleCategoryClick(item?.slug?.current as string)}
                 key={item?._id}
                 className={`w-full text-left px-4 py-3 text-sm font-medium transition-all duration-200 border-b border-border/20 last:border-b-0 capitalize ${
                   item?.slug?.current === currentSlug
