@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import {
   Heart,
   Home,
@@ -293,7 +294,8 @@ const SideMenu = ({
 
           <div className="border-t border-border p-4">
             <p className="text-xs text-center text-muted-foreground">
-              © 2024 FMShop. Todos os direitos reservados.
+              © {format(new Date(), "yyyy")} FMShop. Todos os direitos
+              reservados.
             </p>
           </div>
         </div>
