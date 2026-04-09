@@ -104,6 +104,16 @@ const SideMenu = ({
     },
   ];
 
+  const handleKeyDownClose = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onClose();
+      }
+    },
+    [onClose],
+  );
+
   return (
     <>
       <button
@@ -112,7 +122,7 @@ const SideMenu = ({
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
-        onKeyDown={(e) => e.key === "Enter" && onClose()}
+        onKeyDown={handleKeyDownClose}
         aria-label="Fechar menu"
       />
       <div

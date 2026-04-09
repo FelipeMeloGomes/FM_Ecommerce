@@ -70,6 +70,11 @@ const OrdersComponent = ({
     });
   }, []);
 
+  const handleToggleSelectWrapper = useCallback(
+    (orderId: string) => () => handleToggleSelect(orderId),
+    [handleToggleSelect],
+  );
+
   const toggleSelectAll = useCallback(() => {
     if (selectedIds.size === localOrders.length) {
       setSelectedIds(new Set());
@@ -210,9 +215,9 @@ const OrdersComponent = ({
                           <div className="flex items-center justify-center gap-2">
                             <Checkbox
                               checked={selectedIds.has(order._id)}
-                              onCheckedChange={() =>
-                                handleToggleSelect(order._id)
-                              }
+                              onCheckedChange={handleToggleSelectWrapper(
+                                order._id,
+                              )}
                             />
                           </div>
                         </TableCell>

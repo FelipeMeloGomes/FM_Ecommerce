@@ -79,6 +79,21 @@ export function ReviewImagesGallery({
     [images, onChange],
   );
 
+  const handleKeyDownWrapper = useCallback(
+    (idx: number) => (e: React.KeyboardEvent) => handleKeyDown(e, idx),
+    [handleKeyDown],
+  );
+
+  const handleKeyDownForSelect = useCallback(
+    (idx: number) => (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.stopPropagation();
+        handleSelectIndexWrapper(idx)();
+      }
+    },
+    [handleSelectIndexWrapper],
+  );
+
   if (!images || images.length === 0) return null;
 
   return (
@@ -90,9 +105,7 @@ export function ReviewImagesGallery({
             tabIndex={0}
             key={image.id}
             onClick={handleSelectIndexWrapper(idx)}
-            onKeyDown={(e) =>
-              e.key === "Enter" && handleSelectIndexWrapper(idx)()
-            }
+            onKeyDown={handleKeyDownForSelect(idx)}
             className={cn(
               "relative rounded-xl overflow-hidden border-2 border-border/50",
               "transition-all duration-300 ease-out",
@@ -115,7 +128,7 @@ export function ReviewImagesGallery({
                 role="button"
                 tabIndex={0}
                 onClick={handleRemoveImageWrapper(idx)}
-                onKeyDown={(e) => handleKeyDown(e, idx)}
+                onKeyDown={handleKeyDownWrapper(idx)}
                 className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/80 cursor-pointer"
               >
                 <X className="h-3 w-3" />

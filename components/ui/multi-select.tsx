@@ -49,6 +49,11 @@ export function MultiSelect({
     [value, onChange],
   );
 
+  const handleSelectWrapper = useCallback(
+    (id: string) => () => handleSelect(id),
+    [handleSelect],
+  );
+
   const handleRemove = useCallback(
     (e: React.MouseEvent, id: string) => {
       e.stopPropagation();
@@ -101,7 +106,7 @@ export function MultiSelect({
                 <CommandItem
                   key={option._id}
                   value={option.title ?? ""}
-                  onSelect={() => handleSelect(option._id ?? "")}
+                  onSelect={handleSelectWrapper(option._id ?? "")}
                   className="cursor-pointer"
                 >
                   <Check
