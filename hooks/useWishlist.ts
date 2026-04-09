@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   addToWishlist,
@@ -9,20 +10,38 @@ import {
   resetWishlist,
 } from "@/actions/wishlistActions";
 import type { Product } from "@/sanity.types";
+import { useLocalWishlist } from "./useLocalWishlist";
 
 interface UseWishlistReturn {
   favoriteProduct: Product[];
-  addToFavorite: (product: Product) => Promise<void>;
-  removeFromFavorite: (productId: string) => Promise<void>;
-  resetFavorite: () => Promise<void>;
+  addToFavorite: (product: Product) => void;
+  removeFromFavorite: (productId: string) => void;
+  resetFavorite: () => void;
   isLoading: boolean;
 }
 
 export function useWishlist(): UseWishlistReturn {
-  const [favoriteProduct, setFavoriteProduct] = useState<Product[]>([]);
+  const { isSignedIn } = useAuth();
+  const [serverFavorites, setServerFavorites] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const {
+    localFavorites,
+    addToLocalFavorite,
+    removeFromLocalFavorite,
+    clearLocalFavorites,
+    getLocalWishlist,
+    migrateToServer,
+  } = useLocalWishlist();
+
+  const favoriteProduct = isSignedIn ? serverFavorites : localFavorites;
+
   useEffect(() => {
+    if (!isSignedIn) {
+      setIsLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     const loadWishlist = async () => {
@@ -31,43 +50,25 @@ export function useWishlist(): UseWishlistReturn {
 
         if (cancelled) return;
 
-        setFavoriteProduct(products);
+        const uniqueProducts = products.filter(
+          (product, index, self) =>
+            index === self.findIndex((p) => p._id === product._id),
+        );
 
-        if (typeof window !== "undefined") {
-          try {
-            const stored = localStorage.getItem("cart-store");
-            if (stored) {
-              const parsed = JSON.parse(stored);
-              const localFavorites = parsed?.state?.favoriteProduct as
-                | Product[]
-                | undefined;
+        setServerFavorites(uniqueProducts);
 
-              if (
-                localFavorites &&
-                localFavorites.length > 0 &&
-                products.length > 0
-              ) {
-                const existingIds = new Set(
-                  products.map((p: Product) => p._id),
-                );
-
-                for (const product of localFavorites) {
-                  if (product._id && !existingIds.has(product._id)) {
-                    try {
-                      await addToWishlist(product._id);
-                    } catch {
-                      // Silent fail for migration
-                    }
-                  }
-                }
-
-                const newState = { ...parsed };
-                newState.state = { ...parsed.state, favoriteProduct: [] };
-                localStorage.setItem("cart-store", JSON.stringify(newState));
-              }
-            }
-          } catch {
-            // Silent fail for localStorage
+        const local = getLocalWishlist();
+        if (local.length > 0) {
+          await migrateToServer(async (productId) => {
+            await addToWishlist(productId);
+          });
+          const updatedProducts = await getWishlist();
+          if (!cancelled) {
+            const uniqueUpdated = updatedProducts.filter(
+              (product, index, self) =>
+                index === self.findIndex((p) => p._id === product._id),
+            );
+            setServerFavorites(uniqueUpdated);
           }
         }
       } catch (error) {
@@ -84,72 +85,85 @@ export function useWishlist(): UseWishlistReturn {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isSignedIn, getLocalWishlist, migrateToServer]);
 
-  const addToFavorite = async (product: Product) => {
-    if (!product._id) return;
+  const addToFavorite = useCallback(
+    (product: Product) => {
+      if (!product._id) return;
 
-    const isAlreadyFavorite = favoriteProduct.some(
-      (p) => p._id === product._id,
-    );
-
-    setFavoriteProduct((prev) => {
-      if (isAlreadyFavorite) {
-        return prev.filter((p) => p._id !== product._id);
-      }
-      return [...prev, product];
-    });
-
-    try {
-      if (isAlreadyFavorite) {
-        await removeFromWishlist(product._id);
-        toast.success("Produto removido dos favoritos!");
-      } else {
-        await addToWishlist(product._id);
-        toast.success("Produto adicionado aos favoritos!");
-      }
-    } catch (_error) {
-      setFavoriteProduct((prev) => {
-        if (isAlreadyFavorite) {
+      if (isSignedIn) {
+        setServerFavorites((prev) => {
+          if (prev.some((p) => p._id === product._id)) {
+            return prev;
+          }
           return [...prev, product];
-        }
-        return prev.filter((p) => p._id !== product._id);
-      });
-      toast.error("Erro ao atualizar favoritos");
-    }
-  };
+        });
 
-  const removeFromFavorite = async (productId: string) => {
-    const product = favoriteProduct.find((p) => p._id === productId);
-
-    setFavoriteProduct((prev) => prev.filter((p) => p._id !== productId));
-
-    try {
-      await removeFromWishlist(productId);
-      toast.success("Produto removido dos favoritos!");
-    } catch (_error) {
-      if (product) {
-        setFavoriteProduct((prev) => [...prev, product]);
+        addToWishlist(product._id)
+          .then(() => {
+            toast.success("Produto adicionado aos favoritos!");
+          })
+          .catch(() => {
+            setServerFavorites((prev) =>
+              prev.filter((p) => p._id !== product._id),
+            );
+            toast.error("Erro ao adicionar aos favoritos");
+          });
+      } else {
+        addToLocalFavorite(product);
       }
-      toast.error("Erro ao remover produto");
-    }
-  };
+    },
+    [isSignedIn, addToLocalFavorite],
+  );
 
-  const resetFavorite = async () => {
-    const previousProducts = [...favoriteProduct];
-    setFavoriteProduct([]);
+  const removeFromFavorite = useCallback(
+    (productId: string) => {
+      if (isSignedIn) {
+        const product = serverFavorites.find((p) => p._id === productId);
+        setServerFavorites((prev) => prev.filter((p) => p._id !== productId));
 
-    try {
-      await resetWishlist();
-      toast.success("Lista de favoritos limpa!");
-    } catch (_error) {
-      setFavoriteProduct(previousProducts);
-      toast.error("Erro ao limpar favoritos");
+        removeFromWishlist(productId)
+          .then(() => {
+            toast.success("Produto removido dos favoritos!");
+          })
+          .catch(() => {
+            if (product) {
+              setServerFavorites((prev) => [...prev, product]);
+            }
+            toast.error("Erro ao remover dos favoritos");
+          });
+      } else {
+        removeFromLocalFavorite(productId);
+      }
+    },
+    [isSignedIn, serverFavorites, removeFromLocalFavorite],
+  );
+
+  const resetFavorite = useCallback(() => {
+    if (isSignedIn) {
+      const previousProducts = [...serverFavorites];
+      setServerFavorites([]);
+
+      resetWishlist()
+        .then(() => {
+          toast.success("Lista de favoritos limpa!");
+        })
+        .catch(() => {
+          setServerFavorites(previousProducts);
+          toast.error("Erro ao limpar favoritos");
+        });
+    } else {
+      clearLocalFavorites();
     }
-  };
+  }, [isSignedIn, serverFavorites, clearLocalFavorites]);
+
+  const uniqueFavorites = favoriteProduct.filter(
+    (product, index, self) =>
+      index === self.findIndex((p) => p._id === product._id),
+  );
 
   return {
-    favoriteProduct,
+    favoriteProduct: uniqueFavorites,
     addToFavorite,
     removeFromFavorite,
     resetFavorite,

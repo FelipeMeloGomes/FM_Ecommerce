@@ -1,9 +1,10 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import { Heart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { type ComponentType, useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { confirmToast } from "@/helpers/confirmToast";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -17,8 +18,13 @@ import Title from "./Title";
 import { Button } from "./ui/button";
 import { Table, TableBody, TableCell, TableRow } from "./ui/table";
 
-const WishListProducts = () => {
+interface WishListProductsProps {
+  GuestPrompt?: ComponentType<{ productCount?: number }>;
+}
+
+const WishListProducts = ({ GuestPrompt }: WishListProductsProps) => {
   const [visibleProducts, setVisibleProducts] = useState(7);
+  const { isSignedIn } = useAuth();
   const { favoriteProduct, removeFromFavorite, resetFavorite, isLoading } =
     useWishlist();
 
@@ -146,13 +152,25 @@ const WishListProducts = () => {
                         </div>
                       </TableCell>
                       <TableCell className="p-4 hidden md:table-cell">
-                        {product?.categories && (
-                          <span className="uppercase text-xs font-medium text-muted-foreground">
-                            {product.categories
-                              .map((cat) => (cat as { title?: string }).title)
-                              .join(", ")}
-                          </span>
-                        )}
+                        {product?.categories &&
+                          product.categories.length > 0 && (
+                            <span className="uppercase text-xs font-medium text-muted-foreground">
+                              {product.categories
+                                .map((cat) => {
+                                  if (typeof cat === "string") return cat;
+                                  if (
+                                    cat &&
+                                    typeof cat === "object" &&
+                                    "title" in cat
+                                  ) {
+                                    return (cat as { title?: string }).title;
+                                  }
+                                  return "";
+                                })
+                                .filter(Boolean)
+                                .join(", ")}
+                            </span>
+                          )}
                       </TableCell>
                       <TableCell className="p-4 capitalize hidden md:table-cell text-sm">
                         {product?.variant}
@@ -198,6 +216,8 @@ const WishListProducts = () => {
             )}
           </div>
         </div>
+      ) : !isSignedIn && GuestPrompt ? (
+        <GuestPrompt productCount={favoriteProduct.length} />
       ) : (
         <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-6 px-4 text-center">
           <div className="relative">

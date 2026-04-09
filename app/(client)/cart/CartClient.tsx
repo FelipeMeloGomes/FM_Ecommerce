@@ -10,10 +10,10 @@ import { deleteAddress } from "@/actions/deleteAddress";
 import Container from "@/components/Container";
 import AddressSection from "@/components/cart/AddressSection";
 import CartItemsList from "@/components/cart/CartItemsList";
+import { GuestCheckoutPrompt } from "@/components/cart/GuestCheckoutPrompt";
 import MobileOrderSummary from "@/components/cart/MobileOrderSummary";
 import OrderSummary from "@/components/cart/OrderSummary";
 import EmptyCart from "@/components/EmptyCart";
-import NoAccess from "@/components/NoAccess";
 import { ShippingCalculator } from "@/components/ShippingCalculator";
 import Title from "@/components/Title";
 import { Button } from "@/components/ui/button";
@@ -81,6 +81,11 @@ const CartClient = ({ addresses }: CartClientProps) => {
   }, [resetCart]);
 
   const handleCheckout = useCallback(async () => {
+    if (!isSignedIn) {
+      router.push("/sign-in?redirect_url=/cart");
+      return;
+    }
+
     setLoading(true);
     try {
       const checkoutUrl = await performCheckout(
@@ -102,7 +107,7 @@ const CartClient = ({ addresses }: CartClientProps) => {
     } finally {
       setLoading(false);
     }
-  }, [groupedItems, user, selectedAddress, shipping]);
+  }, [groupedItems, user, selectedAddress, shipping, isSignedIn, router]);
 
   const handleSelectAddress = useCallback(
     (addressId: string) => {
@@ -128,38 +133,48 @@ const CartClient = ({ addresses }: CartClientProps) => {
     [router],
   );
 
+  if (!groupedItems?.length) {
+    return (
+      <div className="bg-background min-h-screen">
+        <Container>
+          <EmptyCart />
+        </Container>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-background min-h-screen pb-52 md:pb-10">
-      {isSignedIn ? (
-        <Container>
-          {groupedItems?.length ? (
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 py-5">
-                <ShoppingBag className="w-6 h-6 text-foreground" />
-                <Title className="text-2xl font-semibold">
-                  Carrinho de compras
-                </Title>
-              </div>
+      <Container>
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 py-5">
+            <ShoppingBag className="w-6 h-6 text-foreground" />
+            <Title className="text-2xl font-semibold">
+              Carrinho de compras
+            </Title>
+          </div>
 
-              <div className="grid lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-4">
-                  <div className="bg-card rounded-xl border border-border overflow-hidden">
-                    <CartItemsList items={groupedItems} />
-                    <div className="p-4 border-t border-border flex justify-end">
-                      <Button
-                        onClick={handleResetCart}
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Limpar Carrinho
-                      </Button>
-                    </div>
-                  </div>
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-card rounded-xl border border-border overflow-hidden">
+                <CartItemsList items={groupedItems} />
+                <div className="p-4 border-t border-border flex justify-end">
+                  <Button
+                    onClick={handleResetCart}
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Limpar Carrinho
+                  </Button>
                 </div>
+              </div>
+            </div>
 
-                <div className="space-y-4">
+            <div className="space-y-4">
+              {isSignedIn ? (
+                <>
                   <OrderSummary
                     subtotal={subtotal}
                     discount={discount}
@@ -188,24 +203,29 @@ const CartClient = ({ addresses }: CartClientProps) => {
                       onSelectShipping={setShipping}
                     />
                   </Card>
-                </div>
-
-                <MobileOrderSummary
+                </>
+              ) : (
+                <GuestCheckoutPrompt
                   subtotal={subtotal}
                   discount={discount}
                   total={total}
-                  loading={loading}
-                  onCheckout={handleCheckout}
+                  cartItems={groupedItems}
+                  selectedShipping={shipping}
+                  onSelectShipping={setShipping}
                 />
-              </div>
+              )}
+
+              <MobileOrderSummary
+                subtotal={subtotal}
+                discount={discount}
+                total={total}
+                loading={loading}
+                onCheckout={handleCheckout}
+              />
             </div>
-          ) : (
-            <EmptyCart />
-          )}
-        </Container>
-      ) : (
-        <NoAccess />
-      )}
+          </div>
+        </div>
+      </Container>
     </div>
   );
 };

@@ -8,7 +8,9 @@ import type { Address } from "@/sanity.types";
 export async function getAddresses(): Promise<Address[]> {
   const { userId } = await auth();
 
-  if (!userId) throw new Error("Unauthorized");
+  if (!userId) {
+    return [];
+  }
 
   return await client.fetch(
     GET_ADDRESSES_QUERY,

@@ -68,27 +68,29 @@ const SideMenu = ({
     { href: "/", label: "Início", icon: Home },
     { href: "/shop", label: "Loja", icon: ShoppingBag },
     { href: "/deal", label: "Promoções", icon: Package },
-  ];
-
-  const accountItems = [
     {
       href: "/cart",
       label: "Carrinho",
       icon: ShoppingCart,
-      highlight: true,
-      badge: cartItemsCount > 0 ? cartItemsCount : undefined,
-    },
-    {
-      href: "/orders",
-      label: "Meus Pedidos",
-      icon: ShoppingBag,
-      badge: ordersCount > 0 ? ordersCount : undefined,
+      badge: mounted && cartItemsCount > 0 ? cartItemsCount : undefined,
     },
     {
       href: "/wishlist",
       label: "Favoritos",
       icon: Heart,
-      badge: favoriteProduct.length > 0 ? favoriteProduct.length : undefined,
+      badge:
+        mounted && favoriteProduct.length > 0
+          ? favoriteProduct.length
+          : undefined,
+    },
+  ];
+
+  const accountItems = [
+    {
+      href: "/orders",
+      label: "Meus Pedidos",
+      icon: ShoppingBag,
+      badge: mounted && ordersCount > 0 ? ordersCount : undefined,
     },
     { href: "/account/addresses", label: "Endereços", icon: MapPin },
   ];
@@ -171,14 +173,21 @@ const SideMenu = ({
                           key={item.href}
                           href={item.href}
                           onClick={onClose}
-                          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                             isActive
                               ? "bg-shop_dark_green text-white"
                               : "text-foreground hover:bg-muted dark:text-zinc-200"
                           }`}
                         >
-                          <item.icon className="w-4 h-4" />
-                          {item.label}
+                          <span className="flex items-center gap-3">
+                            <item.icon className="w-4 h-4" />
+                            {item.label}
+                          </span>
+                          {item.badge && (
+                            <span className="bg-shop_orange text-white text-xs px-2 py-0.5 rounded-full">
+                              {item.badge}
+                            </span>
+                          )}
                         </Link>
                       );
                     })}
