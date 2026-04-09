@@ -33,6 +33,7 @@ const ProductSideMenu = ({
         onClick={handleFavorite}
         disabled={isLoading}
         aria-pressed={isFavorite}
+        suppressHydrationWarning
         className={cn(
           "p-2.5 rounded-full transition-all",
           isFavorite

@@ -47,6 +47,7 @@ const FavoriteButton = ({
     <button
       type="button"
       onClick={handleFavorite}
+      suppressHydrationWarning
       className="group relative hover:text-shop_light_green hoverEffect border border-shop_light_green/80 hover:border-shop_light_green p-1.5 rounded-sm"
     >
       {existingProduct ? (
