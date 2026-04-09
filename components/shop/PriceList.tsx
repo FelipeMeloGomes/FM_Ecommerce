@@ -1,3 +1,4 @@
+import React, { useCallback } from "react";
 import Title from "../Title";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
@@ -14,14 +15,36 @@ interface Props {
   selectedPrice?: string | null;
   setSelectedPrice: (value: string | null) => void;
 }
-const PriceList = ({ selectedPrice, setSelectedPrice }: Props) => {
+
+const PriceList = React.memo(({ selectedPrice, setSelectedPrice }: Props) => {
+  const handleSelect = useCallback(
+    (value: string) => {
+      setSelectedPrice(value);
+    },
+    [setSelectedPrice],
+  );
+
+  const handleClear = useCallback(() => {
+    setSelectedPrice(null);
+  }, [setSelectedPrice]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent, value: string) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setSelectedPrice(value);
+      }
+    },
+    [setSelectedPrice],
+  );
+
   return (
     <div className="w-full bg-card border border-border/60 p-5 rounded-xl">
       <Title className="text-base font-bold">Preço</Title>
       <RadioGroup
         className="mt-3 space-y-2"
         value={selectedPrice || ""}
-        onValueChange={(value) => setSelectedPrice(value || null)}
+        onValueChange={(value) => handleSelect(value)}
       >
         {priceArray?.map((price) => {
           const isSelected = selectedPrice === price.value;
@@ -32,13 +55,8 @@ const PriceList = ({ selectedPrice, setSelectedPrice }: Props) => {
               aria-checked={isSelected}
               tabIndex={0}
               className="flex items-center gap-2 cursor-pointer"
-              onClick={() => setSelectedPrice(price.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setSelectedPrice(price.value);
-                }
-              }}
+              onClick={() => handleSelect(price.value)}
+              onKeyDown={(e) => handleKeyDown(e, price.value)}
             >
               <RadioGroupItem
                 value={price.value}
@@ -62,7 +80,7 @@ const PriceList = ({ selectedPrice, setSelectedPrice }: Props) => {
       {selectedPrice && (
         <button
           type="button"
-          onClick={() => setSelectedPrice(null)}
+          onClick={handleClear}
           className="text-sm font-medium mt-3 text-shop_orange hover:text-shop_btn_dark_green transition-colors"
         >
           Redefinir seleção
@@ -70,6 +88,8 @@ const PriceList = ({ selectedPrice, setSelectedPrice }: Props) => {
       )}
     </div>
   );
-};
+});
+
+PriceList.displayName = "PriceList";
 
 export default PriceList;
