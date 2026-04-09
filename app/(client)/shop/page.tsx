@@ -9,8 +9,10 @@ type Props = {
 
 export default async function ShopPage({ searchParams }: Props) {
   const params = await searchParams;
-  const categories = await getCategories();
-  const brands = await getAllBrands();
+  const [categories, brands] = await Promise.all([
+    getCategories(),
+    getAllBrands(),
+  ]);
   return (
     <div>
       <Shop

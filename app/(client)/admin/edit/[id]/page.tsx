@@ -10,9 +10,12 @@ interface PageProps {
 export default async function EditProductPage({ params }: PageProps) {
   const { id } = await params;
   const repository = new SanityProductRepository();
-  const product = await repository.findById(id);
-  const categories = await getCategories();
-  const brands = await getAllBrands();
+
+  const [product, categories, brands] = await Promise.all([
+    repository.findById(id),
+    getCategories(),
+    getAllBrands(),
+  ]);
 
   if (!product) {
     notFound();
