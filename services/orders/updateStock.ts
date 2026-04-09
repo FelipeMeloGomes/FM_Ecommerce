@@ -1,5 +1,5 @@
+import type { SanityClient } from "next-sanity";
 import { backendClient } from "@/sanity/lib/backendClient";
-import type { ClientPerspective, SanityClient } from "next-sanity";
 
 type Transaction = ReturnType<SanityClient["transaction"]>;
 

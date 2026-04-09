@@ -278,8 +278,13 @@ const OrdersComponent = ({
       )}
 
       <OrderDetailDialog
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        order={selectedOrder as any}
+        order={
+          selectedOrder as unknown as Parameters<
+            typeof OrderDetailDialog
+          >[0] extends { order: infer O }
+            ? NonNullable<O>
+            : never
+        }
         isOpen={!!selectedOrder}
         onClose={handleCloseDialog}
       />
