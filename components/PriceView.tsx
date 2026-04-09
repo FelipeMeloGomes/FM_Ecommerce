@@ -1,3 +1,4 @@
+import React from "react";
 import { twMerge } from "tailwind-merge";
 import { cn } from "@/lib/utils";
 import PriceFormatter from "./PriceFormatter";
@@ -7,7 +8,8 @@ interface Props {
   discount: number | undefined;
   className?: string;
 }
-const PriceView = ({ price, discount, className }: Props) => {
+
+const PriceView = React.memo(({ price, discount, className }: Props) => {
   return (
     <div className="flex items-center gap-3">
       <PriceFormatter
@@ -25,6 +27,8 @@ const PriceView = ({ price, discount, className }: Props) => {
       )}
     </div>
   );
-};
+});
+
+PriceView.displayName = "PriceView";
 
 export default PriceView;

@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import { productType } from "@/constants/data";
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
   onTabSelect: (tab: string) => void;
 }
 
-const HomeTabBar = ({ selectedTab, onTabSelect }: Props) => {
+const HomeTabBar = React.memo(({ selectedTab, onTabSelect }: Props) => {
   const handleTabClick = useCallback(
     (title: string | undefined) => () => {
       onTabSelect(title ?? "");
@@ -42,6 +42,8 @@ const HomeTabBar = ({ selectedTab, onTabSelect }: Props) => {
       </Link>
     </div>
   );
-};
+});
+
+HomeTabBar.displayName = "HomeTabBar";
 
 export default HomeTabBar;

@@ -1,6 +1,6 @@
 "use client";
 import { ShoppingBag } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
@@ -14,7 +14,7 @@ interface Props {
   className?: string;
 }
 
-const AddToCartButton = ({ product, className }: Props) => {
+const AddToCartButton = React.memo(({ product, className }: Props) => {
   const addItem = useStore((state) => state.addItem);
   const items = useStore((state) => state.items);
 
@@ -91,6 +91,8 @@ const AddToCartButton = ({ product, className }: Props) => {
       )}
     </div>
   );
-};
+});
+
+AddToCartButton.displayName = "AddToCartButton";
 
 export default AddToCartButton;
