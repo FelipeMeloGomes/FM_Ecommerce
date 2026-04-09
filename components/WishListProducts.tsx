@@ -3,7 +3,7 @@
 import { Heart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { confirmToast } from "@/helpers/confirmToast";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -22,22 +22,15 @@ const WishListProducts = () => {
   const { favoriteProduct, removeFromFavorite, resetFavorite, isLoading } =
     useWishlist();
 
-  if (isLoading) {
-    return (
-      <Container>
-        <WishlistTableSkeleton />
-      </Container>
-    );
-  }
+  const handleRemoveFromFavorite = useCallback(
+    (productId?: string) => {
+      removeFromFavorite(productId);
+      toast.success("Produto removido da lista de favoritos");
+    },
+    [removeFromFavorite],
+  );
 
-  const loadMore = () => {
-    setVisibleProducts((prev) => Math.min(prev + 5, favoriteProduct.length));
-  };
-
-  const showLoadMore = visibleProducts < favoriteProduct?.length;
-  const showLoadLess = visibleProducts > 10;
-
-  const handleResetWishlist = () => {
+  const handleResetWishlist = useCallback(() => {
     confirmToast({
       message: "Tem certeza que deseja limpar sua lista de favoritos?",
       onConfirm: () => {
@@ -45,7 +38,30 @@ const WishListProducts = () => {
         toast.success("Lista de favoritos limpa com sucesso!");
       },
     });
-  };
+  }, [resetFavorite]);
+
+  const loadMore = useCallback(() => {
+    setVisibleProducts((prev) => Math.min(prev + 5, favoriteProduct.length));
+  }, [favoriteProduct.length]);
+
+  const showLoadMore = useMemo(
+    () => visibleProducts < favoriteProduct?.length,
+    [visibleProducts, favoriteProduct?.length],
+  );
+
+  const showLoadLess = useMemo(() => visibleProducts > 10, [visibleProducts]);
+
+  const handleShowLess = useCallback(() => {
+    setVisibleProducts(10);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Container>
+        <WishlistTableSkeleton />
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -82,7 +98,7 @@ const WishListProducts = () => {
                   <TableCell className="p-4 text-left text-sm font-medium text-muted-foreground">
                     Preço
                   </TableCell>
-                  <TableCell className="p-4 text-center text-sm font-medium text-muted-foreground">
+                  <TableCell className="p-4 center text-sm font-medium text-muted-foreground">
                     Ação
                   </TableCell>
                 </TableRow>
@@ -97,12 +113,9 @@ const WishListProducts = () => {
                         <div className="flex items-center gap-3">
                           <button
                             type="button"
-                            onClick={() => {
-                              removeFromFavorite(product?._id);
-                              toast.success(
-                                "Produto removido da lista de favoritos",
-                              );
-                            }}
+                            onClick={() =>
+                              handleRemoveFromFavorite(product?._id)
+                            }
                             className="p-1.5 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                           >
                             <X size={16} />
@@ -176,7 +189,7 @@ const WishListProducts = () => {
               </Button>
             )}
             {showLoadLess && (
-              <Button variant="outline" onClick={() => setVisibleProducts(10)}>
+              <Button variant="outline" onClick={handleShowLess}>
                 Mostrar menos
               </Button>
             )}

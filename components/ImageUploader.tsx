@@ -180,6 +180,24 @@ export function ImageUploader({
     setError(null);
   }, [images, setImages]);
 
+  const handleUploadClick = useCallback(() => {
+    if (!disabled) {
+      inputRef.current?.click();
+    }
+  }, [disabled]);
+
+  const handleAddMoreClick = useCallback(() => {
+    inputRef.current?.click();
+  }, []);
+
+  const handleRemoveImageClick = useCallback(
+    (e: React.MouseEvent, imageId: string) => {
+      e.stopPropagation();
+      removeImage(imageId);
+    },
+    [removeImage],
+  );
+
   useEffect(() => {
     return () => {
       if (!isControlled) {
@@ -222,7 +240,7 @@ export function ImageUploader({
       <button
         type="button"
         disabled={disabled}
-        onClick={() => !disabled && inputRef.current?.click()}
+        onClick={handleUploadClick}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -308,10 +326,7 @@ export function ImageUploader({
                   <div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100" />
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeImage(image.id);
-                    }}
+                    onClick={(e) => handleRemoveImageClick(e, image.id)}
                     className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
                   >
                     <X className="h-4 w-4" />
@@ -329,7 +344,7 @@ export function ImageUploader({
             {multiple && images.length < maxFiles && (
               <button
                 type="button"
-                onClick={() => inputRef.current?.click()}
+                onClick={handleAddMoreClick}
                 className="flex aspect-square flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 transition-colors hover:border-primary/50 hover:bg-muted/50"
               >
                 <ImageIcon className="h-6 w-6 text-muted-foreground" />

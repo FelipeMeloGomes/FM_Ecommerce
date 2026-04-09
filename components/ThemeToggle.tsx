@@ -2,7 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -11,6 +11,10 @@ export function ThemeToggle() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleToggle = useCallback(() => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  }, [theme, setTheme]);
 
   if (!mounted) {
     return (
@@ -27,7 +31,7 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={handleToggle}
       className="p-2 rounded-lg hover:bg-muted transition-colors"
       aria-label="Alternar tema"
     >

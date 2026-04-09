@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { confirmToast } from "@/helpers/confirmToast";
 import { apiRequest } from "@/lib/api/apiRequest";
@@ -41,7 +41,30 @@ const OrdersComponent = ({
     setLocalOrders(orders);
   }, [orders]);
 
-  const toggleSelectAll = () => {
+  const handleSelectOrder = useCallback(
+    (order: MY_ORDERS_QUERYResult["orders"][number]) => {
+      setSelectedOrder(order);
+    },
+    [],
+  );
+
+  const handleCloseDialog = useCallback(() => {
+    setSelectedOrder(null);
+  }, []);
+
+  const handleToggleSelect = useCallback((orderId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(orderId)) {
+        next.delete(orderId);
+      } else {
+        next.add(orderId);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
     if (selectedIds.size === localOrders.length) {
       setSelectedIds(new Set());
     } else {
@@ -53,9 +76,9 @@ const OrdersComponent = ({
         ),
       );
     }
-  };
+  }, [selectedIds.size, localOrders]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (selectedIds.size === 0) return;
 
     confirmToast({
@@ -106,7 +129,11 @@ const OrdersComponent = ({
         }
       },
     });
-  };
+  }, [selectedIds, router]);
+
+  const handleStopPropagation = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
 
   return (
     <>
@@ -129,7 +156,7 @@ const OrdersComponent = ({
                       className={`cursor-pointer hover:bg-muted/50 border-b transition-colors ${
                         selectedIds.has(order._id) ? "bg-destructive/10" : ""
                       }`}
-                      onClick={() => setSelectedOrder(order)}
+                      onClick={() => handleSelectOrder(order)}
                     >
                       <TableCell className="font-medium">
                         {order.orderNumber?.slice(-10) ?? "N/A"}...
@@ -172,19 +199,13 @@ const OrdersComponent = ({
                       {isAdmin && (
                         <TableCell
                           className="text-center"
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={handleStopPropagation}
                         >
                           <div className="flex items-center justify-center gap-2">
                             <Checkbox
                               checked={selectedIds.has(order._id)}
                               onCheckedChange={() =>
-                                setSelectedIds((prev) => {
-                                  const next = new Set(prev);
-                                  next.has(order._id)
-                                    ? next.delete(order._id)
-                                    : next.add(order._id);
-                                  return next;
-                                })
+                                handleToggleSelect(order._id)
                               }
                             />
                           </div>
@@ -248,7 +269,7 @@ const OrdersComponent = ({
       <OrderDetailDialog
         order={selectedOrder}
         isOpen={!!selectedOrder}
-        onClose={() => setSelectedOrder(null)}
+        onClose={handleCloseDialog}
       />
     </>
   );
