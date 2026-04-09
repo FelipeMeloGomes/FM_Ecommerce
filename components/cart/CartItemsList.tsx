@@ -53,6 +53,7 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
 
   const handleRemoveProduct = useCallback(
     (productId?: string) => {
+      if (!productId) return;
       confirmToast({
         message: "Deseja remover este produto?",
         onConfirm: () => {
@@ -99,7 +100,7 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                 </Link>
               )}
 
-              <div className="flex flex-1 flex-col justify-between min-h-[100px]">
+              <div className="flex flex-1 flex-col justify-between min-h-25">
                 <div className="space-y-1">
                   <h2 className="font-semibold line-clamp-2">
                     {product?.name}
