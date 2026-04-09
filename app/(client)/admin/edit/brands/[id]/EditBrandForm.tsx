@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Brand } from "@/core/brands/Brand";
+import { useImageCleanup } from "@/hooks/use-image-cleanup";
 import { apiRequest } from "@/lib/api/apiRequest";
 import { urlFor } from "@/sanity/lib/image";
 
@@ -54,13 +55,9 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
         });
       }
     }
-
-    return () => {
-      if (image?.preview && image?.file) {
-        URL.revokeObjectURL(image.preview);
-      }
-    };
   }, [brand.image, shouldRemoveImage, image]);
+
+  useImageCleanup(image?.file ? image.preview : null);
 
   const handleCancel = useCallback(() => {
     router.push("/admin/brands");

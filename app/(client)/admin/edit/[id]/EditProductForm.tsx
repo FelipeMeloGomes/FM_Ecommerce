@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Product, ProductImage } from "@/core/products/Product";
+import { useImageCleanup } from "@/hooks/use-image-cleanup";
 import { apiRequest } from "@/lib/api/apiRequest";
 import {
   type ProductFormInput,
@@ -96,15 +97,9 @@ export function EditProductForm({ product, categories, brands }: Props) {
     }
   }, [product]);
 
-  useEffect(() => {
-    return () => {
-      images.forEach((img) => {
-        if (img.file) {
-          URL.revokeObjectURL(img.preview);
-        }
-      });
-    };
-  }, [images]);
+  const lastImage =
+    images.length > 0 ? images[images.length - 1].preview : null;
+  useImageCleanup(lastImage);
 
   const onSubmit = async (data: ProductFormInput) => {
     const formData = new FormData();

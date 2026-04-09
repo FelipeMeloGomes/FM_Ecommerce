@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormError } from "@/components/FormError";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useImageCleanup } from "@/hooks/use-image-cleanup";
 import { apiRequest } from "@/lib/api/apiRequest";
 import {
   type CreateCategoryInput,
@@ -35,13 +36,7 @@ export default function AdminAddCategory() {
 
   const isFeatured = watch("featured");
 
-  useEffect(() => {
-    return () => {
-      if (image?.preview && image?.file) {
-        URL.revokeObjectURL(image.preview);
-      }
-    };
-  }, [image]);
+  useImageCleanup(image?.preview ?? null);
 
   const onSubmit = async (data: CreateCategoryInput) => {
     const formData = new FormData();

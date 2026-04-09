@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { useFilterSelection } from "@/hooks/use-filter-selection";
 import type { BRANDS_QUERYResult } from "@/sanity.types";
 import Title from "../Title";
 import { Label } from "../ui/label";
@@ -12,25 +13,31 @@ interface Props {
 
 const BrandList = React.memo(
   ({ brands, selectedBrand, setSelectedBrand }: Props) => {
+    const { select, clear, isSelected } = useFilterSelection({
+      initialValue: selectedBrand,
+    });
+
     const handleSelect = useCallback(
       (value: string) => {
+        select(value);
         setSelectedBrand(value);
       },
-      [setSelectedBrand],
+      [select, setSelectedBrand],
     );
 
     const handleClear = useCallback(() => {
+      clear();
       setSelectedBrand(null);
-    }, [setSelectedBrand]);
+    }, [clear, setSelectedBrand]);
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent, value: string) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          setSelectedBrand(value);
+          handleSelect(value);
         }
       },
-      [setSelectedBrand],
+      [handleSelect],
     );
 
     return (
@@ -38,17 +45,17 @@ const BrandList = React.memo(
         <Title className="text-base font-bold">Marcas</Title>
         <RadioGroup
           value={selectedBrand || ""}
-          onValueChange={(value) => handleSelect(value)}
+          onValueChange={handleSelect}
           className="mt-3 space-y-2"
         >
           {brands?.map((brand) => {
             const slug = brand?.slug?.current as string;
-            const isSelected = selectedBrand === slug;
+            const checked = isSelected(slug);
             return (
               <div
                 key={brand._id}
                 role="radio"
-                aria-checked={isSelected}
+                aria-checked={checked}
                 tabIndex={0}
                 className="flex items-center gap-2 cursor-pointer"
                 onClick={() => handleSelect(slug)}
@@ -58,7 +65,7 @@ const BrandList = React.memo(
                 <Label
                   htmlFor={slug}
                   className={
-                    isSelected
+                    checked
                       ? "font-semibold text-shop_dark_green cursor-pointer"
                       : "text-muted-foreground cursor-pointer"
                   }

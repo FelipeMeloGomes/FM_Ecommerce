@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { useFilterSelection } from "@/hooks/use-filter-selection";
 import type { Category } from "@/sanity.types";
 import Title from "../Title";
 import { Label } from "../ui/label";
@@ -12,25 +13,31 @@ interface Props {
 
 const CategoryList = React.memo(
   ({ categories, selectedCategory, setSelectedCategory }: Props) => {
+    const { select, clear, isSelected } = useFilterSelection({
+      initialValue: selectedCategory,
+    });
+
     const handleSelect = useCallback(
       (value: string) => {
+        select(value);
         setSelectedCategory(value);
       },
-      [setSelectedCategory],
+      [select, setSelectedCategory],
     );
 
     const handleClear = useCallback(() => {
+      clear();
       setSelectedCategory(null);
-    }, [setSelectedCategory]);
+    }, [clear, setSelectedCategory]);
 
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent, value: string) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          setSelectedCategory(value);
+          handleSelect(value);
         }
       },
-      [setSelectedCategory],
+      [handleSelect],
     );
 
     return (
@@ -39,17 +46,17 @@ const CategoryList = React.memo(
 
         <RadioGroup
           value={selectedCategory || ""}
-          onValueChange={(value) => handleSelect(value)}
+          onValueChange={handleSelect}
           className="mt-3 space-y-2"
         >
           {categories?.map((category) => {
             const slug = category?.slug?.current as string;
-            const isSelected = selectedCategory === slug;
+            const checked = isSelected(slug);
             return (
               <div
                 key={category._id}
                 role="radio"
-                aria-checked={isSelected}
+                aria-checked={checked}
                 tabIndex={0}
                 className="flex items-center gap-2 cursor-pointer"
                 onClick={() => handleSelect(slug)}
@@ -59,7 +66,7 @@ const CategoryList = React.memo(
                 <Label
                   htmlFor={slug}
                   className={
-                    isSelected
+                    checked
                       ? "font-semibold text-shop_dark_green cursor-pointer"
                       : "text-muted-foreground cursor-pointer"
                   }

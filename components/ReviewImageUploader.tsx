@@ -3,6 +3,7 @@
 import { ImagePlus, X } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useId, useState } from "react";
+import { useImageCleanup } from "@/hooks/use-image-cleanup";
 import { cn } from "@/lib/utils";
 
 export interface ReviewImage {
@@ -27,6 +28,10 @@ export function ReviewImageUploader({
 }: ReviewImageUploaderProps) {
   const inputId = useId();
   const [error, setError] = useState<string | null>(null);
+
+  const lastImageUrl =
+    images.length > 0 ? images[images.length - 1].preview : null;
+  useImageCleanup(lastImageUrl);
 
   const acceptedFormats = [
     "image/jpeg",

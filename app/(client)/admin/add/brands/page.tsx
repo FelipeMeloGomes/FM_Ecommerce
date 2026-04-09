@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -10,6 +10,7 @@ import { type ImageFile, ImageUploader } from "@/components/ImageUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useImageCleanup } from "@/hooks/use-image-cleanup";
 import { apiRequest } from "@/lib/api/apiRequest";
 
 const brandSchema = z.object({
@@ -31,13 +32,7 @@ export default function AdminAddBrand() {
     resolver: zodResolver(brandSchema),
   });
 
-  useEffect(() => {
-    return () => {
-      if (image) {
-        URL.revokeObjectURL(image.preview);
-      }
-    };
-  }, [image]);
+  useImageCleanup(image?.preview ?? null);
 
   const onSubmit = async (data: BrandFormData) => {
     const formData = new FormData();

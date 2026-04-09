@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { useFilterSelection } from "@/hooks/use-filter-selection";
 import Title from "../Title";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
@@ -17,25 +18,31 @@ interface Props {
 }
 
 const PriceList = React.memo(({ selectedPrice, setSelectedPrice }: Props) => {
+  const { select, clear, isSelected } = useFilterSelection({
+    initialValue: selectedPrice,
+  });
+
   const handleSelect = useCallback(
     (value: string) => {
+      select(value);
       setSelectedPrice(value);
     },
-    [setSelectedPrice],
+    [select, setSelectedPrice],
   );
 
   const handleClear = useCallback(() => {
+    clear();
     setSelectedPrice(null);
-  }, [setSelectedPrice]);
+  }, [clear, setSelectedPrice]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent, value: string) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        setSelectedPrice(value);
+        handleSelect(value);
       }
     },
-    [setSelectedPrice],
+    [handleSelect],
   );
 
   return (
@@ -44,15 +51,15 @@ const PriceList = React.memo(({ selectedPrice, setSelectedPrice }: Props) => {
       <RadioGroup
         className="mt-3 space-y-2"
         value={selectedPrice || ""}
-        onValueChange={(value) => handleSelect(value)}
+        onValueChange={handleSelect}
       >
         {priceArray?.map((price) => {
-          const isSelected = selectedPrice === price.value;
+          const checked = isSelected(price.value);
           return (
             <div
               key={price.value}
               role="radio"
-              aria-checked={isSelected}
+              aria-checked={checked}
               tabIndex={0}
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => handleSelect(price.value)}
@@ -66,7 +73,7 @@ const PriceList = React.memo(({ selectedPrice, setSelectedPrice }: Props) => {
               <Label
                 htmlFor={price.value}
                 className={
-                  isSelected
+                  checked
                     ? "font-semibold text-shop_dark_green cursor-pointer"
                     : "text-muted-foreground cursor-pointer"
                 }

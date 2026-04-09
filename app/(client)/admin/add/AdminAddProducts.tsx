@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormError } from "@/components/FormError";
@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useImageCleanup } from "@/hooks/use-image-cleanup";
 import { apiRequest } from "@/lib/api/apiRequest";
 import {
   type CreateProductInput,
@@ -54,15 +55,9 @@ export default function AdminAddProducts({ categories, brands }: Props) {
   const categoriesSelected = watch("categories");
   const isFeatured = watch("isFeatured");
 
-  useEffect(() => {
-    return () => {
-      images.forEach((img) => {
-        if (img.file) {
-          URL.revokeObjectURL(img.preview);
-        }
-      });
-    };
-  }, [images]);
+  const lastImage =
+    images.length > 0 ? images[images.length - 1].preview : null;
+  useImageCleanup(lastImage);
 
   const onSubmit = async (data: CreateProductInput) => {
     const formData = new FormData();

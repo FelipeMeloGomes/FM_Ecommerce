@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Category } from "@/core/categories/Category";
+import { useImageCleanup } from "@/hooks/use-image-cleanup";
 import { apiRequest } from "@/lib/api/apiRequest";
 import {
   type CreateCategoryInput,
@@ -57,13 +58,9 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
         });
       }
     }
-
-    return () => {
-      if (image?.preview && image?.file) {
-        URL.revokeObjectURL(image.preview);
-      }
-    };
   }, [category.image, shouldRemoveImage, image]);
+
+  useImageCleanup(image?.file ? image.preview : null);
 
   const handleCancel = useCallback(() => {
     router.push("/admin/categories");
