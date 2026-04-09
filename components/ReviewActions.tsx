@@ -2,7 +2,7 @@
 
 import { Star } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { deleteReview, updateReview } from "@/actions/reviewActions";
 import {
@@ -55,51 +55,76 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
   const [loading, setLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const canEdit = (() => {
+  const canEdit = useMemo(() => {
     const createdAt = new Date(review._createdAt);
     const daysSinceCreation = Math.floor(
       (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
     );
     return daysSinceCreation < MAX_DAYS_TO_EDIT;
-  })();
+  }, [review._createdAt]);
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+  }, []);
 
-    try {
-      const newImages = images.filter((img) => !img.isExisting && img.file);
-      const keepImageIds = images
-        .filter((img) => img.isExisting)
-        .map((img) => img.id);
+  const handleCancelDelete = useCallback(() => {
+    setShowDeleteConfirm(false);
+  }, []);
 
-      const imageFiles: File[] | undefined =
-        newImages.length > 0
-          ? newImages
-              .map((img) => img.file as File)
-              .filter((f): f is File => f !== undefined)
-          : undefined;
+  const handleOpenEdit = useCallback(() => {
+    setIsEditing(true);
+  }, []);
 
-      await updateReview(review._id, {
-        rating,
-        title,
-        comment,
-        images: imageFiles,
-        keepImageIds,
-      });
-      toast.success("Avaliação atualizada!");
-      setIsEditing(false);
-      setImages([]);
-      onSuccess?.();
-      router.refresh();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Erro ao atualizar");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleOpenDelete = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, []);
 
-  const handleDelete = async () => {
+  const handleSetRating = useCallback((star: number) => {
+    setRating(star);
+  }, []);
+
+  const handleUpdate = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoading(true);
+
+      try {
+        const newImages = images.filter((img) => !img.isExisting && img.file);
+        const keepImageIds = images
+          .filter((img) => img.isExisting)
+          .map((img) => img.id);
+
+        const imageFiles: File[] | undefined =
+          newImages.length > 0
+            ? newImages
+                .map((img) => img.file as File)
+                .filter((f): f is File => f !== undefined)
+            : undefined;
+
+        await updateReview(review._id, {
+          rating,
+          title,
+          comment,
+          images: imageFiles,
+          keepImageIds,
+        });
+        toast.success("Avaliação atualizada!");
+        setIsEditing(false);
+        setImages([]);
+        onSuccess?.();
+        router.refresh();
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Erro ao atualizar",
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [images, rating, title, comment, review._id, onSuccess, router],
+  );
+
+  const handleDelete = useCallback(async () => {
     setLoading(true);
     try {
       await deleteReview(review._id);
@@ -112,7 +137,7 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
       setLoading(false);
       setShowDeleteConfirm(false);
     }
-  };
+  }, [review._id, onSuccess, router]);
 
   if (isEditing) {
     return (
@@ -128,7 +153,7 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
                 key={star}
                 type="button"
                 aria-label={`Avaliar com ${star} estrelas`}
-                onClick={() => setRating(star)}
+                onClick={() => handleSetRating(star)}
                 className="p-1 transition-colors"
               >
                 <Star
@@ -183,7 +208,7 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => setIsEditing(false)}
+            onClick={handleCancelEdit}
           >
             Cancelar
           </Button>
@@ -208,11 +233,7 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
           >
             Excluir
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowDeleteConfirm(false)}
-          >
+          <Button variant="ghost" size="sm" onClick={handleCancelDelete}>
             Cancelar
           </Button>
         </div>
@@ -223,14 +244,14 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
   return (
     <div className="flex gap-2 mt-2">
       {canEdit && (
-        <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+        <Button variant="ghost" size="sm" onClick={handleOpenEdit}>
           Editar
         </Button>
       )}
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => setShowDeleteConfirm(true)}
+        onClick={handleOpenDelete}
         className="text-destructive"
       >
         Excluir

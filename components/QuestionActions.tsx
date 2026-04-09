@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { deleteQuestion, updateQuestion } from "@/actions/questionActions";
 import { Button } from "@/components/ui/button";
@@ -25,32 +25,53 @@ export function QuestionActions({ question, onSuccess }: QuestionActionsProps) {
   const [loading, setLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const canEdit = (() => {
+  const canEdit = useMemo(() => {
     const createdAt = new Date(question._createdAt);
     const daysSinceCreation = Math.floor(
       (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24),
     );
     return daysSinceCreation < MAX_DAYS_TO_EDIT;
-  })();
+  }, [question._createdAt]);
 
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+  }, []);
 
-    try {
-      await updateQuestion(question._id, editQuestion);
-      toast.success("Pergunta atualizada!");
-      setIsEditing(false);
-      onSuccess?.();
-      router.refresh();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Erro ao atualizar");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleCancelDelete = useCallback(() => {
+    setShowDeleteConfirm(false);
+  }, []);
 
-  const handleDelete = async () => {
+  const handleOpenEdit = useCallback(() => {
+    setIsEditing(true);
+  }, []);
+
+  const handleOpenDelete = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, []);
+
+  const handleUpdate = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoading(true);
+
+      try {
+        await updateQuestion(question._id, editQuestion);
+        toast.success("Pergunta atualizada!");
+        setIsEditing(false);
+        onSuccess?.();
+        router.refresh();
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Erro ao atualizar",
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [question._id, editQuestion, onSuccess, router],
+  );
+
+  const handleDelete = useCallback(async () => {
     setLoading(true);
     try {
       await deleteQuestion(question._id);
@@ -63,7 +84,7 @@ export function QuestionActions({ question, onSuccess }: QuestionActionsProps) {
       setLoading(false);
       setShowDeleteConfirm(false);
     }
-  };
+  }, [question._id, onSuccess, router]);
 
   if (isEditing) {
     return (
@@ -92,7 +113,7 @@ export function QuestionActions({ question, onSuccess }: QuestionActionsProps) {
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => setIsEditing(false)}
+            onClick={handleCancelEdit}
           >
             Cancelar
           </Button>
@@ -117,11 +138,7 @@ export function QuestionActions({ question, onSuccess }: QuestionActionsProps) {
           >
             Excluir
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowDeleteConfirm(false)}
-          >
+          <Button variant="ghost" size="sm" onClick={handleCancelDelete}>
             Cancelar
           </Button>
         </div>
@@ -132,14 +149,14 @@ export function QuestionActions({ question, onSuccess }: QuestionActionsProps) {
   return (
     <div className="flex gap-2 mt-2">
       {canEdit && (
-        <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+        <Button variant="ghost" size="sm" onClick={handleOpenEdit}>
           Editar
         </Button>
       )}
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => setShowDeleteConfirm(true)}
+        onClick={handleOpenDelete}
         className="text-destructive"
       >
         Excluir
