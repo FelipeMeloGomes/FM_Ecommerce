@@ -198,6 +198,12 @@ export function ImageUploader({
     [removeImage],
   );
 
+  const handleRemoveImageClickWrapper = useCallback(
+    (imageId: string) => (e: React.MouseEvent) =>
+      handleRemoveImageClick(e, imageId),
+    [handleRemoveImageClick],
+  );
+
   useEffect(() => {
     return () => {
       if (!isControlled) {
@@ -326,7 +332,7 @@ export function ImageUploader({
                   <div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100" />
                   <button
                     type="button"
-                    onClick={(e) => handleRemoveImageClick(e, image.id)}
+                    onClick={handleRemoveImageClickWrapper(image.id)}
                     className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
                   >
                     <X className="h-4 w-4" />

@@ -64,6 +64,11 @@ export function ReviewImagesGallery({
     [images, onChange],
   );
 
+  const handleRemoveImageWrapper = useCallback(
+    (idx: number) => (e: React.MouseEvent) => handleRemoveImage(e, idx),
+    [handleRemoveImage],
+  );
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent, idx: number) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -109,7 +114,7 @@ export function ReviewImagesGallery({
               <span
                 role="button"
                 tabIndex={0}
-                onClick={(e) => handleRemoveImage(e, idx)}
+                onClick={handleRemoveImageWrapper(idx)}
                 onKeyDown={(e) => handleKeyDown(e, idx)}
                 className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/80 cursor-pointer"
               >
