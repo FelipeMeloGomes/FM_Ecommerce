@@ -2,8 +2,8 @@
 
 > Projeto de e-commerce completo desenvolvido com Next.js, focado em performance, qualidade de código e melhores práticas modernas de desenvolvimento.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/anomalyco/fm-ecommerce)
-[![CI/CD](https://github.com/anomalyco/fm-ecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/fm-ecommerce/actions)
+[![Deploy with Vercel](https://vercel.com/button)](https://fm-ecommerce-jade.vercel.app/)
+[![CI/CD](https://github.com/anomalyco/fm-ecommerce/actions/workflows/ci.yml/badge.svg)](https://github.com/FelipeMeloGomes/FM_Ecommerce/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
