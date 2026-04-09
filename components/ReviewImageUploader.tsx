@@ -2,7 +2,7 @@
 
 import { ImagePlus, X } from "lucide-react";
 import Image from "next/image";
-import { useId, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ReviewImage {
@@ -69,14 +69,22 @@ export function ReviewImageUploader({
     e.target.value = "";
   };
 
-  const removeImage = (id: string) => {
-    const imageToRemove = images.find((img) => img.id === id);
-    if (imageToRemove && !imageToRemove.isExisting) {
-      URL.revokeObjectURL(imageToRemove.preview);
-    }
-    onChange(images.filter((img) => img.id !== id));
-    setError(null);
-  };
+  const removeImage = useCallback(
+    (id: string) => {
+      const imageToRemove = images.find((img) => img.id === id);
+      if (imageToRemove && !imageToRemove.isExisting) {
+        URL.revokeObjectURL(imageToRemove.preview);
+      }
+      onChange(images.filter((img) => img.id !== id));
+      setError(null);
+    },
+    [images, onChange],
+  );
+
+  const removeImageWrapper = useCallback(
+    (id: string) => () => removeImage(id),
+    [removeImage],
+  );
 
   return (
     <div className="space-y-2">
@@ -111,7 +119,7 @@ export function ReviewImageUploader({
               />
               <button
                 type="button"
-                onClick={() => removeImage(image.id)}
+                onClick={removeImageWrapper(image.id)}
                 className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white"
               >
                 <X className="h-3 w-3" />

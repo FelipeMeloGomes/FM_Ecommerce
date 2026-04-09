@@ -48,6 +48,12 @@ const OrdersComponent = ({
     [],
   );
 
+  const handleSelectOrderWrapper = useCallback(
+    (order: MY_ORDERS_QUERYResult["orders"][number]) => () =>
+      handleSelectOrder(order),
+    [handleSelectOrder],
+  );
+
   const handleCloseDialog = useCallback(() => {
     setSelectedOrder(null);
   }, []);
@@ -156,7 +162,7 @@ const OrdersComponent = ({
                       className={`cursor-pointer hover:bg-muted/50 border-b transition-colors ${
                         selectedIds.has(order._id) ? "bg-destructive/10" : ""
                       }`}
-                      onClick={() => handleSelectOrder(order)}
+                      onClick={handleSelectOrderWrapper(order)}
                     >
                       <TableCell className="font-medium">
                         {order.orderNumber?.slice(-10) ?? "N/A"}...

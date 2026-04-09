@@ -46,6 +46,11 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
     [addToFavorite],
   );
 
+  const handleAddToFavoriteWrapper = useCallback(
+    (product: CartItem["product"]) => () => handleAddToFavorite(product),
+    [handleAddToFavorite],
+  );
+
   const handleRemoveProduct = useCallback(
     (productId?: string) => {
       confirmToast({
@@ -57,6 +62,11 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
       });
     },
     [deleteCartProduct],
+  );
+
+  const handleRemoveProductWrapper = useCallback(
+    (productId?: string) => () => handleRemoveProduct(productId),
+    [handleRemoveProduct],
   );
 
   return (
@@ -113,7 +123,7 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                         <button
                           type="button"
                           className="mt-1"
-                          onClick={() => handleAddToFavorite(product)}
+                          onClick={handleAddToFavoriteWrapper(product)}
                         >
                           <Heart
                             className={cn(
@@ -135,7 +145,7 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                         <button
                           type="button"
                           className="mt-1"
-                          onClick={() => handleRemoveProduct(product?._id)}
+                          onClick={handleRemoveProductWrapper(product?._id)}
                         >
                           <Trash className="w-5 h-5 text-muted-foreground hover:text-destructive transition-colors" />
                         </button>

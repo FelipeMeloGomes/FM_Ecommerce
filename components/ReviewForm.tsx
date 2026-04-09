@@ -29,9 +29,19 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
     setRating(star);
   }, []);
 
+  const handleSetRatingWrapper = useCallback(
+    (star: number) => () => handleSetRating(star),
+    [handleSetRating],
+  );
+
   const handleSetHoverRating = useCallback((star: number) => {
     setHoverRating(star);
   }, []);
+
+  const handleSetHoverRatingWrapper = useCallback(
+    (star: number) => () => handleSetHoverRating(star),
+    [handleSetHoverRating],
+  );
 
   const handleClearHoverRating = useCallback(() => {
     setHoverRating(0);
@@ -94,8 +104,8 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
               key={star}
               type="button"
               aria-label={`Avaliar com ${star} estrelas`}
-              onClick={() => handleSetRating(star)}
-              onMouseEnter={() => handleSetHoverRating(star)}
+              onClick={handleSetRatingWrapper(star)}
+              onMouseEnter={handleSetHoverRatingWrapper(star)}
               onMouseLeave={handleClearHoverRating}
               className="p-1 transition-colors"
             >

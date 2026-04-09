@@ -83,6 +83,11 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
     setRating(star);
   }, []);
 
+  const handleSetRatingWrapper = useCallback(
+    (star: number) => () => handleSetRating(star),
+    [handleSetRating],
+  );
+
   const handleUpdate = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -153,7 +158,7 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
                 key={star}
                 type="button"
                 aria-label={`Avaliar com ${star} estrelas`}
-                onClick={() => handleSetRating(star)}
+                onClick={handleSetRatingWrapper(star)}
                 className="p-1 transition-colors"
               >
                 <Star
