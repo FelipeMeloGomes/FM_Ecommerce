@@ -2,6 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 import { deleteAddress } from "@/actions/deleteAddress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,13 +24,30 @@ export default function AddressesClient({
 
   const editingAddress = addresses.find((address) => address._id === editId);
 
-  const handleEdit = (id: string) => {
-    router.push(`/account/addresses?edit=${id}`);
-  };
+  const handleEdit = useCallback(
+    (id: string) => {
+      router.push(`/account/addresses?edit=${id}`);
+    },
+    [router],
+  );
 
-  const handleNew = () => {
+  const handleEditWrapper = useCallback(
+    (id: string) => () => handleEdit(id),
+    [handleEdit],
+  );
+
+  const handleDelete = useCallback((id: string) => {
+    deleteAddress(id);
+  }, []);
+
+  const handleDeleteWrapper = useCallback(
+    (id: string) => () => handleDelete(id),
+    [handleDelete],
+  );
+
+  const handleNew = useCallback(() => {
     router.push(`/account/addresses`);
-  };
+  }, [router]);
 
   return (
     <div className="space-y-8">
@@ -100,7 +118,7 @@ export default function AddressesClient({
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => handleEdit(address._id)}
+                      onClick={handleEditWrapper(address._id ?? "")}
                       className="border-border hover:border-shop_orange hover:text-shop_orange"
                     >
                       Editar
@@ -111,7 +129,7 @@ export default function AddressesClient({
                       variant="outline"
                       size="sm"
                       className="border-destructive/30 text-destructive hover:bg-destructive hover:text-white"
-                      onClick={() => deleteAddress(address._id)}
+                      onClick={handleDeleteWrapper(address._id ?? "")}
                     >
                       Excluir
                     </Button>

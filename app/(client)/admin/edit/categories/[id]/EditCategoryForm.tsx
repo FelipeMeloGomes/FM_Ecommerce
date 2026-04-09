@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { FormError } from "@/components/FormError";
@@ -64,6 +64,10 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
       }
     };
   }, [category.image, shouldRemoveImage, image]);
+
+  const handleCancel = useCallback(() => {
+    router.push("/admin/categories");
+  }, [router]);
 
   const onSubmit = async (data: CreateCategoryInput) => {
     const formData = new FormData();
@@ -210,7 +214,7 @@ export default function EditCategoryForm({ category }: EditCategoryFormProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push("/admin/categories")}
+              onClick={handleCancel}
               className="h-12"
             >
               Cancelar

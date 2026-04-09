@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -61,6 +61,10 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
       }
     };
   }, [brand.image, shouldRemoveImage, image]);
+
+  const handleCancel = useCallback(() => {
+    router.push("/admin/brands");
+  }, [router]);
 
   const onSubmit = async (data: BrandFormData) => {
     const formData = new FormData();
@@ -176,7 +180,7 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push("/admin/brands")}
+              onClick={handleCancel}
               className="h-12"
             >
               Cancelar

@@ -110,6 +110,12 @@ export default function AdminQuestionsList({
     [router],
   );
 
+  const submitAnswerWrapper = useCallback(
+    (questionId: string) => () =>
+      submitAnswer(questionId, answerText[questionId] || ""),
+    [submitAnswer, answerText],
+  );
+
   const handleAnswer = useCallback(
     (questionId: string) => {
       const answer = answerText[questionId]?.trim();
@@ -361,12 +367,7 @@ export default function AdminQuestionsList({
                             </Button>
                             <Button
                               size="sm"
-                              onClick={() =>
-                                submitAnswer(
-                                  question._id,
-                                  answerText[question._id] || "",
-                                )
-                              }
+                              onClick={submitAnswerWrapper(question._id)}
                               disabled={loadingAnswer === question._id}
                             >
                               Sim
