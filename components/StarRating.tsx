@@ -1,10 +1,11 @@
 import { StarIcon } from "lucide-react";
+import React from "react";
 
 interface StarRatingProps {
   rating?: number;
 }
 
-const StarRating = ({ rating = 4 }: StarRatingProps) => {
+const StarRating = React.memo(({ rating = 4 }: StarRatingProps) => {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -17,6 +18,8 @@ const StarRating = ({ rating = 4 }: StarRatingProps) => {
       ))}
     </div>
   );
-};
+});
+
+StarRating.displayName = "StarRating";
 
 export default StarRating;

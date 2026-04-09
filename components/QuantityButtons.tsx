@@ -1,5 +1,5 @@
 import { Minus, Plus } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
@@ -10,7 +10,7 @@ interface Props {
   product: Product;
   className?: string;
 }
-const QuantityButtons = ({ product, className }: Props) => {
+const QuantityButtons = React.memo(({ product, className }: Props) => {
   const items = useStore((state) => state.items);
   const addItem = useStore((state) => state.addItem);
   const removeItem = useStore((state) => state.removeItem);
@@ -65,6 +65,8 @@ const QuantityButtons = ({ product, className }: Props) => {
       </Button>
     </div>
   );
-};
+});
+
+QuantityButtons.displayName = "QuantityButtons";
 
 export default QuantityButtons;
