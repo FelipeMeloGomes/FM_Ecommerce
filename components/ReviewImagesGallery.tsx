@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { urlFor } from "@/sanity/lib/image";
@@ -27,9 +27,7 @@ export function ReviewImagesGallery({
 }: ReviewImagesGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
-  if (!images || images.length === 0) return null;
-
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setSelectedIndex((prev) =>
       prev === null
         ? images.length - 1
@@ -37,25 +35,52 @@ export function ReviewImagesGallery({
           ? images.length - 1
           : prev - 1,
     );
-  };
+  }, [images.length]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setSelectedIndex((prev) =>
       prev === null ? 0 : prev === images.length - 1 ? 0 : prev + 1,
     );
-  };
+  }, [images.length]);
+
+  const handleClose = useCallback(() => {
+    setSelectedIndex(null);
+  }, []);
+
+  const handleSelectIndex = useCallback((idx: number) => {
+    setSelectedIndex(idx);
+  }, []);
+
+  const handleRemoveImage = useCallback(
+    (e: React.MouseEvent, idx: number) => {
+      e.stopPropagation();
+      onChange?.(images.filter((_, i) => i !== idx));
+    },
+    [images, onChange],
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent, idx: number) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.stopPropagation();
+        onChange?.(images.filter((_, i) => i !== idx));
+      }
+    },
+    [images, onChange],
+  );
+
+  if (!images || images.length === 0) return null;
 
   return (
     <>
       <div className="flex flex-wrap gap-3">
         {images.map((image, idx) => (
-          // eslint-disable-next-line jsx-a11y/no-static-element-interactions
           <div
             role="button"
             tabIndex={0}
             key={image.id}
-            onClick={() => setSelectedIndex(idx)}
-            onKeyDown={(e) => e.key === "Enter" && setSelectedIndex(idx)}
+            onClick={() => handleSelectIndex(idx)}
+            onKeyDown={(e) => e.key === "Enter" && handleSelectIndex(idx)}
             className={cn(
               "relative rounded-xl overflow-hidden border-2 border-border/50",
               "transition-all duration-300 ease-out",
@@ -77,16 +102,8 @@ export function ReviewImagesGallery({
               <span
                 role="button"
                 tabIndex={0}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onChange?.(images.filter((_, i) => i !== idx));
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.stopPropagation();
-                    onChange?.(images.filter((_, i) => i !== idx));
-                  }
-                }}
+                onClick={(e) => handleRemoveImage(e, idx)}
+                onKeyDown={(e) => handleKeyDown(e, idx)}
                 className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/80 cursor-pointer"
               >
                 <X className="h-3 w-3" />
@@ -96,10 +113,7 @@ export function ReviewImagesGallery({
         ))}
       </div>
 
-      <Dialog
-        open={selectedIndex !== null}
-        onOpenChange={() => setSelectedIndex(null)}
-      >
+      <Dialog open={selectedIndex !== null} onOpenChange={handleClose}>
         <DialogContent className="max-w-4xl w-full bg-black/95 border-none p-0">
           <DialogTitle className="sr-only">
             Galeria de imagens -{" "}
@@ -138,7 +152,7 @@ export function ReviewImagesGallery({
                 <button
                   type="button"
                   key={idx}
-                  onClick={() => setSelectedIndex(idx)}
+                  onClick={() => handleSelectIndex(idx)}
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
                     idx === selectedIndex
@@ -151,7 +165,7 @@ export function ReviewImagesGallery({
 
             <button
               type="button"
-              onClick={() => setSelectedIndex(null)}
+              onClick={handleClose}
               className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"
             >
               <X className="h-5 w-5" />
@@ -177,9 +191,7 @@ interface ReviewImagesListProps {
 export function ReviewImagesList({ images }: ReviewImagesListProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
-  if (!images || images.length === 0) return null;
-
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setSelectedIndex((prev) =>
       prev === null
         ? images.length - 1
@@ -187,24 +199,39 @@ export function ReviewImagesList({ images }: ReviewImagesListProps) {
           ? images.length - 1
           : prev - 1,
     );
-  };
+  }, [images.length]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setSelectedIndex((prev) =>
       prev === null ? 0 : prev === images.length - 1 ? 0 : prev + 1,
     );
-  };
+  }, [images.length]);
+
+  const handleClose = useCallback(() => {
+    setSelectedIndex(null);
+  }, []);
+
+  const handleSelectIndex = useCallback((idx: number) => {
+    setSelectedIndex(idx);
+  }, []);
+
+  const imageUrls = useMemo(
+    () => images.map((img) => urlFor(img).url()),
+    [images],
+  );
+
+  if (!images || images.length === 0) return null;
 
   return (
     <>
       <div className="flex flex-wrap gap-3 mt-4">
-        {images.map((img, idx) => {
-          const src = urlFor(img).url();
+        {images.map((_img, idx) => {
+          const src = imageUrls[idx];
           return (
             <button
               key={idx}
               type="button"
-              onClick={() => setSelectedIndex(idx)}
+              onClick={() => handleSelectIndex(idx)}
               className="relative rounded-xl overflow-hidden border-2 border-border/50 transition-all duration-300 ease-out hover:border-shop_orange hover:shadow-lg hover:shadow-shop_orange/20 hover:scale-105 group cursor-pointer"
               style={{ width: 140, height: 140 }}
             >
@@ -223,10 +250,7 @@ export function ReviewImagesList({ images }: ReviewImagesListProps) {
         })}
       </div>
 
-      <Dialog
-        open={selectedIndex !== null}
-        onOpenChange={() => setSelectedIndex(null)}
-      >
+      <Dialog open={selectedIndex !== null} onOpenChange={handleClose}>
         <DialogContent className="max-w-4xl w-full bg-black/95 border-none p-0">
           <DialogTitle className="sr-only">
             Galeria de imagens -{" "}
@@ -244,7 +268,7 @@ export function ReviewImagesList({ images }: ReviewImagesListProps) {
             {selectedIndex !== null && (
               <div className="relative w-full h-full max-w-3xl">
                 <Image
-                  src={urlFor(images[selectedIndex]).url()}
+                  src={imageUrls[selectedIndex]}
                   alt={`Foto ${selectedIndex + 1}`}
                   fill
                   className="object-contain"
@@ -265,7 +289,7 @@ export function ReviewImagesList({ images }: ReviewImagesListProps) {
                 <button
                   type="button"
                   key={idx}
-                  onClick={() => setSelectedIndex(idx)}
+                  onClick={() => handleSelectIndex(idx)}
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
                     idx === selectedIndex
@@ -278,7 +302,7 @@ export function ReviewImagesList({ images }: ReviewImagesListProps) {
 
             <button
               type="button"
-              onClick={() => setSelectedIndex(null)}
+              onClick={handleClose}
               className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all"
             >
               <X className="h-5 w-5" />

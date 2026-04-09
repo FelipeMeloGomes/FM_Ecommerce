@@ -1,7 +1,7 @@
 "use client";
 
 import { HelpCircle, Share2, Split, Truck } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ProductQuestionDialog } from "@/components/ProductQuestionDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import {
@@ -24,12 +24,28 @@ export function ProductActions({ product, userId }: ProductActionsProps) {
   const [shippingOpen, setShippingOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
 
+  const handleOpenCompare = useCallback(() => {
+    setCompareOpen(true);
+  }, []);
+
+  const handleOpenQuestion = useCallback(() => {
+    setQuestionOpen(true);
+  }, []);
+
+  const handleOpenShipping = useCallback(() => {
+    setShippingOpen(true);
+  }, []);
+
+  const handleOpenShare = useCallback(() => {
+    setShareOpen(true);
+  }, []);
+
   return (
     <>
       <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border/60">
         <button
           type="button"
-          onClick={() => setCompareOpen(true)}
+          onClick={handleOpenCompare}
           className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
         >
           <Split className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
@@ -37,7 +53,7 @@ export function ProductActions({ product, userId }: ProductActionsProps) {
         </button>
         <button
           type="button"
-          onClick={() => setQuestionOpen(true)}
+          onClick={handleOpenQuestion}
           className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
         >
           <HelpCircle className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
@@ -45,7 +61,7 @@ export function ProductActions({ product, userId }: ProductActionsProps) {
         </button>
         <button
           type="button"
-          onClick={() => setShippingOpen(true)}
+          onClick={handleOpenShipping}
           className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
         >
           <Truck className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
@@ -53,7 +69,7 @@ export function ProductActions({ product, userId }: ProductActionsProps) {
         </button>
         <button
           type="button"
-          onClick={() => setShareOpen(true)}
+          onClick={handleOpenShare}
           className="flex items-center gap-2.5 p-3 rounded-lg text-sm text-foreground hover:bg-muted/50 hoverEffect group"
         >
           <Share2 className="text-lg text-shop_orange group-hover:scale-110 transition-transform" />
