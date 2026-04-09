@@ -1,5 +1,7 @@
-import type { Transaction } from "@sanity/client";
 import { backendClient } from "@/sanity/lib/backendClient";
+import type { ClientPerspective, SanityClient } from "next-sanity";
+
+type Transaction = ReturnType<SanityClient["transaction"]>;
 
 export async function updateStock(
   items: { productId: string; quantity: number }[],

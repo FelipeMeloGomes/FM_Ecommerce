@@ -30,6 +30,7 @@ const WishListProducts = ({ GuestPrompt }: WishListProductsProps) => {
 
   const handleRemoveFromFavorite = useCallback(
     (productId?: string) => {
+      if (!productId) return;
       removeFromFavorite(productId);
       toast.success("Produto removido da lista de favoritos");
     },

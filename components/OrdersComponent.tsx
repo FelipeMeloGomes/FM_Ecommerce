@@ -278,7 +278,8 @@ const OrdersComponent = ({
       )}
 
       <OrderDetailDialog
-        order={selectedOrder}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        order={selectedOrder as any}
         isOpen={!!selectedOrder}
         onClose={handleCloseDialog}
       />

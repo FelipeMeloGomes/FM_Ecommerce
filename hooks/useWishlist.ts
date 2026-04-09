@@ -51,8 +51,8 @@ export function useWishlist(): UseWishlistReturn {
         if (cancelled) return;
 
         const uniqueProducts = products.filter(
-          (product, index, self) =>
-            index === self.findIndex((p) => p._id === product._id),
+          (product: Product, index: number, self: Product[]) =>
+            index === self.findIndex((p: Product) => p._id === product._id),
         );
 
         setServerFavorites(uniqueProducts);
@@ -65,8 +65,8 @@ export function useWishlist(): UseWishlistReturn {
           const updatedProducts = await getWishlist();
           if (!cancelled) {
             const uniqueUpdated = updatedProducts.filter(
-              (product, index, self) =>
-                index === self.findIndex((p) => p._id === product._id),
+              (product: Product, index: number, self: Product[]) =>
+                index === self.findIndex((p: Product) => p._id === product._id),
             );
             setServerFavorites(uniqueUpdated);
           }
