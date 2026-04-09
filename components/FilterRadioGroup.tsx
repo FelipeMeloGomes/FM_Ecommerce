@@ -1,7 +1,6 @@
 import React, { useCallback } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useFilterSelection } from "@/hooks/use-filter-selection";
 
 interface FilterItem {
   value: string;
@@ -11,21 +10,29 @@ interface FilterItem {
 interface FilterRadioGroupProps {
   title: string;
   items: FilterItem[];
+  selected: string | null;
+  onChange: (value: string) => void;
+  onClear?: () => void;
   className?: string;
 }
 
 const FilterRadioGroup = React.memo(
-  ({ title, items, className }: FilterRadioGroupProps) => {
-    const { selected, select, clear, isSelected } = useFilterSelection();
-
+  ({
+    title,
+    items,
+    selected,
+    onChange,
+    onClear,
+    className,
+  }: FilterRadioGroupProps) => {
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent, value: string) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          select(value);
+          onChange(value);
         }
       },
-      [select],
+      [onChange],
     );
 
     return (
@@ -35,11 +42,11 @@ const FilterRadioGroup = React.memo(
         <h3 className="text-base font-bold text-foreground">{title}</h3>
         <RadioGroup
           value={selected || ""}
-          onValueChange={select}
+          onValueChange={onChange}
           className="mt-3 space-y-2"
         >
           {items?.map((item) => {
-            const checked = isSelected(item.value);
+            const checked = selected === item.value;
             return (
               <div
                 key={item.value}
@@ -47,7 +54,7 @@ const FilterRadioGroup = React.memo(
                 aria-checked={checked}
                 tabIndex={0}
                 className="flex items-center gap-2 cursor-pointer"
-                onClick={() => select(item.value)}
+                onClick={() => onChange(item.value)}
                 onKeyDown={(e) => handleKeyDown(e, item.value)}
               >
                 <RadioGroupItem
@@ -69,10 +76,10 @@ const FilterRadioGroup = React.memo(
             );
           })}
         </RadioGroup>
-        {selected && (
+        {selected && onClear && (
           <button
             type="button"
-            onClick={clear}
+            onClick={onClear}
             className="text-sm font-medium mt-3 text-shop_orange hover:text-shop_btn_dark_green transition-colors"
           >
             Redefinir seleção
@@ -86,3 +93,4 @@ const FilterRadioGroup = React.memo(
 FilterRadioGroup.displayName = "FilterRadioGroup";
 
 export { FilterRadioGroup };
+export type { FilterItem };

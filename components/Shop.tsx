@@ -7,12 +7,18 @@ import { client } from "@/sanity/lib/client";
 import { SHOP_PRODUCTS_QUERY } from "@/sanity/queries/query";
 import type { BRANDS_QUERYResult, Category, Product } from "@/sanity.types";
 import Container from "./Container";
+import { FilterRadioGroup } from "./FilterRadioGroup";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
-import BrandList from "./shop/BrandList";
-import CategoryList from "./shop/CategoryList";
-import PriceList from "./shop/PriceList";
 import Title from "./Title";
+
+const priceArray = [
+  { value: "0-100", label: "Até R$ 100" },
+  { value: "100-200", label: "R$ 100 - R$ 200" },
+  { value: "200-300", label: "R$ 200 - R$ 300" },
+  { value: "300-500", label: "R$ 300 - R$ 500" },
+  { value: "500-10000", label: "Acima de R$ 500" },
+];
 
 interface Props {
   categories: Category[];
@@ -72,21 +78,21 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
     });
   }, []);
 
-  const handleCategoryChange = useCallback((category: string | null) => {
+  const handleCategoryChange = useCallback((value: string) => {
     startTransition(() => {
-      setSelectedCategory(category);
+      setSelectedCategory(value);
     });
   }, []);
 
-  const handleBrandChange = useCallback((brand: string | null) => {
+  const handleBrandChange = useCallback((value: string) => {
     startTransition(() => {
-      setSelectedBrand(brand);
+      setSelectedBrand(value);
     });
   }, []);
 
-  const handlePriceChange = useCallback((price: string | null) => {
+  const handlePriceChange = useCallback((value: string) => {
     startTransition(() => {
-      setSelectedPrice(price);
+      setSelectedPrice(value);
     });
   }, []);
 
@@ -96,6 +102,16 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
     selectedPrice !== null;
 
   const isLoading = loading || isPending;
+
+  const categoryItems = categories.map((cat) => ({
+    value: cat.slug?.current as string,
+    label: cat.title as string,
+  }));
+
+  const brandItems = brands.map((brand) => ({
+    value: brand.slug?.current as string,
+    label: brand.title as string,
+  }));
 
   return (
     <div className="border-t border-border">
@@ -120,21 +136,28 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="lg:sticky lg:top-24 lg:self-start lg:h-[calc(100vh-180px)] lg:overflow-y-auto lg:min-w-72 pb-6 lg:pr-4">
             <div className="bg-card rounded-xl border border-border p-4 shadow-sm">
-              <CategoryList
-                categories={categories}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={handleCategoryChange}
+              <FilterRadioGroup
+                title="Categorias"
+                items={categoryItems}
+                selected={selectedCategory}
+                onChange={handleCategoryChange}
+                onClear={() => setSelectedCategory(null)}
               />
               <div className="my-4 border-t border-border" />
-              <BrandList
-                brands={brands}
-                setSelectedBrand={handleBrandChange}
-                selectedBrand={selectedBrand}
+              <FilterRadioGroup
+                title="Marcas"
+                items={brandItems}
+                selected={selectedBrand}
+                onChange={handleBrandChange}
+                onClear={() => setSelectedBrand(null)}
               />
               <div className="my-4 border-t border-border" />
-              <PriceList
-                setSelectedPrice={handlePriceChange}
-                selectedPrice={selectedPrice}
+              <FilterRadioGroup
+                title="Preço"
+                items={priceArray}
+                selected={selectedPrice}
+                onChange={handlePriceChange}
+                onClear={() => setSelectedPrice(null)}
               />
             </div>
           </aside>
