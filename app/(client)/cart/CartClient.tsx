@@ -28,19 +28,37 @@ interface CartClientProps {
 }
 
 const CartClient = ({ addresses }: CartClientProps) => {
-  const getTotalPrice = useStore((state) => state.getTotalPrice);
-  const getSubTotalPrice = useStore((state) => state.getSubTotalPrice);
-  const resetCart = useStore((state) => state.resetCart);
-  const getGroupedItems = useStore((state) => state.getGroupedItems);
+  const items = useStore((state) => state.items);
   const shipping = useStore((state) => state.shipping);
+  const resetCart = useStore((state) => state.resetCart);
   const setShipping = useStore((state) => state.setShipping);
 
   const [loading, setLoading] = useState(false);
-  const groupedItems = useMemo(() => getGroupedItems(), [getGroupedItems]);
+  const groupedItems = useMemo(() => items, [items]);
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const router = useRouter();
+
+  const subtotal = useMemo(() => {
+    return items.reduce((total, item) => {
+      const price = item.product.price ?? 0;
+      const discount = ((item.product.discount ?? 0) * price) / 100;
+      const discountedPrice = price + discount;
+      return total + discountedPrice * item.quantity;
+    }, 0);
+  }, [items]);
+
+  const total = useMemo(() => {
+    const itemsTotal = items.reduce(
+      (total, item) => total + (item.product.price ?? 0) * item.quantity,
+      0,
+    );
+    const shippingPrice = shipping?.price ?? 0;
+    return itemsTotal + shippingPrice;
+  }, [items, shipping]);
+
+  const discount = useMemo(() => subtotal - total, [subtotal, total]);
 
   useEffect(() => {
     if (addresses.length > 0) {
@@ -109,10 +127,6 @@ const CartClient = ({ addresses }: CartClientProps) => {
     },
     [router],
   );
-
-  const subtotal = useMemo(() => getSubTotalPrice(), [getSubTotalPrice]);
-  const total = useMemo(() => getTotalPrice(), [getTotalPrice]);
-  const discount = useMemo(() => subtotal - total, [subtotal, total]);
 
   return (
     <div className="bg-background min-h-screen pb-52 md:pb-10">

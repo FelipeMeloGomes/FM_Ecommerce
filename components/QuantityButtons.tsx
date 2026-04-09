@@ -1,5 +1,5 @@
 import { Minus, Plus } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
@@ -11,10 +11,15 @@ interface Props {
   className?: string;
 }
 const QuantityButtons = ({ product, className }: Props) => {
+  const items = useStore((state) => state.items);
   const addItem = useStore((state) => state.addItem);
   const removeItem = useStore((state) => state.removeItem);
-  const getItemCount = useStore((state) => state.getItemCount);
-  const itemCount = getItemCount(product?._id);
+
+  const itemCount = useMemo(() => {
+    const item = items.find((i) => i.product._id === product?._id);
+    return item ? item.quantity : 0;
+  }, [items, product?._id]);
+
   const isOutOfStock = product?.stock === 0;
 
   const handleRemoveProduct = useCallback(() => {

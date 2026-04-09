@@ -3,7 +3,7 @@
 import { Heart, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import PriceFormatter from "@/components/PriceFormatter";
 import QuantityButtons from "@/components/QuantityButtons";
@@ -25,8 +25,16 @@ interface CartItemsListProps {
 const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
   const deleteCartProduct = useStore((state) => state.deleteCartProduct);
   const addToFavorite = useStore((state) => state.addToFavorite);
+  const storeItems = useStore((state) => state.items);
   const favoriteProduct = useStore((state) => state.favoriteProduct);
-  const getItemCount = useStore((state) => state.getItemCount);
+
+  const itemsMap = useMemo(() => {
+    const map = new Map<string, number>();
+    storeItems.forEach((item) => {
+      map.set(item.product._id ?? "", item.quantity);
+    });
+    return map;
+  }, [storeItems]);
 
   const handleAddToFavorite = useCallback(
     (product: CartItem["product"]) => {
@@ -54,7 +62,7 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
   return (
     <>
       {items.map(({ product }) => {
-        const itemCount = product?._id ? getItemCount(product._id) : 0;
+        const itemCount = product?._id ? (itemsMap.get(product._id) ?? 0) : 0;
         const isFavorite = product
           ? favoriteProduct?.some((item) => item?._id === product._id)
           : false;
