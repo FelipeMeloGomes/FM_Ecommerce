@@ -3,7 +3,7 @@
 import { useAuth, useUser } from "@clerk/nextjs";
 import { ShoppingBag, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { createCheckoutSession } from "@/actions/createCheckoutSession";
 import { deleteAddress } from "@/actions/deleteAddress";
@@ -28,13 +28,18 @@ interface CartClientProps {
 }
 
 const CartClient = ({ addresses }: CartClientProps) => {
-  const { getTotalPrice, getSubTotalPrice, resetCart } = useStore();
+  const getTotalPrice = useStore((state) => state.getTotalPrice);
+  const getSubTotalPrice = useStore((state) => state.getSubTotalPrice);
+  const resetCart = useStore((state) => state.resetCart);
+  const getGroupedItems = useStore((state) => state.getGroupedItems);
+  const shipping = useStore((state) => state.shipping);
+  const setShipping = useStore((state) => state.setShipping);
+
   const [loading, setLoading] = useState(false);
-  const groupedItems = useStore((state) => state.getGroupedItems());
+  const groupedItems = useMemo(() => getGroupedItems(), [getGroupedItems]);
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-  const { shipping, setShipping } = useStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -47,7 +52,7 @@ const CartClient = ({ addresses }: CartClientProps) => {
     router.refresh();
   }, [router]);
 
-  const handleResetCart = () => {
+  const handleResetCart = useCallback(() => {
     confirmToast({
       message: "Tem certeza que deseja limpar seu carrinho?",
       onConfirm: () => {
@@ -55,9 +60,9 @@ const CartClient = ({ addresses }: CartClientProps) => {
         toast.success("Carrinho limpo com sucesso!");
       },
     });
-  };
+  }, [resetCart]);
 
-  const handleCheckout = async () => {
+  const handleCheckout = useCallback(async () => {
     setLoading(true);
     try {
       const checkoutUrl = await performCheckout(
@@ -79,7 +84,35 @@ const CartClient = ({ addresses }: CartClientProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [groupedItems, user, selectedAddress, shipping]);
+
+  const handleSelectAddress = useCallback(
+    (addressId: string) => {
+      const address = addresses.find((addr) => addr._id === addressId);
+      if (address) {
+        setSelectedAddress(address);
+      }
+    },
+    [addresses],
+  );
+
+  const handleDeleteAddress = useCallback(
+    (id: string) => {
+      confirmToast({
+        message: "Tem certeza que deseja excluir este endereço?",
+        onConfirm: async () => {
+          await deleteAddress(id);
+          router.refresh();
+          toast.success("Endereço removido com sucesso!");
+        },
+      });
+    },
+    [router],
+  );
+
+  const subtotal = useMemo(() => getSubTotalPrice(), [getSubTotalPrice]);
+  const total = useMemo(() => getTotalPrice(), [getTotalPrice]);
+  const discount = useMemo(() => subtotal - total, [subtotal, total]);
 
   return (
     <div className="bg-background min-h-screen pb-52 md:pb-10">
@@ -114,9 +147,9 @@ const CartClient = ({ addresses }: CartClientProps) => {
 
                 <div className="space-y-4">
                   <OrderSummary
-                    subtotal={getSubTotalPrice()}
-                    discount={getSubTotalPrice() - getTotalPrice()}
-                    total={getTotalPrice()}
+                    subtotal={subtotal}
+                    discount={discount}
+                    total={total}
                     loading={loading}
                     selectedAddressId={selectedAddress?._id}
                     onCheckout={handleCheckout}
@@ -125,23 +158,8 @@ const CartClient = ({ addresses }: CartClientProps) => {
                   <AddressSection
                     addresses={addresses}
                     selectedAddressId={selectedAddress?._id}
-                    onSelectAddress={(value) => {
-                      const address = addresses.find(
-                        (addr) => addr._id === value,
-                      );
-                      if (address) setSelectedAddress(address);
-                    }}
-                    onDeleteAddress={(id) => {
-                      confirmToast({
-                        message:
-                          "Tem certeza que deseja excluir este endereço?",
-                        onConfirm: async () => {
-                          await deleteAddress(id);
-                          router.refresh();
-                          toast.success("Endereço removido com sucesso!");
-                        },
-                      });
-                    }}
+                    onSelectAddress={handleSelectAddress}
+                    onDeleteAddress={handleDeleteAddress}
                   />
 
                   <Card className="bg-card border-border">
@@ -159,9 +177,9 @@ const CartClient = ({ addresses }: CartClientProps) => {
                 </div>
 
                 <MobileOrderSummary
-                  subtotal={getSubTotalPrice()}
-                  discount={getSubTotalPrice() - getTotalPrice()}
-                  total={getTotalPrice()}
+                  subtotal={subtotal}
+                  discount={discount}
+                  total={total}
                   loading={loading}
                   onCheckout={handleCheckout}
                 />

@@ -1,6 +1,6 @@
 "use client";
 import { ShoppingBag } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
@@ -17,8 +17,13 @@ interface Props {
 const AddToCartButton = ({ product, className }: Props) => {
   const addItem = useStore((state) => state.addItem);
   const items = useStore((state) => state.items);
-  const itemCount =
-    items.find((item) => item.product._id === product?._id)?.quantity ?? 0;
+
+  const itemCount = useMemo(
+    () =>
+      items.find((item) => item.product._id === product?._id)?.quantity ?? 0,
+    [items, product?._id],
+  );
+
   const [isMounted, setIsMounted] = useState(false);
   const isOutOfStock = product?.stock === 0;
 
@@ -26,14 +31,19 @@ const AddToCartButton = ({ product, className }: Props) => {
     setIsMounted(true);
   }, []);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     if ((product?.stock as number) > itemCount) {
       addItem(product);
       toast.success(`${product?.name?.substring(0, 20)}... adicionado!`);
     } else {
       toast.error("Estoque insuficiente");
     }
-  };
+  }, [product, itemCount, addItem]);
+
+  const subtotal = useMemo(
+    () => (product?.price ? product?.price * itemCount : 0),
+    [product?.price, itemCount],
+  );
 
   if (!isMounted) {
     return (
@@ -61,7 +71,7 @@ const AddToCartButton = ({ product, className }: Props) => {
           <div className="flex items-center justify-between pt-2 border-t border-border/40">
             <span className="text-sm font-semibold">Subtotal</span>
             <PriceFormatter
-              amount={product?.price ? product?.price * itemCount : 0}
+              amount={subtotal}
               className="font-bold text-shop_dark_green"
             />
           </div>

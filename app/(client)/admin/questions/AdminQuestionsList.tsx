@@ -36,7 +36,7 @@ interface AdminQuestionsListProps {
 
 const PAGE_SIZE = 10;
 
-function formatDate(dateStr: string) {
+const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "2-digit",
@@ -44,7 +44,7 @@ function formatDate(dateStr: string) {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
+};
 
 export default function AdminQuestionsList({
   initialQuestions,
@@ -70,12 +70,89 @@ export default function AdminQuestionsList({
     );
   }, [initialQuestions, query]);
 
-  const totalPages = Math.ceil(filteredQuestions.length / PAGE_SIZE);
+  const totalPages = useMemo(
+    () => Math.ceil(filteredQuestions.length / PAGE_SIZE),
+    [filteredQuestions.length],
+  );
 
   const paginatedQuestions = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return filteredQuestions.slice(start, start + PAGE_SIZE);
   }, [filteredQuestions, currentPage]);
+
+  const unansweredCount = useMemo(
+    () => initialQuestions.filter((q) => !q.answered).length,
+    [initialQuestions],
+  );
+
+  const submitAnswer = useCallback(
+    async (questionId: string, answer: string) => {
+      setLoadingAnswer(questionId);
+      setConfirmOverwrite(null);
+
+      try {
+        await answerQuestion(questionId, answer);
+        toast.success("Resposta enviada com sucesso!");
+        setAnswerText((prev) => {
+          const next = { ...prev };
+          delete next[questionId];
+          return next;
+        });
+        router.refresh();
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Erro ao enviar resposta.",
+        );
+      } finally {
+        setLoadingAnswer(null);
+      }
+    },
+    [router],
+  );
+
+  const handleAnswer = useCallback(
+    (questionId: string) => {
+      const answer = answerText[questionId]?.trim();
+      if (!answer || answer.length < 10) {
+        toast.error("Resposta deve ter no mínimo 10 caracteres.");
+        return;
+      }
+
+      const existingQuestion = initialQuestions.find(
+        (q) => q._id === questionId,
+      );
+
+      if (existingQuestion?.answer && answer !== existingQuestion.answer) {
+        setConfirmOverwrite(questionId);
+        return;
+      }
+
+      submitAnswer(questionId, answer);
+    },
+    [answerText, initialQuestions, submitAnswer],
+  );
+
+  const toggleQuestion = useCallback(
+    (id: string) => {
+      setExpandedQuestions((prev) => {
+        const newExpanded = new Set(prev);
+        if (newExpanded.has(id)) {
+          newExpanded.delete(id);
+        } else {
+          newExpanded.add(id);
+          const question = initialQuestions.find((q) => q._id === id);
+          if (question?.answer && !Object.hasOwn(answerText, id)) {
+            setAnswerText((prevAnswer) => ({
+              ...prevAnswer,
+              [id]: question.answer ?? "",
+            }));
+          }
+        }
+        return newExpanded;
+      });
+    },
+    [answerText, initialQuestions],
+  );
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -86,62 +163,9 @@ export default function AdminQuestionsList({
     setCurrentPage(1);
   }, []);
 
-  const toggleQuestion = (id: string) => {
-    const newExpanded = new Set(expandedQuestions);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-      // Initialize draft with existing answer when expanding
-      const question = initialQuestions.find((q) => q._id === id);
-      if (question?.answer && !Object.hasOwn(answerText, id)) {
-        setAnswerText((prev) => ({ ...prev, [id]: question.answer ?? "" }));
-      }
-    }
-    setExpandedQuestions(newExpanded);
-  };
-
-  const handleAnswer = async (questionId: string) => {
-    const answer = answerText[questionId]?.trim();
-    if (!answer || answer.length < 10) {
-      toast.error("Resposta deve ter no mínimo 10 caracteres.");
-      return;
-    }
-
-    const existingQuestion = initialQuestions.find((q) => q._id === questionId);
-
-    if (existingQuestion?.answer && answer !== existingQuestion.answer) {
-      setConfirmOverwrite(questionId);
-      return;
-    }
-
-    await submitAnswer(questionId, answer);
-  };
-
-  const submitAnswer = async (questionId: string, answer: string) => {
-    setLoadingAnswer(questionId);
-    setConfirmOverwrite(null);
-
-    try {
-      await answerQuestion(questionId, answer);
-      toast.success("Resposta enviada com sucesso!");
-      // Clear draft for this question
-      setAnswerText((prev) => {
-        const next = { ...prev };
-        delete next[questionId];
-        return next;
-      });
-      router.refresh();
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Erro ao enviar resposta.",
-      );
-    } finally {
-      setLoadingAnswer(null);
-    }
-  };
-
-  const unansweredCount = initialQuestions.filter((q) => !q.answered).length;
+  const handleConfirmOverwrite = useCallback((questionId: string | null) => {
+    setConfirmOverwrite(questionId);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -300,7 +324,7 @@ export default function AdminQuestionsList({
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setConfirmOverwrite(null)}
+                              onClick={() => handleConfirmOverwrite(null)}
                             >
                               Não
                             </Button>

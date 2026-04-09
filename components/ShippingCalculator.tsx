@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { calculateShipping } from "@/actions/calculateShipping";
 import PriceFormatter from "@/components/PriceFormatter";
 import { Button } from "@/components/ui/button";
@@ -11,25 +11,27 @@ import type { ShippingQuote } from "@/core/shipping/ShippingQuote";
 import { formatCep, isValidCep } from "@/helpers/validateCep";
 import type { CartItem } from "@/store";
 
+interface ShippingCalculatorProps {
+  cartItems: CartItem[];
+  selectedShipping: ShippingQuote | null;
+  onSelectShipping: (quote: ShippingQuote | null) => void;
+}
+
 export function ShippingCalculator({
   cartItems,
   selectedShipping,
   onSelectShipping,
-}: {
-  cartItems: CartItem[];
-  selectedShipping: ShippingQuote | null;
-  onSelectShipping: (quote: ShippingQuote | null) => void;
-}) {
+}: ShippingCalculatorProps) {
   const [cep, setCep] = useState("");
   const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (value: string) => {
+  const handleChange = useCallback((value: string) => {
     setCep(formatCep(value));
-  };
+  }, []);
 
-  const handleCalculate = async () => {
+  const handleCalculate = useCallback(async () => {
     if (!isValidCep(cep)) {
       setError("CEP inválido. Use 12345678 ou 12345-678.");
       return;
@@ -55,7 +57,15 @@ export function ShippingCalculator({
     } finally {
       setLoading(false);
     }
-  };
+  }, [cep, cartItems, onSelectShipping]);
+
+  const handleShippingSelect = useCallback(
+    (value: string) => {
+      const quote = quotes.find((q) => q.service === value) ?? null;
+      onSelectShipping(quote);
+    },
+    [quotes, onSelectShipping],
+  );
 
   useEffect(() => {
     if (cartItems.length > 0 && !selectedShipping) {
@@ -89,10 +99,7 @@ export function ShippingCalculator({
       {quotes.length > 0 && (
         <RadioGroup
           value={selectedShipping?.service ?? ""}
-          onValueChange={(value) => {
-            const quote = quotes.find((q) => q.service === value) ?? null;
-            onSelectShipping(quote);
-          }}
+          onValueChange={handleShippingSelect}
           className="space-y-2"
         >
           {quotes.map((q) => (
