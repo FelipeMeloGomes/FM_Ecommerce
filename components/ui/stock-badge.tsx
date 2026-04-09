@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
+import { memo } from "react";
 
 import { cn, getStockStatus } from "@/lib/stock";
 
@@ -26,29 +27,33 @@ export interface StockBadgeProps
   showCount?: boolean;
 }
 
-function StockBadge({
-  className,
-  variant,
-  stock,
-  showCount = true,
-  ...props
-}: StockBadgeProps) {
-  const status = variant ?? getStockStatus(stock);
+const StockBadge = memo(
+  ({
+    className,
+    variant,
+    stock,
+    showCount = true,
+    ...props
+  }: StockBadgeProps) => {
+    const status = variant ?? getStockStatus(stock);
 
-  const getLabel = () => {
-    if (!stock || stock === 0) return "Indisponível";
-    if (!showCount) return "Em estoque";
-    return `${stock} ${stock === 1 ? "unidade" : "unidades"}`;
-  };
+    const getLabel = () => {
+      if (!stock || stock === 0) return "Indisponível";
+      if (!showCount) return "Em estoque";
+      return `${stock} ${stock === 1 ? "unidade" : "unidades"}`;
+    };
 
-  return (
-    <span
-      className={cn(stockBadgeVariants({ variant: status }), className)}
-      {...props}
-    >
-      {getLabel()}
-    </span>
-  );
-}
+    return (
+      <span
+        className={cn(stockBadgeVariants({ variant: status }), className)}
+        {...props}
+      >
+        {getLabel()}
+      </span>
+    );
+  },
+);
+
+StockBadge.displayName = "StockBadge";
 
 export { StockBadge, stockBadgeVariants };

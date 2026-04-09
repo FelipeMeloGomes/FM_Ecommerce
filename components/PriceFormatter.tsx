@@ -1,3 +1,4 @@
+import React from "react";
 import { twMerge } from "tailwind-merge";
 
 interface Props {
@@ -5,7 +6,7 @@ interface Props {
   className?: string;
 }
 
-const PriceFormatter = ({ amount, className }: Props) => {
+const PriceFormatter = React.memo(({ amount, className }: Props) => {
   const formattedPrice = new Number(amount).toLocaleString("pt-BR", {
     currency: "BRL",
     style: "currency",
@@ -18,6 +19,8 @@ const PriceFormatter = ({ amount, className }: Props) => {
       {formattedPrice}
     </span>
   );
-};
+});
+
+PriceFormatter.displayName = "PriceFormatter";
 
 export default PriceFormatter;

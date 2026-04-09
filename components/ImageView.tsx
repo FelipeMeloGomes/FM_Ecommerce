@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { urlFor } from "@/sanity/lib/image";
 import {
   internalGroqTypeReferenceTo,
@@ -25,7 +25,7 @@ interface Props {
   isStock?: number | undefined;
 }
 
-const ImageView = ({ images = [], isStock }: Props) => {
+const ImageView = React.memo(({ images = [], isStock }: Props) => {
   const [active, setActive] = useState(images[0]);
 
   const handleSetActive = useCallback(
@@ -81,6 +81,8 @@ const ImageView = ({ images = [], isStock }: Props) => {
       </div>
     </div>
   );
-};
+});
+
+ImageView.displayName = "ImageView";
 
 export default ImageView;
