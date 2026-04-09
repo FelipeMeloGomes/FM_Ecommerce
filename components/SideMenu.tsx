@@ -18,7 +18,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -59,6 +59,10 @@ const SideMenu = ({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleThemeToggle = useCallback(() => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  }, [theme, setTheme]);
 
   const menuItems = [
     { href: "/", label: "Início", icon: Home },
@@ -250,7 +254,7 @@ const SideMenu = ({
               <Separator className="my-2" />
               <Button
                 variant="ghost"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                onClick={handleThemeToggle}
                 className="w-full justify-start gap-3 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted dark:text-zinc-200"
               >
                 {mounted && theme === "dark" ? (

@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { client } from "@/sanity/lib/client";
 import { SHOP_PRODUCTS_QUERY } from "@/sanity/queries/query";
 import type { BRANDS_QUERYResult, Category, Product } from "@/sanity.types";
@@ -25,6 +25,7 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
   const searchParams = useSearchParams();
   const brandParams = searchParams?.get("brand") ?? initialBrand;
   const categoryParams = searchParams?.get("category") ?? initialCategory;
+  const [isPending, startTransition] = useTransition();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
@@ -53,7 +54,7 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
       );
       setProducts(data);
     } catch (error) {
-      console.log("Shop product fetching Error", error);
+      console.error("Shop product fetching Error", error);
     } finally {
       setLoading(false);
     }
@@ -63,10 +64,38 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
     fetchProducts();
   }, [fetchProducts]);
 
+  const handleClearFilters = useCallback(() => {
+    startTransition(() => {
+      setSelectedCategory(null);
+      setSelectedBrand(null);
+      setSelectedPrice(null);
+    });
+  }, []);
+
+  const handleCategoryChange = useCallback((category: string | null) => {
+    startTransition(() => {
+      setSelectedCategory(category);
+    });
+  }, []);
+
+  const handleBrandChange = useCallback((brand: string | null) => {
+    startTransition(() => {
+      setSelectedBrand(brand);
+    });
+  }, []);
+
+  const handlePriceChange = useCallback((price: string | null) => {
+    startTransition(() => {
+      setSelectedPrice(price);
+    });
+  }, []);
+
   const hasFilters =
     selectedCategory !== null ||
     selectedBrand !== null ||
     selectedPrice !== null;
+
+  const isLoading = loading || isPending;
 
   return (
     <div className="border-t border-border">
@@ -79,11 +108,7 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
             {hasFilters && (
               <button
                 type="button"
-                onClick={() => {
-                  setSelectedCategory(null);
-                  setSelectedBrand(null);
-                  setSelectedPrice(null);
-                }}
+                onClick={handleClearFilters}
                 className="text-sm text-muted-foreground hover:text-foreground underline transition-colors"
               >
                 Limpar filtros
@@ -98,17 +123,17 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
               <CategoryList
                 categories={categories}
                 selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
+                setSelectedCategory={handleCategoryChange}
               />
               <div className="my-4 border-t border-border" />
               <BrandList
                 brands={brands}
-                setSelectedBrand={setSelectedBrand}
+                setSelectedBrand={handleBrandChange}
                 selectedBrand={selectedBrand}
               />
               <div className="my-4 border-t border-border" />
               <PriceList
-                setSelectedPrice={setSelectedPrice}
+                setSelectedPrice={handlePriceChange}
                 selectedPrice={selectedPrice}
               />
             </div>
@@ -116,7 +141,7 @@ const Shop = ({ categories, brands, initialBrand, initialCategory }: Props) => {
 
           <main className="flex-1 min-h-0">
             <div className="h-full overflow-y-auto pr-2 scrollbar-hide">
-              {loading ? (
+              {isLoading ? (
                 <div className="flex flex-col gap-3 items-center justify-center py-20 bg-card rounded-xl border border-border">
                   <Loader2 className="w-10 h-10 text-primary animate-spin" />
                   <p className="font-medium text-muted-foreground">

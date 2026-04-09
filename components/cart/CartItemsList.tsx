@@ -3,7 +3,7 @@
 import { Heart, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useCallback } from "react";
 import { toast } from "sonner";
 import PriceFormatter from "@/components/PriceFormatter";
 import QuantityButtons from "@/components/QuantityButtons";
@@ -23,14 +23,38 @@ interface CartItemsListProps {
 }
 
 const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
-  const { deleteCartProduct, addToFavorite, favoriteProduct } = useStore();
+  const deleteCartProduct = useStore((state) => state.deleteCartProduct);
+  const addToFavorite = useStore((state) => state.addToFavorite);
+  const favoriteProduct = useStore((state) => state.favoriteProduct);
+  const getItemCount = useStore((state) => state.getItemCount);
+
+  const handleAddToFavorite = useCallback(
+    (product: CartItem["product"]) => {
+      if (product?._id) {
+        addToFavorite(product);
+        toast.success("Produto adicionado aos favoritos!");
+      }
+    },
+    [addToFavorite],
+  );
+
+  const handleRemoveProduct = useCallback(
+    (productId?: string) => {
+      confirmToast({
+        message: "Deseja remover este produto?",
+        onConfirm: () => {
+          deleteCartProduct(productId);
+          toast.success("Produto removido!");
+        },
+      });
+    },
+    [deleteCartProduct],
+  );
 
   return (
     <>
       {items.map(({ product }) => {
-        const itemCount = product
-          ? useStore.getState().getItemCount(product._id)
-          : 0;
+        const itemCount = product?._id ? getItemCount(product._id) : 0;
         const isFavorite = product
           ? favoriteProduct?.some((item) => item?._id === product._id)
           : false;
@@ -81,15 +105,7 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                         <button
                           type="button"
                           className="mt-1"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            if (product?._id) {
-                              addToFavorite(product);
-                              toast.success(
-                                "Produto adicionado aos favoritos!",
-                              );
-                            }
-                          }}
+                          onClick={() => handleAddToFavorite(product)}
                         >
                           <Heart
                             className={cn(
@@ -111,15 +127,7 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                         <button
                           type="button"
                           className="mt-1"
-                          onClick={() => {
-                            confirmToast({
-                              message: "Deseja remover este produto?",
-                              onConfirm: () => {
-                                deleteCartProduct(product?._id);
-                                toast.success("Produto removido!");
-                              },
-                            });
-                          }}
+                          onClick={() => handleRemoveProduct(product?._id)}
                         >
                           <Trash className="w-5 h-5 text-muted-foreground hover:text-destructive transition-colors" />
                         </button>

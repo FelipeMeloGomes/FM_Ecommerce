@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { client } from "@/sanity/lib/client";
 import { PRODUCTS_BY_CATEGORY_QUERY } from "@/sanity/queries/query";
 import type { Category, Product } from "@/sanity.types";
@@ -16,14 +16,10 @@ interface Props {
 
 const CategoryProducts = ({ categories, slug }: Props) => {
   const [currentSlug, setCurrentSlug] = useState(slug);
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const handleCategoryChange = (newSlug: string) => {
-    if (newSlug === currentSlug) return;
-    setCurrentSlug(newSlug);
-    router.push(`/category/${newSlug}`, { scroll: false });
-  };
 
   const fetchProducts = useCallback(async (categorySlug: string) => {
     setLoading(true);
@@ -45,6 +41,19 @@ const CategoryProducts = ({ categories, slug }: Props) => {
       fetchProducts(currentSlug);
     }
   }, [currentSlug, fetchProducts]);
+
+  const handleCategoryChange = useCallback(
+    (newSlug: string) => {
+      if (newSlug === currentSlug) return;
+      startTransition(() => {
+        setCurrentSlug(newSlug);
+        router.push(`/category/${newSlug}`, { scroll: false });
+      });
+    },
+    [currentSlug, router],
+  );
+
+  const isLoading = loading || isPending;
 
   return (
     <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
@@ -74,7 +83,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
         </div>
       </div>
       <div className="flex-1 min-h-[400px]">
-        {loading ? (
+        {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             <ProductCardSkeleton count={8} />
           </div>

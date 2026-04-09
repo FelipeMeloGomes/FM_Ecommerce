@@ -2,7 +2,7 @@
 import { Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { client } from "@/sanity/lib/client";
 import { PRODUCTS_BY_BRAND_QUERY } from "@/sanity/queries/query";
 import type { Brand, Product } from "@/sanity.types";
@@ -16,15 +16,10 @@ interface Props {
 
 const BrandProducts = ({ brands, slug }: Props) => {
   const [currentSlug, setCurrentSlug] = useState(slug);
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
-
-  const handleBrandChange = (newSlug: string) => {
-    if (newSlug === currentSlug) return;
-    setCurrentSlug(newSlug);
-    router.push(`/brand/${newSlug}`, { scroll: false });
-  };
 
   const fetchProducts = useCallback(async (brandSlug: string) => {
     setLoading(true);
@@ -46,6 +41,19 @@ const BrandProducts = ({ brands, slug }: Props) => {
       fetchProducts(currentSlug);
     }
   }, [currentSlug, fetchProducts]);
+
+  const handleBrandChange = useCallback(
+    (newSlug: string) => {
+      if (newSlug === currentSlug) return;
+      startTransition(() => {
+        setCurrentSlug(newSlug);
+        router.push(`/brand/${newSlug}`, { scroll: false });
+      });
+    },
+    [currentSlug, router],
+  );
+
+  const isLoading = loading || isPending;
 
   return (
     <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
@@ -73,7 +81,7 @@ const BrandProducts = ({ brands, slug }: Props) => {
         </div>
       </div>
       <div className="flex-1 min-h-[400px]">
-        {loading ? (
+        {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 min-h-80 space-y-4 text-center bg-muted/30 rounded-xl w-full border border-dashed border-border">
             <div className="flex items-center gap-2 text-shop_orange">
               <Loader2 className="w-5 h-5 animate-spin" />

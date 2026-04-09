@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { productType } from "@/constants/data";
 import { client } from "@/sanity/lib/client";
 import { PRODUCTS_BY_VARIANT_QUERY } from "@/sanity/queries/query";
@@ -20,35 +20,47 @@ export function ProductGrid({ initialProducts }: ProductGridProps) {
   const [selectedTab, setSelectedTab] = useState(productType[0]?.title || "");
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const defaultTab = productType[0]?.title || "";
+
+  const fetchProducts = useCallback(async (variant: string) => {
+    setLoading(true);
+    try {
+      const response = await client.fetch(PRODUCTS_BY_VARIANT_QUERY, {
+        variant: variant.toLowerCase(),
+        limit: 100,
+      });
+      setProducts(response);
+    } catch (error) {
+      console.error("Product fetching Error", error);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (selectedTab === defaultTab) return;
 
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await client.fetch(PRODUCTS_BY_VARIANT_QUERY, {
-          variant: selectedTab.toLowerCase(),
-          limit: 100,
-        });
-        setProducts(response);
-      } catch (error) {
-        console.log("Product fetching Error", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const debounceTimer = setTimeout(fetchData, 300);
+    const debounceTimer = setTimeout(() => {
+      fetchProducts(selectedTab);
+    }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [selectedTab, defaultTab]);
+  }, [selectedTab, defaultTab, fetchProducts]);
+
+  const handleTabSelect = useCallback((tab: string) => {
+    startTransition(() => {
+      setSelectedTab(tab);
+    });
+  }, []);
+
+  const isLoading = loading || isPending;
 
   return (
     <Container className="flex flex-col lg:px-0 my-8 lg:my-12">
-      <HomeTabBar selectedTab={selectedTab} onTabSelect={setSelectedTab} />
-      {loading ? (
+      <HomeTabBar selectedTab={selectedTab} onTabSelect={handleTabSelect} />
+      {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 min-h-[400px] space-y-4 text-center bg-muted/30 rounded-xl w-full mt-8">
           <Loader2 className="w-8 h-8 animate-spin text-shop_orange" />
           <p className="text-muted-foreground">Carregando produtos...</p>
