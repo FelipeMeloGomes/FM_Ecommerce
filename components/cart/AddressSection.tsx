@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -22,6 +23,17 @@ const AddressSection = ({
   onDeleteAddress,
 }: AddressSectionProps) => {
   const router = useRouter();
+
+  const handleNewAddress = useCallback(() => {
+    router.push("/account/addresses");
+  }, [router]);
+
+  const handleEditAddress = useCallback(
+    (id: string) => () => {
+      router.push(`/account/addresses?edit=${id}`);
+    },
+    [router],
+  );
 
   if (!addresses.length) {
     return (
@@ -83,7 +95,7 @@ const AddressSection = ({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => router.push("/account/addresses")}
+                  onClick={handleNewAddress}
                 >
                   Novo
                 </Button>
@@ -91,9 +103,7 @@ const AddressSection = ({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    router.push(`/account/addresses?edit=${address._id}`)
-                  }
+                  onClick={handleEditAddress(address._id ?? "")}
                 >
                   Editar
                 </Button>

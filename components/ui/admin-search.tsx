@@ -1,5 +1,6 @@
 import { Search, X } from "lucide-react";
 import Link from "next/link";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -18,6 +19,17 @@ export function AdminSearch({
   createLabel,
   createHref,
 }: AdminSearchProps) {
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onQueryChange(e.target.value);
+    },
+    [onQueryChange],
+  );
+
+  const handleClear = useCallback(() => {
+    onQueryChange("");
+  }, [onQueryChange]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3">
@@ -28,7 +40,7 @@ export function AdminSearch({
           <Input
             type="text"
             value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
+            onChange={handleChange}
             placeholder={placeholder}
             className="
               h-11 pl-10 pr-10 
@@ -45,7 +57,7 @@ export function AdminSearch({
           {query && (
             <button
               type="button"
-              onClick={() => onQueryChange("")}
+              onClick={handleClear}
               className="
                 absolute right-3 top-1/2 -translate-y-1/2 
                 text-muted-foreground hover:text-foreground

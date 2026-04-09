@@ -1,4 +1,5 @@
 import { Minus, Plus } from "lucide-react";
+import { useCallback } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
@@ -10,27 +11,29 @@ interface Props {
   className?: string;
 }
 const QuantityButtons = ({ product, className }: Props) => {
-  const { addItem, removeItem, getItemCount } = useStore();
+  const addItem = useStore((state) => state.addItem);
+  const removeItem = useStore((state) => state.removeItem);
+  const getItemCount = useStore((state) => state.getItemCount);
   const itemCount = getItemCount(product?._id);
   const isOutOfStock = product?.stock === 0;
 
-  const handleRemoveProduct = () => {
+  const handleRemoveProduct = useCallback(() => {
     removeItem(product?._id);
     if (itemCount > 1) {
       toast.success("Quantidade atualizada");
     } else {
       toast.success("Produto removido");
     }
-  };
+  }, [product?._id, itemCount, removeItem]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     if ((product?.stock as number) > itemCount) {
       addItem(product);
       toast.success("Quantidade atualizada");
     } else {
       toast.error("Estoque insuficiente");
     }
-  };
+  }, [product, itemCount, addItem]);
 
   return (
     <div className={cn("flex items-center gap-1", className)}>

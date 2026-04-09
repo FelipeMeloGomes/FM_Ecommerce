@@ -2,7 +2,7 @@
 
 import { Loader2, Search, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
 import ProductCard from "./ProductCard";
@@ -39,12 +39,14 @@ export function FilterableProductList({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = searchQuery
-      ? product.name?.toLowerCase().includes(searchQuery.toLowerCase())
-      : true;
-    return matchesSearch;
-  });
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const matchesSearch = searchQuery
+        ? product.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
+      return matchesSearch;
+    });
+  }, [products, searchQuery]);
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,6 +66,13 @@ export function FilterableProductList({
       onFilterChange?.(newFilter || "");
     },
     [selectedFilter, onFilterChange],
+  );
+
+  const handleFilterSelect = useCallback(
+    (filterValue: string) => () => {
+      handleFilterClick(filterValue);
+    },
+    [handleFilterClick],
   );
 
   return (
@@ -96,7 +105,7 @@ export function FilterableProductList({
             <button
               type="button"
               key={filter.value}
-              onClick={() => handleFilterClick(filter.value)}
+              onClick={handleFilterSelect(filter.value)}
               className={cn(
                 "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                 selectedFilter === filter.value

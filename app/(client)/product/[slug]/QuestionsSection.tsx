@@ -6,7 +6,7 @@ import {
   MessageCircleQuestion,
   Send,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { sendProductQuestion } from "@/actions/questionActions";
 import { Avatar } from "@/components/Avatar";
@@ -50,49 +50,70 @@ export default function QuestionsSection({
     new Set(),
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleShowForm = useCallback(() => {
+    setShowForm(true);
+  }, []);
 
-    if (!newQuestion.trim() || newQuestion.trim().length < 10) {
-      toast.error("Pergunta muito curta. Mínimo de 10 caracteres.");
-      return;
-    }
+  const handleHideForm = useCallback(() => {
+    setShowForm(false);
+    setNewQuestion("");
+  }, []);
 
-    setLoading(true);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    try {
-      await sendProductQuestion(productId, productName, newQuestion.trim());
-      toast.success("Pergunta enviada com sucesso!");
-      setNewQuestion("");
-      setShowForm(false);
-    } catch (_error) {
-      toast.error("Erro ao enviar pergunta. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (!newQuestion.trim() || newQuestion.trim().length < 10) {
+        toast.error("Pergunta muito curta. Mínimo de 10 caracteres.");
+        return;
+      }
 
-  const toggleQuestion = (id: string) => {
-    const newExpanded = new Set(expandedQuestions);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedQuestions(newExpanded);
-  };
+      setLoading(true);
 
-  const formatDate = (dateStr: string) => {
+      try {
+        await sendProductQuestion(productId, productName, newQuestion.trim());
+        toast.success("Pergunta enviada com sucesso!");
+        setNewQuestion("");
+        setShowForm(false);
+      } catch (_error) {
+        toast.error("Erro ao enviar pergunta. Tente novamente.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [productId, productName, newQuestion],
+  );
+
+  const toggleQuestion = useCallback((id: string) => {
+    setExpandedQuestions((prev) => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(id)) {
+        newExpanded.delete(id);
+      } else {
+        newExpanded.add(id);
+      }
+      return newExpanded;
+    });
+  }, []);
+
+  const handleToggleQuestion = useCallback(
+    (id: string) => () => {
+      toggleQuestion(id);
+    },
+    [toggleQuestion],
+  );
+
+  const formatDate = useCallback((dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("pt-BR", {
       day: "numeric",
       month: "short",
       year: "numeric",
     });
-  };
+  }, []);
 
-  const handleQuestionUpdated = () => {
+  const handleQuestionUpdated = useCallback(() => {
     window.location.reload();
-  };
+  }, []);
 
   return (
     <>
@@ -120,7 +141,7 @@ export default function QuestionsSection({
         <CardContent className="space-y-4">
           {userId && !showForm && (
             <Button
-              onClick={() => setShowForm(true)}
+              onClick={handleShowForm}
               className="w-full bg-shop_dark_green hover:bg-shop_btn_dark_green transition-all duration-200"
             >
               <MessageCircleQuestion className="h-4 w-4 mr-2" />
@@ -160,10 +181,7 @@ export default function QuestionsSection({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    setShowForm(false);
-                    setNewQuestion("");
-                  }}
+                  onClick={handleHideForm}
                 >
                   Cancelar
                 </Button>
@@ -205,7 +223,7 @@ export default function QuestionsSection({
                 >
                   <button
                     type="button"
-                    onClick={() => toggleQuestion(q._id)}
+                    onClick={handleToggleQuestion(q._id)}
                     className="w-full text-left p-4 bg-card hover:bg-muted/20 transition-colors"
                   >
                     <div className="flex items-start gap-3">

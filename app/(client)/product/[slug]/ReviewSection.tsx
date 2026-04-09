@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ReviewForm } from "@/components/ReviewForm";
 import { ReviewList } from "@/components/ReviewList";
 import StarRating from "@/components/StarRating";
@@ -39,9 +39,17 @@ export default function ReviewSection({
 }: ReviewSectionProps) {
   const [showForm, setShowForm] = useState(false);
 
-  const handleReviewSubmitted = () => {
+  const handleShowForm = useCallback(() => {
+    setShowForm(true);
+  }, []);
+
+  const handleHideForm = useCallback(() => {
     setShowForm(false);
-  };
+  }, []);
+
+  const handleReviewSubmitted = useCallback(() => {
+    setShowForm(false);
+  }, []);
 
   return (
     <>
@@ -66,7 +74,7 @@ export default function ReviewSection({
             </div>
             {userId && !showForm && hasPurchased && (
               <Button
-                onClick={() => setShowForm(true)}
+                onClick={handleShowForm}
                 className="ml-auto bg-shop_dark_green hover:bg-shop_btn_dark_green"
               >
                 Avaliar Produto
@@ -79,7 +87,7 @@ export default function ReviewSection({
             )}
             {userId && showForm && (
               <Button
-                onClick={() => setShowForm(false)}
+                onClick={handleHideForm}
                 variant="ghost"
                 className="ml-auto"
               >

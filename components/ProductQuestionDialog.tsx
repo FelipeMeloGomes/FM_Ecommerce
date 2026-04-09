@@ -1,7 +1,7 @@
 "use client";
 
 import { Send } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { sendProductQuestion } from "@/actions/questionActions";
 import { Button } from "@/components/ui/button";
@@ -34,33 +34,40 @@ export function ProductQuestionDialog({
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleClose = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
 
-    if (!question.trim() || question.trim().length < 10) {
-      toast.error("Pergunta muito curta. Mínimo de 10 caracteres.");
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!userId) {
-      toast.error("Você precisa estar logado para fazer uma pergunta.");
-      return;
-    }
+      if (!question.trim() || question.trim().length < 10) {
+        toast.error("Pergunta muito curta. Mínimo de 10 caracteres.");
+        return;
+      }
 
-    setLoading(true);
+      if (!userId) {
+        toast.error("Você precisa estar logado para fazer uma pergunta.");
+        return;
+      }
 
-    try {
-      await sendProductQuestion(product._id, product.name, question.trim());
-      toast.success("Pergunta enviada com sucesso!");
-      setQuestion("");
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Error sending question:", error);
-      toast.error("Erro ao enviar pergunta. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLoading(true);
+
+      try {
+        await sendProductQuestion(product._id, product.name, question.trim());
+        toast.success("Pergunta enviada com sucesso!");
+        setQuestion("");
+        handleClose();
+      } catch (error) {
+        console.error("Error sending question:", error);
+        toast.error("Erro ao enviar pergunta. Tente novamente.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [question, userId, product, handleClose],
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -88,11 +95,7 @@ export function ProductQuestionDialog({
             </p>
           </div>
           <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
             <Button

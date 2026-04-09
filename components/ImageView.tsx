@@ -1,7 +1,7 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { urlFor } from "@/sanity/lib/image";
 import {
   internalGroqTypeReferenceTo,
@@ -27,6 +27,13 @@ interface Props {
 
 const ImageView = ({ images = [], isStock }: Props) => {
   const [active, setActive] = useState(images[0]);
+
+  const handleSetActive = useCallback(
+    (image: (typeof images)[0]) => () => {
+      setActive(image);
+    },
+    [],
+  );
 
   return (
     <div className="w-full lg:w-1/2 space-y-4">
@@ -54,7 +61,7 @@ const ImageView = ({ images = [], isStock }: Props) => {
           <button
             type="button"
             key={image?._key}
-            onClick={() => setActive(image)}
+            onClick={handleSetActive(image)}
             className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200 ${
               active?._key === image?._key
                 ? "border-shop_orange ring-2 ring-shop_orange/20"

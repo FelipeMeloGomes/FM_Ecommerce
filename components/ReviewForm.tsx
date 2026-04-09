@@ -1,7 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { createReview } from "@/actions/reviewActions";
 import {
@@ -25,49 +25,64 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
   const [images, setImages] = useState<ReviewImage[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSetRating = useCallback((star: number) => {
+    setRating(star);
+  }, []);
 
-    if (rating === 0) {
-      toast.error("Por favor, selecione uma avaliação");
-      return;
-    }
+  const handleSetHoverRating = useCallback((star: number) => {
+    setHoverRating(star);
+  }, []);
 
-    if (!title.trim() || !comment.trim()) {
-      toast.error("Preencha o título e o comentário");
-      return;
-    }
+  const handleClearHoverRating = useCallback(() => {
+    setHoverRating(0);
+  }, []);
 
-    setLoading(true);
-    try {
-      const files =
-        images.length > 0
-          ? images
-              .map((img) => img.file)
-              .filter((f): f is File => f !== undefined)
-          : undefined;
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-      await createReview({
-        productId,
-        rating,
-        title: title.trim(),
-        comment: comment.trim(),
-        images: files,
-      });
-      toast.success("Avaliação enviada!");
-      setRating(0);
-      setTitle("");
-      setComment("");
-      setImages([]);
-      onSuccess?.();
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Erro ao enviar avaliação";
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (rating === 0) {
+        toast.error("Por favor, selecione uma avaliação");
+        return;
+      }
+
+      if (!title.trim() || !comment.trim()) {
+        toast.error("Preencha o título e o comentário");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const files =
+          images.length > 0
+            ? images
+                .map((img) => img.file)
+                .filter((f): f is File => f !== undefined)
+            : undefined;
+
+        await createReview({
+          productId,
+          rating,
+          title: title.trim(),
+          comment: comment.trim(),
+          images: files,
+        });
+        toast.success("Avaliação enviada!");
+        setRating(0);
+        setTitle("");
+        setComment("");
+        setImages([]);
+        onSuccess?.();
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Erro ao enviar avaliação";
+        toast.error(message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [rating, title, comment, images, productId, onSuccess],
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -79,9 +94,9 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
               key={star}
               type="button"
               aria-label={`Avaliar com ${star} estrelas`}
-              onClick={() => setRating(star)}
-              onMouseEnter={() => setHoverRating(star)}
-              onMouseLeave={() => setHoverRating(0)}
+              onClick={() => handleSetRating(star)}
+              onMouseEnter={() => handleSetHoverRating(star)}
+              onMouseLeave={handleClearHoverRating}
               className="p-1 transition-colors"
             >
               <Star

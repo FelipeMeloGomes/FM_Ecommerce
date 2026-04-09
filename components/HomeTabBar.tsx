@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useCallback } from "react";
 import { productType } from "@/constants/data";
 
 interface Props {
@@ -8,13 +9,20 @@ interface Props {
 }
 
 const HomeTabBar = ({ selectedTab, onTabSelect }: Props) => {
+  const handleTabClick = useCallback(
+    (title: string | undefined) => () => {
+      onTabSelect(title ?? "");
+    },
+    [onTabSelect],
+  );
+
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-2 flex-wrap">
         {productType?.map((item) => (
           <button
             type="button"
-            onClick={() => onTabSelect(item?.title)}
+            onClick={handleTabClick(item?.title)}
             key={item?.title}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               selectedTab === item?.title

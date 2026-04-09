@@ -1,7 +1,7 @@
 "use client";
 
 import { Copy, Facebook, Mail, Twitter } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +29,7 @@ export function ShareDialog({ product, open, onOpenChange }: ShareDialogProps) {
       ? `${window.location.origin}/product/${product.slug || ""}`
       : `/product/${product.slug || ""}`;
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -38,7 +38,7 @@ export function ShareDialog({ product, open, onOpenChange }: ShareDialogProps) {
     } catch {
       toast.error("Erro ao copiar link");
     }
-  };
+  }, [shareUrl]);
 
   const shareLinks = {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,

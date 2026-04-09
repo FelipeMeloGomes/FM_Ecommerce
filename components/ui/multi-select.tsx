@@ -2,6 +2,7 @@
 
 import { Check, X } from "lucide-react";
 import * as React from "react";
+import { useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,19 +37,30 @@ export function MultiSelect({
     return options.filter((opt) => value.includes(opt._id ?? ""));
   }, [options, value]);
 
-  const handleSelect = (id: string) => {
-    const optionId = id;
-    if (value.includes(optionId)) {
-      onChange(value.filter((v) => v !== optionId));
-    } else {
-      onChange([...value, optionId]);
-    }
-  };
+  const handleSelect = useCallback(
+    (id: string) => {
+      const optionId = id;
+      if (value.includes(optionId)) {
+        onChange(value.filter((v) => v !== optionId));
+      } else {
+        onChange([...value, optionId]);
+      }
+    },
+    [value, onChange],
+  );
 
-  const handleRemove = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    onChange(value.filter((v) => v !== id));
-  };
+  const handleRemove = useCallback(
+    (e: React.MouseEvent, id: string) => {
+      e.stopPropagation();
+      onChange(value.filter((v) => v !== id));
+    },
+    [value, onChange],
+  );
+
+  const handleRemoveBadge = useCallback(
+    (id: string) => (e: React.MouseEvent) => handleRemove(e, id),
+    [handleRemove],
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -66,7 +78,7 @@ export function MultiSelect({
                   key={option._id}
                   variant="secondary"
                   className="px-1.5 py-0.5 text-xs"
-                  onClick={(e) => handleRemove(e, option._id ?? "")}
+                  onClick={handleRemoveBadge(option._id ?? "")}
                 >
                   {option.title || ""}
                   <X className="ml-1 h-3 w-3 cursor-pointer" />

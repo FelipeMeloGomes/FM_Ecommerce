@@ -1,5 +1,6 @@
 "use client";
 import { Heart } from "lucide-react";
+import { useCallback } from "react";
 import { useWishlist } from "@/hooks/useWishlist";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
@@ -15,12 +16,15 @@ const ProductSideMenu = ({
 
   const isFavorite = favoriteProduct.some((item) => item?._id === product?._id);
 
-  const handleFavorite = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    if (product?._id && !isLoading) {
-      addToFavorite(product);
-    }
-  };
+  const handleFavorite = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      if (product?._id && !isLoading) {
+        addToFavorite(product);
+      }
+    },
+    [product, isLoading, addToFavorite],
+  );
 
   return (
     <div className={cn("absolute top-3 right-3", className)}>
