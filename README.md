@@ -233,6 +233,129 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Correção automática de formatação
 - Imports organizados automaticamente
 
+---
+
+## ⚡ Otimizações de Performance React
+
+Este projeto segue as melhores práticas de performance do React conforme documentado na skill [Vercel React Best Practices](https://vercel.com/blog/react-best-practices), focando em otimizações de re-render e redução de work desnecessário.
+
+### Event Handlers Estáveis (useCallback)
+
+Todos os event handlers são extraídos em callbacks estáveis para evitar recriação de funções a cada render:
+
+```tsx
+// ❌ Evitado: função criada em cada render
+<button onClick={() => handleDelete(id)}>
+
+// ✅ Correto: callback estável via useCallback
+const handleDeleteWrapper = useCallback(
+  (id: string) => () => handleDelete(id),
+  [handleDelete],
+);
+
+<button onClick={handleDeleteWrapper(id)}>
+```
+
+**Componentes otimizados:**
+- Admin lists (brands, categories, products)
+- Review components (ReviewForm, ReviewActions, ReviewImagesGallery)
+- Cart components (CartItemsList, CartClient)
+- Product components (ProductSideMenu, ProductQuestionDialog, ImageView)
+- OrdersComponent
+- WishListProducts
+- BrandProducts, CategoryProducts
+- HomeTabBar, MobileMenu
+- Multi-select, Pagination, AdminSearch, AdminBackButton
+- ShareDialog, ShippingCalculator
+- SideMenu
+
+### Valores Derivados Memorizados (useMemo)
+
+Valores computados a partir de estado são memorizados para evitar cálculos repetidos:
+
+```tsx
+// ❌ Evitado: recalcula em cada render
+const filteredProducts = products.filter(/* ... */);
+
+// ✅ Correto: só recalcula quando dependencies mudam
+const filteredProducts = useMemo(() => {
+  return products.filter(/* ... */);
+}, [products, searchQuery]);
+```
+
+**Exemplos implementados:**
+- `filteredProducts` em `FilterableProductList`
+- `itemsMap` em `CartItemsList` (Map para O(1) lookups)
+- `selectedOptions` em `MultiSelect`
+- `subtotal`/`total` em `CartClient`
+
+### Subscribe Direto ao Estado (Zustand)
+
+Padrão: subscribe diretamente ao array de items em vez de funções getter:
+
+```tsx
+// ❌ Evitado: subscribe a função (não re-renderiza quando items mudam)
+const getItemCount = useStore((state) => state.getItemCount);
+const itemCount = getItemCount(productId);
+
+// ✅ Correto: subscribe ao array items
+const items = useStore((state) => state.items);
+const itemCount = useMemo(() => {
+  const item = items.find((i) => i.product._id === productId);
+  return item ? item.quantity : 0;
+}, [items, productId]);
+```
+
+**Componentes corrigidos:**
+- `CartClient`: `items` → `subtotal`/`total` derivados com useMemo
+- `QuantityButtons`: `items` → `itemCount` derivado
+- `CartItemsList`: `storeItems` → `itemsMap` para lookups eficientes
+
+### Updates Não-Bloqueantes (useTransition)
+
+Operações que não precisam bloquear a UI usam `useTransition`:
+
+```tsx
+const [isPending, startTransition] = useTransition();
+
+const handleFilterChange = (filter: string) => {
+  startTransition(() => {
+    setSelectedFilter(filter);
+  });
+};
+```
+
+**Usado em:**
+- BrandProducts, CategoryProducts
+- Shop (filtros)
+- Todos os componentes com mudanças de estado assíncronas
+
+### Componentes Puros (React.memo)
+
+Componentes que recebem props imutáveis são memoizados:
+
+```tsx
+const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
+  // ...
+});
+
+CartItemsList.displayName = "CartItemsList";
+```
+
+**Componentes memoizados:**
+- `CartItemsList`
+- `AdminPagination`
+
+### Padrões Aplicados
+
+| Padrão | Arquivo | Descrição |
+|--------|---------|-----------|
+| `rerender-functional-setstate` | Store hooks | Callbacks estáveis para setState |
+| `rerender-memo` | Vários | useMemo para valores derivados |
+| `rerender-transitions` | Filtros | useTransition para updates não-urgentes |
+| `rerender-move-effect-to-event` | Handlers | Event handlers em vez de useEffect |
+| `rerender-dependencies` | Hooks | Dependencies primitivas em effects |
+
 ### Limpeza de Dependências
 
 - Remoção de pacotes não utilizados: `react-hot-toast`, `react-icons`, `dayjs`
