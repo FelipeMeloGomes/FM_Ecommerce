@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import {
   Heart,
   Home,
+  LayoutGrid,
   MapPin,
   MessageCircleQuestion,
   Moon,
@@ -68,6 +69,7 @@ const SideMenu = ({
   const menuItems = [
     { href: "/", label: "Início", icon: Home },
     { href: "/shop", label: "Loja", icon: ShoppingBag },
+    { href: "/category/gadget", label: "Categorias", icon: LayoutGrid },
     { href: "/deal", label: "Promoções", icon: Package },
     {
       href: "/cart",
