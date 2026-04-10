@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 const baseAppearance = {
   variables: {
     borderRadius: "10px",
-    fontFamily: "Poppins, sans-serif",
+    fontFamily: "DM Sans, sans-serif",
   },
 };
 
