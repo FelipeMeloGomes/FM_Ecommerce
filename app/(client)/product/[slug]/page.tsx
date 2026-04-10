@@ -1,5 +1,4 @@
 import { auth } from "@clerk/nextjs/server";
-import { CornerDownLeft, Truck } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProductQuestions } from "@/actions/questionActions";
@@ -15,6 +14,7 @@ import ImageView from "@/components/ImageView";
 import PriceView from "@/components/PriceView";
 import { ProductActions } from "@/components/ProductActions";
 import ProductCharacteristics from "@/components/ProductCharacteristics";
+import { ShippingInfoCard } from "@/components/ShippingInfoCard";
 import StarRating from "@/components/StarRating";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -139,40 +139,7 @@ const SingleProductPage = async ({
 
           <ProductActions product={product} userId={userId} />
 
-          <div className="flex flex-col gap-0 rounded-xl overflow-hidden border border-border/60">
-            <div className="p-4 flex items-start gap-4 bg-shop_light_pink/30 border-b border-border/40">
-              <div className="p-2.5 rounded-full bg-shop_orange/10">
-                <Truck size={24} className="text-shop_orange" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-base font-semibold text-foreground">
-                  Entrega Grátis
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Digite seu CEP para ver a disponibilidade de entrega.
-                </p>
-              </div>
-            </div>
-            <div className="p-4 flex items-start gap-4">
-              <div className="p-2.5 rounded-full bg-shop_orange/10">
-                <CornerDownLeft size={24} className="text-shop_orange" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-base font-semibold text-foreground">
-                  Devolução do Pedido
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Devoluções grátis em até 30 dias.{" "}
-                  <button
-                    type="button"
-                    className="text-shop_orange hover:underline underline-offset-2 font-medium"
-                  >
-                    Detalhes
-                  </button>
-                </p>
-              </div>
-            </div>
-          </div>
+          <ShippingInfoCard />
 
           <ReviewSection
             productId={product._id}
