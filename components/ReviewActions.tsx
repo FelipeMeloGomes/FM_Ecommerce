@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import { deleteReview, updateReview } from "@/actions/reviewActions";
 import {
   type ReviewImage,
-  ReviewImagesGallery,
-} from "@/components/ReviewImagesGallery";
+  ReviewImageUploader,
+} from "@/components/ReviewImageUploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -199,10 +199,10 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
           />
         </div>
 
-        <ReviewImagesGallery
+        <ReviewImageUploader
           images={images}
           onChange={setImages}
-          editable={true}
+          maxFiles={5}
         />
 
         <div className="flex gap-2">
