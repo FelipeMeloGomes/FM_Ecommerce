@@ -89,7 +89,7 @@ const ProductCard = React.memo(
             )}
           </div>
 
-          <StockBadge stock={product?.stock} />
+          <StockBadge stock={product?.stock} className="w-fit" />
 
           <PriceView
             price={product?.price}

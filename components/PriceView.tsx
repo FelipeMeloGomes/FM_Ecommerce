@@ -11,16 +11,19 @@ interface Props {
 
 const PriceView = React.memo(({ price, discount, className }: Props) => {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-col gap-0.5">
       <PriceFormatter
         amount={price}
-        className={cn("text-xl font-bold text-shop_dark_green", className)}
+        className={cn(
+          "text-lg lg:text-xl font-bold text-shop_dark_green",
+          className,
+        )}
       />
       {price && discount && (
         <PriceFormatter
           amount={price + (discount * price) / 100}
           className={twMerge(
-            "text-sm text-muted-foreground line-through",
+            "text-xs lg:text-sm text-muted-foreground line-through",
             className,
           )}
         />
