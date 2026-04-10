@@ -86,6 +86,29 @@ const PRODUCTS_BY_VARIANT_QUERY = `
   }
 `;
 
+const SIMILAR_PRODUCTS_QUERY = `
+  *[_type == "product" && _id != $currentProductId && references($categoryId)]
+  | order(_createdAt desc) [0...6]{
+    _id,
+    name,
+    slug,
+    price,
+    discount,
+    stock,
+    images,
+    "categories": categories[]->title,
+    "rating": *[_type == "review" && product._ref == ^._id].rating,
+    "reviewCount": count(*[_type == "review" && product._ref == ^._id])
+  }
+`;
+
+const PRODUCT_WITH_CATEGORIES_QUERY = `
+  *[_type == "product" && _id == $productId][0]{
+    _id,
+    "categories": categories[]->{_id, title, slug}
+  }
+`;
+
 export {
   BRANDS_QUERY,
   DEAL_PRODUCTS,
@@ -98,4 +121,6 @@ export {
   SHOP_PRODUCTS_QUERY,
   PRODUCTS_BY_VARIANT_QUERY,
   PRODUCTS_BY_CATEGORY_QUERY,
+  SIMILAR_PRODUCTS_QUERY,
+  PRODUCT_WITH_CATEGORIES_QUERY,
 };
