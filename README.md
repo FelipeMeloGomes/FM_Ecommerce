@@ -114,10 +114,24 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 ### 💳 Checkout e Pagamentos
 
 - Integração com Stripe Checkout
+- **Métodos de pagamento:** Cartão, Boleto
+- **Wallets:** Apple Pay, Google Pay (automaticamente habilitadas quando configuradas)
 - Cálculo de frete por CEP
 - Validação de endereço
 - Geração de pedidos
 - Webhook para confirmação de pagamento
+
+#### Boleto
+
+- Vencimento: 3 dias
+- Processamento: até 2 dias úteis após pagamento
+- Comprovante enviado por email automático
+
+#### Apple Pay / Google Pay
+
+- Habilitadas automaticamente quando domínio verificado
+- Requer configuração no Stripe Dashboard
+- Oferece experiência de checkout otimizada
 
 ### 🔍 Busca e Filtros
 
@@ -459,6 +473,10 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=sua_chave_publica
 STRIPE_SECRET_KEY=sua_chave_secreta
 STRIPE_WEBHOOK_SECRET=seu_webhook_secret
 
+# Stripe (Sandbox/Produção)
+STRIPE_SECRET_KEY=sk_test_...  # Modo teste
+STRIPE_SECRET_KEY=sk_live_...  # Modo produção
+
 # App
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
@@ -469,6 +487,119 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 # Vercel
 VERCEL_URL=seu-projeto.vercel.app
 ```
+
+---
+
+## 💳 Configuração do Stripe (Pagamentos Brasil)
+
+### Métodos de Pagamento Habilitados
+
+O projeto está configurado para aceitar:
+
+| Método | Tipo | Status |
+|--------|------|--------|
+| **Cartão de Crédito/Débito** | `card` | ✅ Padrão |
+| **Boleto** | `boleto` | ✅ Configurado |
+| **Apple Pay** | wallet | ⚙️ Requer configuração |
+| **Google Pay** | wallet | ⚙️ Requer configuração |
+
+### Configuração no Stripe Dashboard
+
+#### 1. Ativar Boleto (Modo Sandbox)
+
+1. Acesse [Stripe Dashboard - Test Mode](https://dashboard.stripe.com/test)
+2. Vá em **Payment Methods** → **Settings**
+3. Ative:
+   - ✅ **Boleto**
+
+#### 2. Configurar Conta Bancária (para receber)
+
+1. Vá em **Settings** → **Payment methods** → **Manage further payment method settings**
+2. Adicione sua conta bancária para receber transferências
+3. Complete a verificação de identidade (KYC)
+
+#### 3. Apple Pay (requer domínio verificado)
+
+1. Acesse **Payment Methods** → **Apple Pay**
+2. Clique em **Add Web Domain**
+3. Adicione seu domínio:
+   - Produção: `fm-ecommerce.vercel.app` (ou seu domínio customizado)
+   - Sandbox: `localhost` (para testes locais)
+
+#### 4. Google Pay
+
+1. Acesse **Payment Methods** → **Google Pay**
+2. Ative o método
+3. O domínio será automaticamente verificado se já configurado para Apple Pay
+
+### Como Testar no Modo Sandbox
+
+#### Boleto (Teste)
+
+```bash
+# Gere o boleto e ignore (não pague de verdade)
+# O webhook confirmará o pagamento automaticamente no sandbox
+```
+
+#### Cartão de Teste
+
+```bash
+# Número do cartão
+4242 4242 4242 4242
+
+# validade: qualquer data futura
+# CVV: qualquer 3 dígitos
+```
+
+#### Wallets (Apple Pay / Google Pay)
+
+```bash
+# Use cartões de teste do Stripe:
+# https://stripe.com/docs/testing#network-tokens
+```
+
+### Webhook para Pagamentos
+
+O webhook já está configurado em `app/(client)/api/webhook/route.ts`:
+
+- ✅ Validação de assinatura Stripe
+- ✅ Criação de pedido no Sanity
+- ✅ Atualização de status automático
+
+### URL do Webhook (ngrok para testes locais)
+
+```bash
+# Para testar webhooks localmente:
+ngrok http 3000
+
+# Configure no Stripe Dashboard:
+# Webhooks → Add endpoint → https://seu-ngrok.ngrok.io/api/webhook
+```
+
+### Migrar para Produção
+
+1. **Troque as chaves:**
+   ```env
+   # De:
+   STRIPE_SECRET_KEY=sk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   
+   # Para:
+   STRIPE_SECRET_KEY=sk_live_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   ```
+
+2. **Configure domínio verificado:**
+   - Adicione seu domínio em **Payment Methods** → **Apple Pay**
+   - O mesmo domínio serve para Google Pay
+
+3. **Ative conta bancária real:**
+   - Complete verificação KYC no Stripe
+   - Adicione conta bancária para depósitos
+
+4. **Teste em produção:**
+   - Faça uma compra teste com valor baixo
+   - Verifique se o pedido foi criado corretamente
 
 ---
 

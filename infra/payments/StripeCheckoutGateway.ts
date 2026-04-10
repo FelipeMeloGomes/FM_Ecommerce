@@ -37,10 +37,18 @@ export class StripeCheckoutGateway implements CheckoutGateway {
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}&orderNumber=${metadata.orderNumber}`,
       cancel_url: `${baseUrl}/cart`,
 
+      payment_method_types: ["card", "boleto"],
+
+      payment_method_options: {
+        boleto: {
+          expires_after_days: 3,
+        },
+      },
+
       line_items: [
         ...items.map((item) => ({
           price_data: {
-            currency: "BRL",
+            currency: "brl",
             unit_amount: Math.round(item.price * 100),
             product_data: {
               name: item.name,
@@ -56,7 +64,7 @@ export class StripeCheckoutGateway implements CheckoutGateway {
           ? [
               {
                 price_data: {
-                  currency: "BRL",
+                  currency: "brl",
                   unit_amount: Math.round(metadata.shipping.price * 100),
                   product_data: {
                     name: `Frete - ${metadata.shipping.method ?? "Entrega"}`,
