@@ -4,6 +4,9 @@ import Link from "next/link";
 import React from "react";
 import { urlFor } from "@/sanity/lib/image";
 import type { Product } from "@/sanity.types";
+
+type CompatibleProduct = Product & ProductWithRating;
+
 import AddToCartButton from "./AddToCartButton";
 import PriceView from "./PriceView";
 import ProductSideMenu from "./ProductSideMenu";
@@ -12,10 +15,22 @@ import Title from "./Title";
 import { Badge } from "./ui/badge";
 import { StockBadge } from "./ui/stock-badge";
 
-interface ProductWithRating extends Product {
+export type ProductWithRating = Omit<Product, "categories"> & {
+  categories?:
+    | (
+        | string
+        | null
+        | { _ref: string; _type: "reference"; _key: string }
+        | {
+            _id?: string;
+            title?: string | null;
+            slug?: { current?: string } | null;
+          }
+      )[]
+    | null;
   rating?: number;
   reviewCount?: number;
-}
+};
 
 const ProductCard = React.memo(
   ({ product }: { product: ProductWithRating }) => {
@@ -40,7 +55,7 @@ const ProductCard = React.memo(
               />
             </Link>
           )}
-          <ProductSideMenu product={product} />
+          <ProductSideMenu product={product as CompatibleProduct} />
           {product?.status === "sale" ? (
             <Badge className="absolute top-3 left-3 bg-destructive/90 text-white text-xs font-medium">
               Promoção!
@@ -81,7 +96,10 @@ const ProductCard = React.memo(
             discount={product?.discount}
             className="text-base"
           />
-          <AddToCartButton product={product} className="w-full rounded-lg" />
+          <AddToCartButton
+            product={product as CompatibleProduct}
+            className="w-full rounded-lg"
+          />
         </div>
       </div>
     );

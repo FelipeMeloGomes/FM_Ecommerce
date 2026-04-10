@@ -5,8 +5,14 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
 
+interface ProductBase {
+  _id: string;
+  name?: string;
+  slug?: { current?: string } | null;
+}
+
 const ProductSideMenu = React.memo(
-  ({ product, className }: { product: Product; className?: string }) => {
+  ({ product, className }: { product: ProductBase; className?: string }) => {
     const { favoriteProduct, addToFavorite, isLoading } = useWishlist();
 
     const isFavorite = favoriteProduct.some(
@@ -17,7 +23,7 @@ const ProductSideMenu = React.memo(
       (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         if (product?._id && !isLoading) {
-          addToFavorite(product);
+          addToFavorite(product as Product);
         }
       },
       [product, isLoading, addToFavorite],

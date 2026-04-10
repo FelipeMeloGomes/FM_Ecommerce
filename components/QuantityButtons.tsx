@@ -7,7 +7,13 @@ import useStore from "@/store";
 import { Button } from "./ui/button";
 
 interface Props {
-  product: Product;
+  product: {
+    _id: string;
+    name?: string;
+    price?: number;
+    stock?: number;
+    images?: Array<{ asset?: { _ref: string } }>;
+  };
   className?: string;
 }
 const QuantityButtons = React.memo(({ product, className }: Props) => {
@@ -33,7 +39,7 @@ const QuantityButtons = React.memo(({ product, className }: Props) => {
 
   const handleAddToCart = useCallback(() => {
     if ((product?.stock as number) > itemCount) {
-      addItem(product);
+      addItem(product as Product);
       toast.success("Quantidade atualizada");
     } else {
       toast.error("Estoque insuficiente");

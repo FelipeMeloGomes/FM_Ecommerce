@@ -2,12 +2,11 @@ import Container from "@/components/Container";
 import ProductCard from "@/components/ProductCard";
 import Title from "@/components/Title";
 import { getDealProducts } from "@/sanity/queries";
-import type { Product } from "@/sanity.types";
 
 export const revalidate = 300;
 
 const DealPage = async () => {
-  const products: Product[] = await getDealProducts();
+  const products = await getDealProducts();
   return (
     <div className="min-h-screen bg-background">
       <Container className="py-8">
