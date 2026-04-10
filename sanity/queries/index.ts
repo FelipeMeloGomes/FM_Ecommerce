@@ -1,3 +1,8 @@
+import type {
+  SitemapBrand,
+  SitemapCategory,
+  SitemapProduct,
+} from "@/types/sitemap";
 import { sanityFetch, sanityFetchStatic } from "../lib/live";
 import {
   BRAND_QUERY,
@@ -6,6 +11,9 @@ import {
   MY_ORDERS_QUERY,
   PRODUCT_BY_SLUG_QUERY,
   PRODUCTS_BY_BRAND_QUERY,
+  SITEMAP_BRANDS_QUERY,
+  SITEMAP_CATEGORIES_QUERY,
+  SITEMAP_PRODUCTS_QUERY,
 } from "./query";
 
 const getCategories = async (quantity?: number) => {
@@ -132,4 +140,38 @@ export const getCategoriesStatic = async () => {
   }`;
   const data = await sanityFetchStatic<{ slug: string }[]>(query);
   return data ?? [];
+};
+
+export const getSitemapProducts = async (): Promise<SitemapProduct[]> => {
+  try {
+    const data = await sanityFetchStatic<SitemapProduct[]>(
+      SITEMAP_PRODUCTS_QUERY,
+    );
+    return data ?? [];
+  } catch (error) {
+    console.error("Error fetching sitemap products:", error);
+    return [];
+  }
+};
+
+export const getSitemapCategories = async (): Promise<SitemapCategory[]> => {
+  try {
+    const data = await sanityFetchStatic<SitemapCategory[]>(
+      SITEMAP_CATEGORIES_QUERY,
+    );
+    return data ?? [];
+  } catch (error) {
+    console.error("Error fetching sitemap categories:", error);
+    return [];
+  }
+};
+
+export const getSitemapBrands = async (): Promise<SitemapBrand[]> => {
+  try {
+    const data = await sanityFetchStatic<SitemapBrand[]>(SITEMAP_BRANDS_QUERY);
+    return data ?? [];
+  } catch (error) {
+    console.error("Error fetching sitemap brands:", error);
+    return [];
+  }
 };

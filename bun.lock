@@ -33,6 +33,7 @@
         "motion": "^12.29.2",
         "next": "16.1.5",
         "next-sanity": "^11.6.12",
+        "next-seo": "^7.2.0",
         "next-themes": "^0.4.6",
         "react": "19.2.3",
         "react-dom": "19.2.3",
@@ -1767,6 +1768,8 @@
     "next": ["next@16.1.5", "", { "dependencies": { "@next/env": "16.1.5", "@swc/helpers": "0.5.15", "baseline-browser-mapping": "2.10.16", "caniuse-lite": "1.0.30001787", "postcss": "8.4.31", "styled-jsx": "5.1.6" }, "optionalDependencies": { "@next/swc-darwin-arm64": "16.1.5", "@next/swc-darwin-x64": "16.1.5", "@next/swc-linux-arm64-gnu": "16.1.5", "@next/swc-linux-arm64-musl": "16.1.5", "@next/swc-linux-x64-gnu": "16.1.5", "@next/swc-linux-x64-musl": "16.1.5", "@next/swc-win32-arm64-msvc": "16.1.5", "@next/swc-win32-x64-msvc": "16.1.5", "sharp": "0.34.5" }, "peerDependencies": { "react": "19.2.3", "react-dom": "19.2.3" }, "bin": { "next": "dist/bin/next" } }, "sha512-f+wE+NSbiQgh3DSAlTaw2FwY5yGdVViAtp8TotNQj4kk4Q8Bh1sC/aL9aH+Rg1YAVn18OYXsRDT7U/079jgP7w=="],
 
     "next-sanity": ["next-sanity@11.6.12", "", { "dependencies": { "@portabletext/react": "6.0.3", "@sanity/comlink": "4.0.1", "@sanity/presentation-comlink": "2.0.1", "@sanity/preview-url-secret": "3.0.0", "@sanity/visual-editing": "4.0.3", "dequal": "2.0.3", "groq": "4.22.0", "history": "5.3.0", "server-only": "0.0.1", "use-effect-event": "2.0.3" }, "peerDependencies": { "@sanity/client": "7.20.0", "next": "16.1.5", "react": "19.2.3", "react-dom": "19.2.3", "sanity": "4.22.0", "styled-components": "6.3.12" } }, "sha512-ZmQ+g5axuHCZWgfLiUxq9ZHjSWwD++bdISPmCGYceB+YN3gpf8h1fKt4TgCk291LszZOPMHWK1bSM5hwaLtP9Q=="],
+
+    "next-seo": ["next-seo@7.2.0", "", { "peerDependencies": { "next": ">=13.4.0", "react": ">=18.2.0" } }, "sha512-ST7/YB8g0SXGuEKNucBz9wiP6nCYVZ4v8qJB7rAz9Vr1X98mw5orWL9COr8td/dzqtCYd4xaIg0YVCq5Yy3PQA=="],
 
     "next-themes": ["next-themes@0.4.6", "", { "peerDependencies": { "react": "19.2.3", "react-dom": "19.2.3" } }, "sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA=="],
 

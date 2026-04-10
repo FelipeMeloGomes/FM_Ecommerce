@@ -12,4 +12,6 @@ Disallow: /cart
 Disallow: /account/
 Disallow: /studio/
 
-Sitemap: https://www.fmshop.com.br/sitemap.xml
+Sitemap: https://fm-ecommerce-jade.vercel.app/sitemap.xml
+Sitemap: https://fm-ecommerce-jade.vercel.app/sitemap.categories.xml
+Sitemap: https://fm-ecommerce-jade.vercel.app/sitemap.brands.xml

@@ -109,6 +109,27 @@ const PRODUCT_WITH_CATEGORIES_QUERY = `
   }
 `;
 
+const SITEMAP_PRODUCTS_QUERY = defineQuery(`
+  *[_type == "product"] {
+    "slug": slug.current,
+    _updatedAt
+  }
+`);
+
+const SITEMAP_CATEGORIES_QUERY = defineQuery(`
+  *[_type == "category"] {
+    "slug": slug.current,
+    _updatedAt
+  }
+`);
+
+const SITEMAP_BRANDS_QUERY = defineQuery(`
+  *[_type == "brand"] {
+    "slug": slug.current,
+    _updatedAt
+  }
+`);
+
 export {
   BRANDS_QUERY,
   DEAL_PRODUCTS,
@@ -123,4 +144,7 @@ export {
   PRODUCTS_BY_CATEGORY_QUERY,
   SIMILAR_PRODUCTS_QUERY,
   PRODUCT_WITH_CATEGORIES_QUERY,
+  SITEMAP_PRODUCTS_QUERY,
+  SITEMAP_CATEGORIES_QUERY,
+  SITEMAP_BRANDS_QUERY,
 };
