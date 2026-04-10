@@ -140,6 +140,8 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Upload de imagens via Sanity
 - Otimização automática de imagens
 - Múltiplas imagens por produto
+- **Uploader redimensionado** para melhor usabilidade no mobile
+- Upload integrado no formulário de edição de avaliações
 
 ### 🧪 Testes Unitários (Vitest)
 
@@ -175,6 +177,18 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Aparência customizada para light e dark mode
 - Cores alinhadas com o tema do site (#063c28 para primary)
 
+### Tema Dark Minimalista
+
+Paleta monocromática escura para interface premium:
+
+- **Background:** `#09090b` (zinc-950)
+- **Foreground:** `#fafafa` (zinc-50)
+- **Accent:** `#3f3f46` (zinc-700)
+- **Muted:** `#27272a` (zinc-800)
+- **Border:** `#3f3f46` (zinc-700)
+- **Scrollbar customizado** com tema escuro
+- **Selection** com cor accent
+
 ---
 
 ## 📱 Menu Mobile
@@ -187,6 +201,56 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Backdrop com animação de opacity
 - Suporte completo dark mode
 - Ícones e links para todas as funcionalidades
+- **Link para Categorias** adicionado ao menu mobile
+
+---
+
+## 🎯 Componentes de Produto
+
+### ProductActions Refatorado
+
+Componente de ações do produto refatorado seguindo React best practices:
+
+- **Arquitetura modular:** Dialogs extraídos para `components/dialogs/`
+- **Responsabilidade única:** Cada componente tem sua própria lógica
+- **Separação do estado:** Cada dialog gerencia seu próprio estado
+
+```
+components/
+├── ProductActions.tsx          # Botões e callbacks (82 linhas)
+└── dialogs/
+    ├── ShippingDialog.tsx      # Info de entrega/devolução
+    └── SimilarProductsDialog.tsx # Produtos similares
+```
+
+### ShippingDialog
+
+Dialog de informações de entrega e devolução:
+
+- **Prazo de Entrega:** Informações sobre calculadora de frete
+- **Política de Devolução:** 30 dias para solicitação
+- **Reembolso:** Processamento em até 10 dias úteis
+- `useTransition` para abertura não-bloqueante
+
+### SimilarProductsDialog
+
+Dialog de produtos similares por categoria:
+
+- Busca produtos da mesma categoria via GROQ
+- Exibe até 6 produtos similares ordenados por criação
+- Card com imagem, nome, preço e status de estoque
+- Skeleton de carregamento durante fetch
+- `useEffect` para buscar dados apenas quando dialog abre
+- `useCallback` para fetch otimizado
+
+### Componentes de Preço e Estoque
+
+**PriceView** e **StockBadge** otimizados:
+
+- Layout responsivo para preço com desconto
+- Badge de desconto visível
+- Status de estoque com cores semânticas
+- Cores alinhadas ao tema: `shop_dark_green`, `shop_orange`
 
 ---
 
@@ -219,6 +283,15 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Adicionado `isMounted` guard em `AddToCartButton`
 - Framer Motion configurado com `initial={false}` para evitar SSR mismatch
 - Fallback button antes da hidratação
+
+### ImageView com Navegação
+
+Galeria de imagens do produto com navegação melhorada:
+
+- **Setas de navegação:** Anterior/Próximo com `useTransition`
+- **Indicadores (dots):** Navegação visual para cada imagem
+- **Keyboard support:** Navegação por setas do teclado
+- `useCallback` para handlers de navegação estáveis
 
 ### Next.js App Router
 
@@ -260,7 +333,7 @@ const handleDeleteWrapper = useCallback(
 - Admin lists (brands, categories, products)
 - Review components (ReviewForm, ReviewActions, ReviewImagesGallery)
 - Cart components (CartItemsList, CartClient)
-- Product components (ProductSideMenu, ProductQuestionDialog, ImageView)
+- Product components (ProductSideMenu, ProductQuestionDialog, ImageView, **ShippingDialog**, **SimilarProductsDialog**)
 - OrdersComponent
 - WishListProducts
 - BrandProducts, CategoryProducts
@@ -471,8 +544,9 @@ fm-ecommerce/
 │   └── api/             # API Routes
 ├── components/           # Componentes React
 │   ├── admin/          # Componentes administrativos
-│   ├── skeletons/     # Componentes skeleton
-│   └── ui/            # Componentes shadcn/ui
+│   ├── dialogs/         # Dialogs modulares (Shipping, SimilarProducts)
+│   ├── skeletons/       # Componentes skeleton
+│   └── ui/             # Componentes shadcn/ui
 │   └── ...
 ├── core/                # Interfaces e tipos (Domain Driven Design)
 │   └── types/         # Tipos compartilhados (Pagination, etc.)
@@ -491,6 +565,7 @@ fm-ecommerce/
 - **`app/`** - Todas as rotas e páginas usando App Router
 - **`components/`** - Componentes React reutilizáveis
 - **`components/admin/`** - Componentes específicos do admin (Pagination)
+- **`components/dialogs/`** - Dialogs modulares (ShippingDialog, SimilarProductsDialog)
 - **`components/ui/`** - Componentes shadcn/ui base
 - **`components/skeletons/`** - Skeletons para estados de loading
 - **`core/`** - Interfaces de domínio e tipos (DDD)
