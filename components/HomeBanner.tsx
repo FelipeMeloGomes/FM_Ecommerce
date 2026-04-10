@@ -5,28 +5,46 @@ import { Title } from "./ui/text";
 
 const HomeBanner = () => {
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-shop_light_pink/50 via-background to-shop_light_pink/30 dark:from-zinc-800 dark:via-zinc-900 dark:to-zinc-800 rounded-2xl p-8 lg:p-12">
-      <div className="absolute inset-0 bg-gradient-to-r from-shop_light_pink/20 to-transparent dark:hidden" />
-      <div className="relative z-10 flex items-center justify-between">
-        <div className="space-y-4 max-w-lg">
-          <Title className="text-3xl lg:text-4xl font-bold leading-tight">
-            Garanta até 50% OFF em <br />
-            Fones de ouvido selecionados
+    <div className="relative overflow-hidden bg-gradient-to-br from-neutral-100/80 via-background to-neutral-50/60 dark:from-neutral-900 dark:via-neutral-950 dark:to-black rounded-none lg:rounded-2xl p-8 lg:p-16 border border-border dark:border-neutral-800">
+      <div className="absolute inset-0 bg-gradient-to-br from-neutral-200/30 to-transparent dark:from-neutral-800/20 dark:to-transparent pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+        <div className="space-y-6 max-w-xl text-center lg:text-left">
+          <Title
+            className="text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight leading-[1.1] dark:text-neutral-100 animate-fade-in-up"
+            style={{ animationDelay: "0ms" }}
+          >
+            Garanta até <span className="font-bold">50% OFF</span>
+            <br />
+            em fones selecionados
           </Title>
+          <p
+            className="text-sm lg:text-base text-muted-foreground dark:text-neutral-500 animate-fade-in-up"
+            style={{ animationDelay: "100ms" }}
+          >
+            Ofertas por tempo limitado. Não perca essa oportunidade.
+          </p>
           <Link
             href={"/shop"}
-            className="inline-flex bg-shop_dark_green hover:bg-shop_btn_dark_green text-white px-6 py-3 rounded-lg text-sm font-semibold transition-all hover:shadow-lg hover:shadow-shop_dark_green/25"
+            className="inline-flex items-center justify-center bg-neutral-900 hover:bg-neutral-800 dark:bg-neutral-100 dark:hover:bg-neutral-200 text-white dark:text-neutral-900 px-8 py-4 rounded-lg text-sm font-medium tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] animate-fade-in-up"
+            style={{ animationDelay: "200ms" }}
           >
-            Comprar agora
+            Ver ofertas
           </Link>
         </div>
-        <div className="hidden lg:block">
+
+        <div
+          className="relative animate-fade-in-scale"
+          style={{ animationDelay: "300ms" }}
+        >
+          <div className="absolute -inset-4 bg-gradient-to-br from-neutral-300/20 to-neutral-100/10 dark:from-neutral-700/20 dark:to-neutral-900/10 rounded-full blur-3xl opacity-50" />
           <Image
             src={banner_1}
             alt="banner_1"
-            width={400}
-            height={400}
-            className="object-contain"
+            width={450}
+            height={450}
+            className="relative w-64 lg:w-96 h-64 lg:h-96 object-contain"
+            priority
           />
         </div>
       </div>

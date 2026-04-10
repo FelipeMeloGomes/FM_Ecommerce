@@ -26,19 +26,24 @@ export default async function Home() {
   ]);
 
   return (
-    <Container className="bg-shop-light-pink dark:bg-zinc-900">
-      <section className="pb-8 lg:pb-12">
-        <HomeBanner />
-      </section>
-      <section className="pb-8 lg:pb-12">
-        <ProductGrid initialProducts={products} />
-      </section>
-      <section className="pb-8 lg:pb-12">
-        <HomeCategories categories={categories} />
-      </section>
-      <section className="pb-12 lg:pb-16">
-        <ShopByBrands />
-      </section>
+    <Container className="bg-shop-light-pink dark:bg-neutral-950">
+      <div className="space-y-0 lg:space-y-0">
+        <section className="pb-0 lg:pb-0">
+          <HomeBanner />
+        </section>
+
+        <section className="px-4 lg:px-0 py-8 lg:py-12">
+          <ProductGrid initialProducts={products} />
+        </section>
+
+        <section className="px-4 lg:px-0 pb-8 lg:pb-12">
+          <HomeCategories categories={categories} />
+        </section>
+
+        <section className="px-4 lg:px-0 pb-12 lg:pb-16">
+          <ShopByBrands />
+        </section>
+      </div>
     </Container>
   );
 }

@@ -3,9 +3,11 @@ import { cn } from "@/lib/utils";
 const Title = ({
   children,
   className,
+  style,
 }: {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }) => {
   return (
     <h2
@@ -13,6 +15,7 @@ const Title = ({
         "text-3xl font-bold text-shop_dark_green capitalize tracking-wide font-sans",
         className,
       )}
+      style={style}
     >
       {children}
     </h2>
