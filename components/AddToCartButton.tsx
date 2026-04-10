@@ -2,9 +2,9 @@
 import { ShoppingBag } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useCart } from "@/hooks";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
-import useStore from "@/store";
 import PriceFormatter from "./PriceFormatter";
 import QuantityButtons from "./QuantityButtons";
 import { Button } from "./ui/button";
@@ -21,14 +21,9 @@ interface Props {
 }
 
 const AddToCartButton = React.memo(({ product, className }: Props) => {
-  const addItem = useStore((state) => state.addItem);
-  const items = useStore((state) => state.items);
+  const { addItem, getItemQuantity } = useCart();
 
-  const itemCount = useMemo(
-    () =>
-      items.find((item) => item.product._id === product?._id)?.quantity ?? 0,
-    [items, product?._id],
-  );
+  const itemCount = getItemQuantity(product?._id ?? "");
 
   const [isMounted, setIsMounted] = useState(false);
   const isOutOfStock = product?.stock === 0;

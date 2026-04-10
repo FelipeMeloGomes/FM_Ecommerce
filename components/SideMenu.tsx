@@ -29,9 +29,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useOutsideClick } from "@/hooks";
-import { useWishlist } from "@/hooks/useWishlist";
-import useStore from "@/store";
+import { useCart, useOutsideClick } from "@/hooks";
 import Logo from "./Logo";
 
 interface SideMenuProps {
@@ -53,10 +51,7 @@ const SideMenu = ({
   const sidebarRef = useOutsideClick<HTMLDivElement>(onClose);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const cartItemsCount = useStore((state) =>
-    state.items.reduce((total, item) => total + item.quantity, 0),
-  );
-  const { favoriteProduct } = useWishlist();
+  const { itemCount: cartItemsCount, favoriteProduct } = useCart();
 
   useEffect(() => {
     setMounted(true);

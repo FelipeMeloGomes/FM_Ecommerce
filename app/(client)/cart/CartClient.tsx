@@ -3,7 +3,7 @@
 import { useAuth, useUser } from "@clerk/nextjs";
 import { ShoppingBag, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { createCheckoutSession } from "@/actions/createCheckoutSession";
 import { deleteAddress } from "@/actions/deleteAddress";
@@ -19,8 +19,8 @@ import Title from "@/components/Title";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { confirmToast } from "@/helpers/confirmToast";
+import { useCart } from "@/hooks";
 import type { Address } from "@/sanity.types";
-import useStore from "@/store";
 import { performCheckout } from "./checkoutLogic";
 
 interface CartClientProps {
@@ -28,37 +28,19 @@ interface CartClientProps {
 }
 
 const CartClient = ({ addresses }: CartClientProps) => {
-  const items = useStore((state) => state.items);
-  const shipping = useStore((state) => state.shipping);
-  const resetCart = useStore((state) => state.resetCart);
-  const setShipping = useStore((state) => state.setShipping);
+  const { items, shipping, resetCart, setShipping, subTotalPrice, totalPrice } =
+    useCart();
 
   const [loading, setLoading] = useState(false);
-  const groupedItems = useMemo(() => items, [items]);
+  const groupedItems = items;
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const router = useRouter();
 
-  const subtotal = useMemo(() => {
-    return items.reduce((total, item) => {
-      const price = item.product.price ?? 0;
-      const discount = ((item.product.discount ?? 0) * price) / 100;
-      const discountedPrice = price + discount;
-      return total + discountedPrice * item.quantity;
-    }, 0);
-  }, [items]);
-
-  const total = useMemo(() => {
-    const itemsTotal = items.reduce(
-      (total, item) => total + (item.product.price ?? 0) * item.quantity,
-      0,
-    );
-    const shippingPrice = shipping?.price ?? 0;
-    return itemsTotal + shippingPrice;
-  }, [items, shipping]);
-
-  const discount = useMemo(() => subtotal - total, [subtotal, total]);
+  const subtotal = subTotalPrice;
+  const total = totalPrice;
+  const discount = subtotal - total;
 
   useEffect(() => {
     if (addresses.length > 0) {

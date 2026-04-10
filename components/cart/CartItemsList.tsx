@@ -3,7 +3,7 @@
 import { Heart, Trash } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import { toast } from "sonner";
 import PriceFormatter from "@/components/PriceFormatter";
 import QuantityButtons from "@/components/QuantityButtons";
@@ -14,27 +14,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { confirmToast } from "@/helpers/confirmToast";
+import { useCart } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { urlFor } from "@/sanity/lib/image";
-import useStore, { type CartItem } from "@/store";
+import type { CartItem } from "@/store";
 
 interface CartItemsListProps {
   items: CartItem[];
 }
 
 const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
-  const deleteCartProduct = useStore((state) => state.deleteCartProduct);
-  const addToFavorite = useStore((state) => state.addToFavorite);
-  const storeItems = useStore((state) => state.items);
-  const favoriteProduct = useStore((state) => state.favoriteProduct);
-
-  const itemsMap = useMemo(() => {
-    const map = new Map<string, number>();
-    storeItems.forEach((item) => {
-      map.set(item.product._id ?? "", item.quantity);
-    });
-    return map;
-  }, [storeItems]);
+  const { deleteItem, addToFavorite, favoriteProduct, getItemQuantity } =
+    useCart();
 
   const handleAddToFavorite = useCallback(
     (product: CartItem["product"]) => {
@@ -57,12 +48,12 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
       confirmToast({
         message: "Deseja remover este produto?",
         onConfirm: () => {
-          deleteCartProduct(productId);
+          deleteItem(productId);
           toast.success("Produto removido!");
         },
       });
     },
-    [deleteCartProduct],
+    [deleteItem],
   );
 
   const handleRemoveProductWrapper = useCallback(
@@ -73,7 +64,7 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
   return (
     <>
       {items.map(({ product }) => {
-        const itemCount = product?._id ? (itemsMap.get(product._id) ?? 0) : 0;
+        const itemCount = product?._id ? getItemQuantity(product._id) : 0;
         const isFavorite = product
           ? favoriteProduct?.some((item) => item?._id === product._id)
           : false;

@@ -1,9 +1,9 @@
 import { Minus, Plus } from "lucide-react";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import { toast } from "sonner";
+import { useCart } from "@/hooks";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/sanity.types";
-import useStore from "@/store";
 import { Button } from "./ui/button";
 
 interface Props {
@@ -17,14 +17,9 @@ interface Props {
   className?: string;
 }
 const QuantityButtons = React.memo(({ product, className }: Props) => {
-  const items = useStore((state) => state.items);
-  const addItem = useStore((state) => state.addItem);
-  const removeItem = useStore((state) => state.removeItem);
+  const { addItem, removeItem, getItemQuantity } = useCart();
 
-  const itemCount = useMemo(() => {
-    const item = items.find((i) => i.product._id === product?._id);
-    return item ? item.quantity : 0;
-  }, [items, product?._id]);
+  const itemCount = getItemQuantity(product?._id ?? "");
 
   const isOutOfStock = product?.stock === 0;
 

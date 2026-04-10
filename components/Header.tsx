@@ -10,8 +10,7 @@ import SignIn from "./SignIn";
 export const revalidate = 60;
 
 const Header = async () => {
-  const user = await currentUser();
-  const { userId } = await auth();
+  const [user, { userId }] = await Promise.all([currentUser(), auth()]);
   const isAdmin = user?.publicMetadata?.role === "admin";
 
   let ordersData = null;
