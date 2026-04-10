@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
+    "analyze": "ANALYZE=true bun run build",
     "typegen": "sanity schema extract && sanity typegen generate",
     "test": "vitest run --environment jsdom",
     "test:watch": "vitest --environment jsdom"
@@ -54,6 +55,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.4",
+    "@next/bundle-analyzer": "^16.2.3",
     "@sanity/types": "^5.8.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.5.2",
