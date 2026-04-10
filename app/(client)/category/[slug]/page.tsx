@@ -3,7 +3,7 @@ import CategoryProducts from "@/components/CategoryProducts";
 import Container from "@/components/Container";
 import Title from "@/components/Title";
 import { Badge } from "@/components/ui/badge";
-import { getCategories } from "@/sanity/queries";
+import { getCategories, getCategoriesStatic } from "@/sanity/queries";
 
 export const revalidate = 60;
 
@@ -12,9 +12,9 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  const categories = await getCategories();
-  return categories.map((category: { slug?: { current?: string } }) => ({
-    slug: category.slug?.current,
+  const categories = await getCategoriesStatic();
+  return categories.map((category) => ({
+    slug: category.slug,
   }));
 }
 

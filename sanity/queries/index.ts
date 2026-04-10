@@ -1,4 +1,4 @@
-import { sanityFetch } from "../lib/live";
+import { sanityFetch, sanityFetchStatic } from "../lib/live";
 import {
   BRAND_QUERY,
   BRANDS_QUERY,
@@ -124,4 +124,12 @@ export {
   getBrand,
   getProductsByBrand,
   getMyOrders,
+};
+
+export const getCategoriesStatic = async () => {
+  const query = `*[_type == 'category'] | order(name asc) {
+    "slug": slug.current
+  }`;
+  const data = await sanityFetchStatic<{ slug: string }[]>(query);
+  return data ?? [];
 };
