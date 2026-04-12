@@ -1,8 +1,19 @@
+import DOMPurify from "isomorphic-dompurify";
 import { z } from "zod";
 
+const sanitizeString = (val: unknown) => {
+  if (typeof val === "string") {
+    return DOMPurify.sanitize(val) as string;
+  }
+  return val;
+};
+
 export const productSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  description: z.string().min(1, "Descrição é obrigatória"),
+  name: z.string().min(1, "Nome é obrigatório").transform(sanitizeString),
+  description: z
+    .string()
+    .min(1, "Descrição é obrigatória")
+    .transform(sanitizeString),
 
   price: z.number().positive("Preço deve ser positivo"),
   discount: z
@@ -20,7 +31,10 @@ export const productSchema = z.object({
   height: z.number().positive("Altura deve ser positiva"),
   length: z.number().positive("Comprimento deve ser positivo"),
 
-  variant: z.string().min(1, "Tipo do produto é obrigatório"),
+  variant: z
+    .string()
+    .min(1, "Tipo do produto é obrigatório")
+    .transform(sanitizeString),
   brand: z.string().min(1, "Marca é obrigatória"),
   categories: z.array(z.string()).min(1, "Selecione ao menos uma categoria"),
   status: z.string().min(1, "Status é obrigatório"),
