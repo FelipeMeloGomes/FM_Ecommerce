@@ -52,6 +52,7 @@ const Shop = memo(
     const [isPending, startTransition] = useTransition();
     const [products, setProducts] = useState<ProductWithReviews[]>([]);
     const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
       categoryParams || null,
     );
@@ -61,6 +62,8 @@ const Shop = memo(
     const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
     const [start, setStart] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+    const loadingRef = useRef(false);
+    const hasMoreRef = useRef(true);
     const loadMoreRef = useRef<HTMLDivElement>(null);
 
     const deferredCategory = useDeferredValue(selectedCategory);
@@ -112,14 +115,23 @@ const Shop = memo(
 
           if (isLoadMore) {
             setProducts((prev) => [...prev, ...productsWithRating]);
+            setLoadingMore(false);
+            hasMoreRef.current = productsWithRating.length === PAGE_SIZE;
+            setHasMore(hasMoreRef.current);
           } else {
             setProducts(productsWithRating);
+            setLoading(false);
+            hasMoreRef.current = productsWithRating.length === PAGE_SIZE;
+            setHasMore(hasMoreRef.current);
           }
-          setHasMore(productsWithRating.length === PAGE_SIZE);
         } catch (error) {
           console.error("Shop product fetching Error", error);
-        } finally {
-          setLoading(false);
+          if (isLoadMore) {
+            setLoadingMore(false);
+            hasMoreRef.current = true;
+          } else {
+            setLoading(false);
+          }
         }
       },
       [],
@@ -138,9 +150,15 @@ const Shop = memo(
     useEffect(() => {
       const observer = new IntersectionObserver(
         (entries) => {
-          if (entries[0].isIntersecting && hasMore && !loading) {
+          if (
+            entries[0].isIntersecting &&
+            hasMoreRef.current &&
+            !loadingRef.current
+          ) {
             const newStart = start + PAGE_SIZE;
             setStart(newStart);
+            hasMoreRef.current = false;
+            setLoadingMore(true);
             fetchProducts(
               deferredCategory,
               deferredBrand,
@@ -158,15 +176,7 @@ const Shop = memo(
       }
 
       return () => observer.disconnect();
-    }, [
-      hasMore,
-      loading,
-      start,
-      deferredCategory,
-      deferredBrand,
-      deferredPrice,
-      fetchProducts,
-    ]);
+    }, [start, deferredCategory, deferredBrand, deferredPrice, fetchProducts]);
 
     const handleClearFilters = useCallback(() => {
       startTransition(() => {
@@ -199,7 +209,7 @@ const Shop = memo(
       selectedBrand !== null ||
       selectedPrice !== null;
 
-    const isLoading = loading || isPending;
+    const isLoading = loading || loadingMore || isPending;
 
     const categoryItems = categories.map((cat) => ({
       value: cat.slug?.current as string,
@@ -286,7 +296,7 @@ const Shop = memo(
                         ref={loadMoreRef}
                         className="flex justify-center py-8"
                       >
-                        {loading && (
+                        {loadingMore && (
                           <Loader2 className="w-8 h-8 text-primary animate-spin" />
                         )}
                       </div>
