@@ -1,9 +1,12 @@
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
 
 const sanitizeString = (val: unknown) => {
   if (typeof val === "string") {
-    return DOMPurify.sanitize(val) as string;
+    return sanitizeHtml(val, {
+      allowedTags: sanitizeHtml.defaults.allowedTags,
+      allowedAttributes: sanitizeHtml.defaults.allowedAttributes,
+    }) as string;
   }
   return val;
 };
@@ -23,24 +26,19 @@ export const productSchema = z.object({
     .default(0),
   stock: z
     .number()
-    .int("Estoque deve ser inteiro")
-    .min(1, "Estoque é obrigatório"),
-
-  weight: z.number().positive("Peso deve ser positivo"),
-  width: z.number().positive("Largura deve ser positiva"),
-  height: z.number().positive("Altura deve ser positiva"),
-  length: z.number().positive("Comprimento deve ser positivo"),
-
-  variant: z
-    .string()
-    .min(1, "Tipo do produto é obrigatório")
-    .transform(sanitizeString),
-  brand: z.string().min(1, "Marca é obrigatória"),
-  categories: z.array(z.string()).min(1, "Selecione ao menos uma categoria"),
-  status: z.string().min(1, "Status é obrigatório"),
-
+    .int()
+    .min(0, "Estoque deve ser maior ou igual a 0")
+    .default(0),
+  weight: z.number().positive("Peso deve ser positivo").default(0),
+  width: z.number().positive("Largura deve ser positiva").default(0),
+  height: z.number().positive("Altura deve ser positiva").default(0),
+  length: z.number().positive("Comprimento deve ser positivo").default(0),
+  status: z.string().optional(),
+  variant: z.string().optional(),
   isFeatured: z.boolean().default(false),
-  images: z.array(z.instanceof(File)).optional(),
+  categories: z.array(z.string()).optional(),
+  brand: z.string().optional(),
+  images: z.any().optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;
