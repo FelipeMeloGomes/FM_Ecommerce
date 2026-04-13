@@ -223,7 +223,7 @@ const Shop = memo(
 
     return (
       <div className="border-t border-border">
-        <Container className="mt-6">
+        <Container className="mt-6 pb-24">
           <div className="sticky top-0 z-10 mb-6 bg-background pt-2">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-border">
               <Title className="text-xl font-semibold tracking-tight">
