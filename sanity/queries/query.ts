@@ -58,7 +58,7 @@ const SHOP_PRODUCTS_QUERY = `
     && (!defined($selectedBrand) || references(*[_type == "brand" && slug.current == $selectedBrand]._id))
     && price >= $minPrice && price <= $maxPrice
   ] 
-  | order(name asc) [0...$limit] {
+  | order(name asc) [$start...($start + $limit)] {
     _id,
     name,
     slug,

@@ -7,6 +7,7 @@ import {
   useCallback,
   useDeferredValue,
   useEffect,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -21,7 +22,7 @@ import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
 import Title from "./Title";
 
-const LIMIT = 24;
+const PAGE_SIZE = 24;
 
 const priceArray = [
   { value: "0-100", label: "Até R$ 100" },
@@ -58,6 +59,9 @@ const Shop = memo(
       brandParams || null,
     );
     const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
+    const [start, setStart] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const loadMoreRef = useRef<HTMLDivElement>(null);
 
     const deferredCategory = useDeferredValue(selectedCategory);
     const deferredBrand = useDeferredValue(selectedBrand);
@@ -68,8 +72,14 @@ const Shop = memo(
         category: string | null,
         brand: string | null,
         price: string | null,
+        startIndex: number = 0,
+        isLoadMore: boolean = false,
       ) => {
-        setLoading(true);
+        if (isLoadMore) {
+          setLoading(true);
+        } else {
+          setLoading(true);
+        }
         try {
           let minPrice = 0;
           let maxPrice = 10000;
@@ -86,7 +96,8 @@ const Shop = memo(
               selectedBrand: brand,
               minPrice,
               maxPrice,
-              limit: LIMIT,
+              start: startIndex,
+              limit: PAGE_SIZE,
             },
             { next: { revalidate: 60 } },
           );
@@ -98,7 +109,13 @@ const Shop = memo(
               reviewCount: p.reviewCount ?? 0,
             }),
           );
-          setProducts(productsWithRating);
+
+          if (isLoadMore) {
+            setProducts((prev) => [...prev, ...productsWithRating]);
+          } else {
+            setProducts(productsWithRating);
+          }
+          setHasMore(productsWithRating.length === PAGE_SIZE);
         } catch (error) {
           console.error("Shop product fetching Error", error);
         } finally {
@@ -109,12 +126,47 @@ const Shop = memo(
     );
 
     useEffect(() => {
+      setStart(0);
+      setHasMore(true);
       const timer = setTimeout(() => {
-        fetchProducts(deferredCategory, deferredBrand, deferredPrice);
+        fetchProducts(deferredCategory, deferredBrand, deferredPrice, 0, false);
       }, 300);
 
       return () => clearTimeout(timer);
     }, [deferredCategory, deferredBrand, deferredPrice, fetchProducts]);
+
+    useEffect(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore && !loading) {
+            const newStart = start + PAGE_SIZE;
+            setStart(newStart);
+            fetchProducts(
+              deferredCategory,
+              deferredBrand,
+              deferredPrice,
+              newStart,
+              true,
+            );
+          }
+        },
+        { threshold: 0.1 },
+      );
+
+      if (loadMoreRef.current) {
+        observer.observe(loadMoreRef.current);
+      }
+
+      return () => observer.disconnect();
+    }, [
+      hasMore,
+      loading,
+      start,
+      deferredCategory,
+      deferredBrand,
+      deferredPrice,
+      fetchProducts,
+    ]);
 
     const handleClearFilters = useCallback(() => {
       startTransition(() => {
@@ -218,16 +270,28 @@ const Shop = memo(
                     </p>
                   </div>
                 ) : products?.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {products?.map((product) => (
-                      <ProductCard
-                        key={product?._id}
-                        product={product}
-                        rating={product.rating}
-                        reviewCount={product.reviewCount}
-                      />
-                    ))}
-                  </div>
+                  <>
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {products?.map((product) => (
+                        <ProductCard
+                          key={product?._id}
+                          product={product}
+                          rating={product.rating}
+                          reviewCount={product.reviewCount}
+                        />
+                      ))}
+                    </div>
+                    {hasMore && (
+                      <div
+                        ref={loadMoreRef}
+                        className="flex justify-center py-8"
+                      >
+                        {loading && (
+                          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                        )}
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <NoProductAvailable className="bg-card mt-0 rounded-xl border border-border" />
                 )}
