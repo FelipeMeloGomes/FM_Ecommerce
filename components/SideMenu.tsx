@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useCart, useOutsideClick } from "@/hooks";
+import { useCart } from "@/hooks";
 import Logo from "./Logo";
 
 interface SideMenuProps {
@@ -48,7 +48,6 @@ const SideMenu = ({
   ordersCount = 0,
 }: SideMenuProps) => {
   const pathname = usePathname();
-  const sidebarRef = useOutsideClick<HTMLDivElement>(onClose);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { itemCount: cartItemsCount, favoriteProduct } = useCart();
@@ -130,10 +129,7 @@ const SideMenu = ({
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div
-          ref={sidebarRef}
-          className="flex h-full flex-col bg-background dark:bg-zinc-900"
-        >
+        <div className="flex h-full flex-col bg-background dark:bg-zinc-900">
           <div className="flex items-center justify-between border-b border-border p-4">
             <Logo
               className="text-shop_dark_green dark:text-white"
