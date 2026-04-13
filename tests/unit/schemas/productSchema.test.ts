@@ -74,7 +74,9 @@ describe("productSchema", () => {
   it("deve falhar quando stock é negativo", () => {
     const result = productSchema.safeParse({ ...baseProduct, stock: -5 });
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toBe("Estoque é obrigatório");
+    expect(result.error?.issues[0].message).toBe(
+      "Estoque deve ser maior ou igual a 0",
+    );
   });
 
   it("deve falhar quando weight é zero", () => {
