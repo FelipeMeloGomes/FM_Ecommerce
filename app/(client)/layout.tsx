@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://fm-ecommerce-jade.vercel.app"),
   title: {
     template: "%s | FMShop",
     default: "FMShop",
