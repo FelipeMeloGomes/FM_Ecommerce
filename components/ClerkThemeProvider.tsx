@@ -2,6 +2,7 @@
 
 import { ptBR } from "@clerk/localizations";
 import { ClerkProvider } from "@clerk/nextjs";
+import { CsrfProvider } from "@csrf-armor/nextjs/client";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -326,7 +327,7 @@ export function ClerkThemeProvider({
 
   return (
     <ClerkProvider localization={ptBR} appearance={appearance}>
-      {children}
+      <CsrfProvider>{children}</CsrfProvider>
     </ClerkProvider>
   );
 }

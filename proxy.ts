@@ -28,12 +28,10 @@ interface RateLimitStoreEntry {
 const rateLimitStore = new Map<RateLimitKey, RateLimitStoreEntry>();
 
 const _csrfMiddleware = createCsrfMiddleware({
-  strategy: "signed-double-submit",
-  secret: process.env.CSRF_SECRET ?? "dev-secret-change-in-production",
-  token: { expiry: 3600 * 2 },
+  strategy: "double-submit",
   cookie: {
     name: "csrf-token",
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
@@ -43,6 +41,10 @@ const _csrfMiddleware = createCsrfMiddleware({
 
 const isApiRoute = (request: NextRequest): boolean => {
   return request.nextUrl.pathname.startsWith("/api");
+};
+
+const isAdminRoute = (path: string): boolean => {
+  return path.startsWith("/api/admin");
 };
 
 const getClientIp = (request: NextRequest): ClientIp => {
@@ -173,6 +175,22 @@ export default clerkMiddleware(async (_auth, request: NextRequest) => {
     }
 
     const response = NextResponse.next();
+
+    // CSRF validation for non-GET requests, excluding admin routes (already protected by Clerk)
+    if (
+      request.method !== "GET" &&
+      request.method !== "HEAD" &&
+      !isAdminRoute(path)
+    ) {
+      const csrfResult = await _csrfMiddleware(request, response);
+      if (!csrfResult.success) {
+        return new NextResponse(
+          JSON.stringify({ error: "Invalid CSRF token" }),
+          { status: 403, headers: { "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     const result = buildRateLimitResponse(
       response,
       remaining,
