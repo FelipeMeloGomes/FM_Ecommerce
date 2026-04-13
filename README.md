@@ -149,6 +149,18 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Integração com perfil do Clerk
 - Gestão de endereços
 
+### 🔐 Páginas Customizadas de Login/Registro
+
+- Páginas customizadas em `/login` e `/register`
+- UI própria com formulário usando **react-hook-form** + **zod**
+- Integração com Clerk via hooks `useSignIn` e `useSignUp`
+- Toggle de senha (show/hide) com componente `PasswordInput`
+- Login com Google OAuth
+- Validação de formulários com Zod schemas
+- Componente `Avatar` do shadcn/ui no Header
+- Dropdown com Radix Popover para login/register
+- Otimizações: `memo`, `useCallback`
+
 ### 📦 Gerenciamento de Imagens
 
 - Upload de imagens via Sanity
@@ -292,6 +304,16 @@ Dialog de produtos similares por categoria:
 - Arquivos loading.tsx simplificados nas rotas
 - Skeletons para: ProductCard, ProductGrid, DealHero, WishlistTable, Cart, Orders, Admin (products, brands, categories), Account Addresses
 
+### Novos Componentes UI
+
+- **PasswordInput**: Componente com toggle show/hide de senha
+  - Usa `forwardRef` para integração com react-hook-form
+  - Estado interno com `useState`
+  - Suporte a desativar toggle via prop `showToggle`
+- **Avatar**: Componente do Radix UI
+  - Props: `Avatar`, `AvatarImage`, `AvatarFallback`
+  - Integração com tema dark/light
+
 ### Prevenção de Hydration Mismatch
 
 - Adicionado `isMounted` guard em `AddToCartButton`
@@ -319,6 +341,14 @@ Galeria de imagens do produto com navegação melhorada:
 - Biome configurado com regras de lint
 - Correção automática de formatação
 - Imports organizados automaticamente
+
+### 🔒 Segurança
+
+- **Rate Limiting** via middleware (limites por rota/IP)
+- **CSRF Protection** usando `@csrf-armor/nextjs` com estratégia double-submit
+- **Input Sanitization** com `sanitize-html`
+- Exclusão de admin routes do CSRF (protegidas por Clerk)
+- Middleware renomeado para `proxy.ts` (Next.js 16+)
 
 ---
 
