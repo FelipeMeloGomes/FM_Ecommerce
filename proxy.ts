@@ -6,8 +6,13 @@ import { NextResponse } from "next/server";
 import { DEV_WHITELIST } from "./lib/dev-whitelist";
 import { DEFAULT_RATE_LIMITS, type RateLimitConfig } from "./lib/rate-limit";
 
-if (process.env.NODE_ENV === "production" && !process.env.CSRF_SECRET) {
-  throw new Error("CSRF_SECRET environment variable is required in production");
+const useCsrfInProduction =
+  process.env.CSRF_SECRET && process.env.NODE_ENV === "production";
+
+if (useCsrfInProduction && !process.env.CSRF_SECRET) {
+  throw new Error(
+    "CSRF_SECRET environment variable is required when CSRF protection is enabled",
+  );
 }
 
 type RateLimitKey = `${string}:${string}`;
@@ -27,17 +32,24 @@ interface RateLimitStoreEntry {
 
 const rateLimitStore = new Map<RateLimitKey, RateLimitStoreEntry>();
 
-const _csrfMiddleware = createCsrfMiddleware({
-  strategy: "double-submit",
-  cookie: {
-    name: "csrf-token",
-    httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 3600 * 2,
-  },
-});
+const useCsrfProtection =
+  process.env.NODE_ENV === "production" && !!process.env.CSRF_SECRET;
+
+const createCsrf = () =>
+  createCsrfMiddleware({
+    strategy: useCsrfProtection ? "signed-double-submit" : "double-submit",
+    secret: useCsrfProtection ? process.env.CSRF_SECRET : undefined,
+    cookie: {
+      name: "csrf-token",
+      httpOnly: useCsrfProtection,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 3600 * 2,
+    },
+  });
+
+const _csrfMiddleware = createCsrf();
 
 const isApiRoute = (request: NextRequest): boolean => {
   return request.nextUrl.pathname.startsWith("/api");
