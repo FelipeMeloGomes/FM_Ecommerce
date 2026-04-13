@@ -27,7 +27,7 @@ interface RateLimitStoreEntry {
 
 const rateLimitStore = new Map<RateLimitKey, RateLimitStoreEntry>();
 
-const csrfMiddleware = createCsrfMiddleware({
+const _csrfMiddleware = createCsrfMiddleware({
   strategy: "signed-double-submit",
   secret: process.env.CSRF_SECRET ?? "dev-secret-change-in-production",
   token: { expiry: 3600 * 2 },
@@ -134,13 +134,11 @@ const cleanupExpiredEntries = (): void => {
 setInterval(cleanupExpiredEntries, 60 * 60 * 1000);
 
 const buildRateLimitResponse = (
+  response: NextResponse,
   remaining: number,
   resetTime: number,
   config: RateLimitConfig,
-  body?: BodyInit | null,
-  init?: ResponseInit,
 ): NextResponse => {
-  const response = new NextResponse(body, init);
   response.headers.set("X-RateLimit-Limit", String(config.limit));
   response.headers.set("X-RateLimit-Remaining", String(remaining));
   if (resetTime > 0) {
@@ -162,39 +160,26 @@ export default clerkMiddleware(async (_auth, request: NextRequest) => {
 
     if (!allowed) {
       const retryAfter = Math.ceil((resetTime - Date.now()) / 1000 / 60);
-      return buildRateLimitResponse(
-        0,
-        resetTime,
-        config,
+      return new NextResponse(
         JSON.stringify({
           error: "Too Many Requests",
           message: `Limite de requisições excedido. Tente novamente em ${retryAfter} minutos.`,
         }),
-        { status: 429 },
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json" },
+        },
       );
-    }
-
-    if (request.method === "GET" || request.method === "HEAD") {
-      return buildRateLimitResponse(remaining, resetTime, config);
     }
 
     const response = NextResponse.next();
-    const csrfResult = await csrfMiddleware(request, response);
-
-    if (!csrfResult.success) {
-      return NextResponse.json(
-        { error: "Invalid CSRF token" },
-        { status: 403 },
-      );
-    }
-
-    return buildRateLimitResponse(
+    const result = buildRateLimitResponse(
+      response,
       remaining,
       resetTime,
       config,
-      csrfResult.response.body,
-      csrfResult.response,
     );
+    return result;
   }
 
   return NextResponse.next();
