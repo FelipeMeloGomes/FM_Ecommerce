@@ -58,10 +58,18 @@ const SHOP_PRODUCTS_QUERY = `
     && (!defined($selectedBrand) || references(*[_type == "brand" && slug.current == $selectedBrand]._id))
     && price >= $minPrice && price <= $maxPrice
   ] 
-  | order(name asc) {
-    ...,
+  | order(name asc) [0...$limit] {
+    _id,
+    name,
+    slug,
+    price,
+    discount,
+    stock,
+    images,
+    status,
+    variant,
     "categories": categories[]->title,
-    "rating": *[_type == "review" && product._ref == ^._id].rating,
+    "rating": *[_type == "review" && product._ref == ^._id][0].rating,
     "reviewCount": count(*[_type == "review" && product._ref == ^._id])
   }
 `;

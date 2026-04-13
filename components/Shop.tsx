@@ -21,6 +21,8 @@ import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
 import Title from "./Title";
 
+const LIMIT = 24;
+
 const priceArray = [
   { value: "0-100", label: "Até R$ 100" },
   { value: "100-200", label: "R$ 100 - R$ 200" },
@@ -36,13 +38,18 @@ interface Props {
   initialCategory?: string | null;
 }
 
+interface ProductWithReviews extends Product {
+  rating: number;
+  reviewCount: number;
+}
+
 const Shop = memo(
   ({ categories, brands, initialBrand, initialCategory }: Props) => {
     const searchParams = useSearchParams();
     const brandParams = searchParams?.get("brand") ?? initialBrand;
     const categoryParams = searchParams?.get("category") ?? initialCategory;
     const [isPending, startTransition] = useTransition();
-    const [products, setProducts] = useState<Product[]>([]);
+    const [products, setProducts] = useState<ProductWithReviews[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
       categoryParams || null,
@@ -79,10 +86,19 @@ const Shop = memo(
               selectedBrand: brand,
               minPrice,
               maxPrice,
+              limit: LIMIT,
             },
-            { next: { revalidate: 0 } },
+            { next: { revalidate: 60 } },
           );
-          setProducts(data);
+
+          const productsWithRating = (data || []).map(
+            (p: ProductWithReviews) => ({
+              ...p,
+              rating: p.rating ?? 0,
+              reviewCount: p.reviewCount ?? 0,
+            }),
+          );
+          setProducts(productsWithRating);
         } catch (error) {
           console.error("Shop product fetching Error", error);
         } finally {
@@ -204,7 +220,12 @@ const Shop = memo(
                 ) : products?.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                     {products?.map((product) => (
-                      <ProductCard key={product?._id} product={product} />
+                      <ProductCard
+                        key={product?._id}
+                        product={product}
+                        rating={product.rating}
+                        reviewCount={product.reviewCount}
+                      />
                     ))}
                   </div>
                 ) : (

@@ -33,11 +33,22 @@ export type ProductWithRating = Omit<Product, "categories"> & {
 };
 
 const ProductCard = React.memo(
-  ({ product }: { product: ProductWithRating }) => {
-    const averageRating = Array.isArray(product?.rating)
-      ? product.rating.reduce((a: number, b: number) => a + b, 0) /
-        product.rating.length
-      : (product?.rating ?? 0);
+  ({
+    product,
+    rating: propRating,
+    reviewCount: propReviewCount,
+  }: {
+    product: ProductWithRating;
+    rating?: number;
+    reviewCount?: number;
+  }) => {
+    const reviewCountValue = propReviewCount ?? product?.reviewCount ?? 0;
+    const averageRating =
+      propRating ??
+      (Array.isArray(product?.rating)
+        ? product.rating.reduce((a: number, b: number) => a + b, 0) /
+          product.rating.length
+        : (product?.rating ?? 0));
 
     return (
       <div className="group relative bg-card border border-border/60 rounded-xl overflow-hidden hover:shadow-xl hover:shadow-shop_orange/10 transition-all duration-300">
@@ -80,9 +91,9 @@ const ProductCard = React.memo(
           </Title>
           <div className="flex items-center gap-2">
             <StarRating rating={averageRating} />
-            {product?.reviewCount !== undefined && product?.reviewCount > 0 ? (
+            {reviewCountValue > 0 ? (
               <p className="text-xs text-muted-foreground">
-                ({product?.reviewCount})
+                ({reviewCountValue})
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">(0)</p>
