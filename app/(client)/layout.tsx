@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://www.fmshop.com.br",
+    url: "https://fm-ecommerce-jade.vercel.app",
     siteName: "FMShop",
     images: [
       {
