@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { client } from "@/sanity/lib/client";
+import { getAllBrands } from "@/sanity/queries";
 import { PRODUCTS_BY_BRAND_QUERY } from "@/sanity/queries/query";
 import type { Brand } from "@/sanity.types";
 import NoProductAvailable from "./NoProductAvailable";
@@ -11,16 +12,31 @@ import type { ProductWithRating } from "./ProductCard";
 import ProductCard from "./ProductCard";
 
 interface Props {
-  brands: Brand[];
   slug: string;
 }
 
-const BrandProducts = ({ brands, slug }: Props) => {
+const BrandProducts = ({ slug }: Props) => {
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [loadingBrands, setLoadingBrands] = useState(true);
   const [currentSlug, setCurrentSlug] = useState(slug);
   const [products, setProducts] = useState<ProductWithRating[]>([]);
   const [loading, setLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const data = await getAllBrands();
+        setBrands(data ?? []);
+      } catch (error) {
+        console.error("Error fetching brands:", error);
+      } finally {
+        setLoadingBrands(false);
+      }
+    };
+    fetchBrands();
+  }, []);
 
   const fetchProducts = useCallback(async (brandSlug: string) => {
     setLoading(true);
@@ -62,7 +78,7 @@ const BrandProducts = ({ brands, slug }: Props) => {
     [handleBrandChange],
   );
 
-  const isLoading = loading || isPending;
+  const isLoading = loading || isPending || loadingBrands;
 
   return (
     <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">

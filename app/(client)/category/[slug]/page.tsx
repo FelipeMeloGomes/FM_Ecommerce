@@ -32,8 +32,12 @@ const CategoryPage = async ({
 }: {
   params: Promise<{ slug: string }>;
 }) => {
-  const categories = await getCategories();
-  const { slug } = await params;
+  const [categoriesData, paramsData] = await Promise.all([
+    getCategories(),
+    params,
+  ]);
+  const categories = categoriesData;
+  const { slug } = paramsData;
   return (
     <div className="py-8 lg:py-12">
       <Container>

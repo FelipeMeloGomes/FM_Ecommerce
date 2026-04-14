@@ -3,7 +3,6 @@ import BrandProducts from "@/components/BrandProducts";
 import Container from "@/components/Container";
 import Title from "@/components/Title";
 import { Badge } from "@/components/ui/badge";
-import { getAllBrands } from "@/sanity/queries";
 
 export const revalidate = 60;
 
@@ -21,7 +20,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const BrandPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
-  const brands = await getAllBrands();
   const { slug } = await params;
   return (
     <div className="py-8 lg:py-12">
@@ -43,7 +41,7 @@ const BrandPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
             </span>
           </p>
         </div>
-        <BrandProducts brands={brands} slug={slug} />
+        <BrandProducts slug={slug} />
       </Container>
     </div>
   );
