@@ -15,11 +15,21 @@ export async function POST(req: Request) {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
 
-  if (!signature)
+  console.log(
+    "Webhook received, signature:",
+    signature ? "present" : "missing",
+  );
+  console.log("Body length:", body.length);
+
+  if (!signature) {
+    console.error("No signature provided");
     return Response.json({ error: "No signature" }, { status: 400 });
+  }
 
   try {
+    console.log("Verifying webhook...");
     const session = await paymentGateway.verifyWebhook(body, signature);
+    console.log("Session result:", session ? "valid" : "null");
 
     if (!session) return Response.json({ received: true });
 
@@ -28,10 +38,13 @@ export async function POST(req: Request) {
     );
     if (!metadataValidation.success) {
       console.error("Metadados inválidos:", metadataValidation.error.issues);
+      console.error("Session metadata:", session.metadata);
       return Response.json({ error: "Metadados inválidos" }, { status: 400 });
     }
 
+    console.log("Creating order for:", session.metadata.orderNumber);
     await createOrder(session);
+    console.log("Order created successfully!");
 
     return Response.json({ received: true });
   } catch (error) {
