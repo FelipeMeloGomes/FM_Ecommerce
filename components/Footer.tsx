@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer className="bg-muted/30 border-t border-border">
       <Container>
-        <div className="py-8 border-t border-border/40">
+        <div className="py-12 border-t border-border/40">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Logo className="text-lg" />
