@@ -3,11 +3,13 @@
 import PriceFormatter from "@/components/PriceFormatter";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import type { ShippingQuote } from "@/core/shipping/ShippingQuote";
 
 interface OrderSummaryProps {
   subtotal: number;
   discount: number;
   total: number;
+  shipping?: ShippingQuote | null;
   loading?: boolean;
   selectedAddressId?: string;
   onCheckout: () => void;
@@ -17,6 +19,7 @@ const OrderSummary = ({
   subtotal,
   discount,
   total,
+  shipping,
   loading = false,
   selectedAddressId: _selectedAddressId,
   onCheckout,
@@ -29,6 +32,14 @@ const OrderSummary = ({
           <span className="text-muted-foreground">SubTotal</span>
           <PriceFormatter amount={subtotal} className="font-medium" />
         </div>
+        {shipping && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">
+              Frete ({shipping.service})
+            </span>
+            <PriceFormatter amount={shipping.price} className="font-medium" />
+          </div>
+        )}
         {discount > 0 && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Desconto</span>

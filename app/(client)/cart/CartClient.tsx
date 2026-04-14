@@ -170,6 +170,7 @@ const CartClient = ({ addresses }: CartClientProps) => {
                     subtotal={subtotal}
                     discount={discount}
                     total={total}
+                    shipping={store.shipping}
                     loading={loading}
                     selectedAddressId={selectedAddress?._id}
                     onCheckout={handleCheckout}
@@ -210,6 +211,7 @@ const CartClient = ({ addresses }: CartClientProps) => {
                 subtotal={subtotal}
                 discount={discount}
                 total={total}
+                shipping={store.shipping}
                 loading={loading}
                 onCheckout={handleCheckout}
               />
