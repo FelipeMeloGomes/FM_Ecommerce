@@ -5,6 +5,7 @@ import { ShoppingBag, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 import { createCheckoutSession } from "@/actions/createCheckoutSession";
 import { deleteAddress } from "@/actions/deleteAddress";
 import Container from "@/components/Container";
@@ -19,8 +20,8 @@ import Title from "@/components/Title";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { confirmToast } from "@/helpers/confirmToast";
-import { useCart } from "@/hooks";
 import type { Address } from "@/sanity.types";
+import useStore from "@/store";
 import { performCheckout } from "./checkoutLogic";
 
 interface CartClientProps {
@@ -28,18 +29,26 @@ interface CartClientProps {
 }
 
 const CartClient = ({ addresses }: CartClientProps) => {
-  const { items, shipping, resetCart, setShipping, subTotalPrice, totalPrice } =
-    useCart();
+  const store = useStore(
+    useShallow((state) => ({
+      items: state.items,
+      shipping: state.shipping,
+      resetCart: state.resetCart,
+      setShipping: state.setShipping,
+      subTotalPrice: state.getSubTotalPrice(),
+      totalPrice: state.getTotalPrice(),
+    })),
+  );
 
   const [loading, setLoading] = useState(false);
-  const groupedItems = items;
+  const groupedItems = store.items;
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const router = useRouter();
 
-  const subtotal = subTotalPrice;
-  const total = totalPrice;
+  const subtotal = store.subTotalPrice;
+  const total = store.totalPrice;
   const discount = subtotal - total;
 
   useEffect(() => {
@@ -56,11 +65,11 @@ const CartClient = ({ addresses }: CartClientProps) => {
     confirmToast({
       message: "Tem certeza que deseja limpar seu carrinho?",
       onConfirm: () => {
-        resetCart();
+        store.resetCart();
         toast.success("Carrinho limpo com sucesso!");
       },
     });
-  }, [resetCart]);
+  }, [store.resetCart]);
 
   const handleCheckout = useCallback(async () => {
     if (!isSignedIn) {
@@ -74,7 +83,7 @@ const CartClient = ({ addresses }: CartClientProps) => {
         groupedItems,
         user,
         selectedAddress,
-        shipping,
+        store.shipping,
         { createCheckoutSession },
       );
       if (checkoutUrl) {
@@ -89,7 +98,7 @@ const CartClient = ({ addresses }: CartClientProps) => {
     } finally {
       setLoading(false);
     }
-  }, [groupedItems, user, selectedAddress, shipping, isSignedIn, router]);
+  }, [groupedItems, user, selectedAddress, store.shipping, isSignedIn, router]);
 
   const handleSelectAddress = useCallback(
     (addressId: string) => {
@@ -181,8 +190,8 @@ const CartClient = ({ addresses }: CartClientProps) => {
                     </CardHeader>
                     <ShippingCalculator
                       cartItems={groupedItems}
-                      selectedShipping={shipping}
-                      onSelectShipping={setShipping}
+                      selectedShipping={store.shipping}
+                      onSelectShipping={store.setShipping}
                     />
                   </Card>
                 </>
@@ -192,8 +201,8 @@ const CartClient = ({ addresses }: CartClientProps) => {
                   discount={discount}
                   total={total}
                   cartItems={groupedItems}
-                  selectedShipping={shipping}
-                  onSelectShipping={setShipping}
+                  selectedShipping={store.shipping}
+                  onSelectShipping={store.setShipping}
                 />
               )}
 

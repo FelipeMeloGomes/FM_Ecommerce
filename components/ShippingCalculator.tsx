@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Check } from "lucide-react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { calculateShipping } from "@/actions/calculateShipping";
 import PriceFormatter from "@/components/PriceFormatter";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,14 @@ export function ShippingCalculator({
   const [quotes, setQuotes] = useState<ShippingQuote[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [hasCalculated, setHasCalculated] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (selectedShipping) {
+      setHasCalculated(true);
+    }
+  }, [selectedShipping]);
 
   const handleChange = useCallback((value: string) => {
     setCep(formatCep(value));
@@ -50,28 +59,34 @@ export function ShippingCalculator({
       }));
 
       const result: ShippingQuote[] = await calculateShipping(cep, mappedItems);
-      onSelectShipping(null);
-      setQuotes(result);
+
+      startTransition(() => {
+        const previousService = selectedShipping?.service;
+        const matchingQuote = result.find((q) => q.service === previousService);
+
+        onSelectShipping(matchingQuote ?? null);
+        setQuotes(result);
+        setHasCalculated(true);
+      });
     } catch {
       setError("Não foi possível calcular o frete.");
     } finally {
       setLoading(false);
     }
-  }, [cep, cartItems, onSelectShipping]);
+  }, [cep, cartItems, onSelectShipping, selectedShipping?.service]);
 
   const handleShippingSelect = useCallback(
     (value: string) => {
       const quote = quotes.find((q) => q.service === value) ?? null;
-      onSelectShipping(quote);
+      startTransition(() => {
+        onSelectShipping(quote);
+      });
     },
     [quotes, onSelectShipping],
   );
 
-  useEffect(() => {
-    if (cartItems.length > 0 && !selectedShipping) {
-      setQuotes([]);
-    }
-  }, [cartItems.length, selectedShipping]);
+  const showQuotes = hasCalculated && quotes.length > 0;
+  const showSelectedOnly = hasCalculated && !showQuotes && selectedShipping;
 
   return (
     <div className="space-y-4 p-4 bg-card border border-border/60 rounded-xl">
@@ -87,7 +102,7 @@ export function ShippingCalculator({
           <Button
             type="button"
             onClick={handleCalculate}
-            disabled={loading}
+            disabled={loading || isPending}
             className="bg-shop_dark_green hover:bg-shop_btn_dark_green shrink-0"
           >
             {loading ? "..." : "Calcular"}
@@ -96,7 +111,7 @@ export function ShippingCalculator({
         {error && <p className="text-destructive text-sm">{error}</p>}
       </div>
 
-      {quotes.length > 0 && (
+      {showQuotes && (
         <RadioGroup
           value={selectedShipping?.service ?? ""}
           onValueChange={handleShippingSelect}
@@ -105,24 +120,62 @@ export function ShippingCalculator({
           {quotes.map((q) => (
             <div
               key={q.service}
-              className="flex items-center justify-between rounded-lg border border-border/40 p-3 hover:bg-muted/30 transition-colors"
+              className={`flex items-center justify-between rounded-lg border p-3 transition-colors cursor-pointer ${
+                selectedShipping?.service === q.service
+                  ? "border-shop_dark_green bg-shop_dark_green/5"
+                  : "border-border/40 hover:bg-muted/30"
+              }`}
+              onClick={() => handleShippingSelect(q.service)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  handleShippingSelect(q.service);
+                }
+              }}
             >
               <div className="flex items-start gap-3">
-                <RadioGroupItem id={`ship-${q.service}`} value={q.service} />
-                <Label
-                  htmlFor={`ship-${q.service}`}
-                  className="grid gap-1 cursor-pointer"
-                >
+                <RadioGroupItem
+                  id={`ship-${q.service}`}
+                  value={q.service}
+                  className="mt-0.5"
+                />
+                <div className="grid gap-1">
                   <span className="font-medium">{q.service}</span>
                   <span className="text-sm text-muted-foreground">
                     {q.deliveryDays} dias úteis
                   </span>
-                </Label>
+                </div>
               </div>
               <PriceFormatter amount={q.price} className="font-semibold" />
             </div>
           ))}
         </RadioGroup>
+      )}
+
+      {showSelectedOnly && (
+        <div className="rounded-lg border border-shop_dark_green bg-shop_dark_green/5 p-3">
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center size-5 rounded-full border-2 border-shop_dark_green bg-shop_dark_green shrink-0">
+              <Check className="h-3 w-3 text-white" />
+            </div>
+            <div className="grid gap-1">
+              <span className="font-medium">{selectedShipping.service}</span>
+              <span className="text-sm text-muted-foreground">
+                {selectedShipping.deliveryDays} dias úteis
+              </span>
+            </div>
+          </div>
+          <div className="flex justify-end mt-2">
+            <PriceFormatter
+              amount={selectedShipping.price}
+              className="font-semibold"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Recalcule para alterar o frete
+          </p>
+        </div>
       )}
     </div>
   );
