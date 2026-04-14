@@ -26,7 +26,7 @@ export default async function Home() {
   ]);
 
   return (
-    <Container className="bg-shop-light-pink dark:bg-neutral-950">
+    <Container className="bg-shop-light-pink dark:bg-neutral-950 pt-4">
       <div className="space-y-0 lg:space-y-0">
         <section className="pb-0 lg:pb-0">
           <HomeBanner />
