@@ -143,13 +143,7 @@ type Props = {
   searchParams: Promise<{ orderNumber?: string }>;
 };
 
-const SuccessPage = async ({ searchParams }: Props) => {
+export default async function SuccessPage({ searchParams }: Props) {
   const params = await searchParams;
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <SuccessPageContent initialOrderNumber={params.orderNumber} />
-    </Suspense>
-  );
-};
-
-export default SuccessPage;
+  return <SuccessPageContent initialOrderNumber={params.orderNumber} />;
+}
