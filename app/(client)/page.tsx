@@ -32,7 +32,7 @@ export default async function Home() {
           <HomeBanner />
         </section>
 
-        <section className="px-4 lg:px-0 py-8 lg:py-12 lg:mt-4">
+        <section className="px-4 lg:px-0 py-8 lg:py-12">
           <ProductGrid initialProducts={products} />
         </section>
 
