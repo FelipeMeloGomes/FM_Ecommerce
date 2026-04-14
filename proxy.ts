@@ -59,6 +59,10 @@ const isAdminRoute = (path: string): boolean => {
   return path.startsWith("/api/admin");
 };
 
+const isWebhookRoute = (path: string): boolean => {
+  return path.startsWith("/api/webhook");
+};
+
 const getClientIp = (request: NextRequest): ClientIp => {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
@@ -188,11 +192,12 @@ export default clerkMiddleware(async (_auth, request: NextRequest) => {
 
     const response = NextResponse.next();
 
-    // CSRF validation for non-GET requests, excluding admin routes (already protected by Clerk)
+    // CSRF validation for non-GET requests, excluding admin routes and webhooks (already protected by external service signature verification)
     if (
       request.method !== "GET" &&
       request.method !== "HEAD" &&
-      !isAdminRoute(path)
+      !isAdminRoute(path) &&
+      !isWebhookRoute(path)
     ) {
       const csrfResult = await _csrfMiddleware(request, response);
       if (!csrfResult.success) {
