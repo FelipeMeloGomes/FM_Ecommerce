@@ -151,12 +151,20 @@ const cleanupExpiredEntries = (): void => {
 
 setInterval(cleanupExpiredEntries, 60 * 60 * 1000);
 
+const addSecurityHeaders = (response: NextResponse): void => {
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+};
+
 const buildRateLimitResponse = (
   response: NextResponse,
   remaining: number,
   resetTime: number,
   config: RateLimitConfig,
 ): NextResponse => {
+  addSecurityHeaders(response);
   response.headers.set("X-RateLimit-Limit", String(config.limit));
   response.headers.set("X-RateLimit-Remaining", String(remaining));
   if (resetTime > 0) {
@@ -178,7 +186,7 @@ export default clerkMiddleware(async (_auth, request: NextRequest) => {
 
     if (!allowed) {
       const retryAfter = Math.ceil((resetTime - Date.now()) / 1000 / 60);
-      return new NextResponse(
+      const errorResponse = new NextResponse(
         JSON.stringify({
           error: "Too Many Requests",
           message: `Limite de requisições excedido. Tente novamente em ${retryAfter} minutos.`,
@@ -188,6 +196,8 @@ export default clerkMiddleware(async (_auth, request: NextRequest) => {
           headers: { "Content-Type": "application/json" },
         },
       );
+      addSecurityHeaders(errorResponse);
+      return errorResponse;
     }
 
     const response = NextResponse.next();
@@ -201,10 +211,12 @@ export default clerkMiddleware(async (_auth, request: NextRequest) => {
     ) {
       const csrfResult = await _csrfMiddleware(request, response);
       if (!csrfResult.success) {
-        return new NextResponse(
+        const csrfErrorResponse = new NextResponse(
           JSON.stringify({ error: "Invalid CSRF token" }),
           { status: 403, headers: { "Content-Type": "application/json" } },
         );
+        addSecurityHeaders(csrfErrorResponse);
+        return csrfErrorResponse;
       }
     }
 
@@ -217,7 +229,10 @@ export default clerkMiddleware(async (_auth, request: NextRequest) => {
     return result;
   }
 
-  return NextResponse.next();
+  // Non-API routes (pages) - also add security headers
+  const pageResponse = NextResponse.next();
+  addSecurityHeaders(pageResponse);
+  return pageResponse;
 });
 
 export const config = {
