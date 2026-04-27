@@ -13,10 +13,15 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  CI: true
+  NEXT_TELEMETRY_DISABLED: 1
+
 jobs:
   lint:
     name: Lint Code
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -28,10 +33,7 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    needs: lint
-    env:
-      CI: true
-      NEXT_TELEMETRY_DISABLED: 1
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -43,10 +45,9 @@ jobs:
   build:
     name: Build Application
     runs-on: ubuntu-latest
-    needs: test
+    needs: [lint, test]
+    timeout-minutes: 15
     env:
-      CI: true
-      NEXT_TELEMETRY_DISABLED: 1
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
       NEXT_PUBLIC_SANITY_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_DATASET }}
       NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_ID }}
@@ -64,6 +65,7 @@ jobs:
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: build
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
     env:
@@ -75,12 +77,11 @@ jobs:
         with:
           bun-version: "1.3.11"
       - run: bun install --frozen-lockfile
-      - run: bun add -g vercel
 
       - name: Deploy Main
         if: github.ref == 'refs/heads/main'
-        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Beta
         if: github.ref == 'refs/heads/beta'
-        run: vercel --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel --token=${{ secrets.VERCEL_TOKEN }}
