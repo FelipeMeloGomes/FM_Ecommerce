@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import type { ServerResult } from "@/lib/server-result";
 import type { Product } from "@/sanity.types";
 
 const LOCAL_WISHLIST_KEY = "fm-wishlist";
@@ -44,7 +45,7 @@ interface UseLocalWishlistReturn {
   clearLocalFavorites: () => void;
   getLocalWishlist: () => Product[];
   migrateToServer: (
-    addToServerWishlist: (productId: string) => Promise<void>,
+    addToServerWishlist: (productId: string) => Promise<ServerResult<void>>,
   ) => Promise<void>;
 }
 
@@ -100,7 +101,9 @@ export function useLocalWishlist(): UseLocalWishlistReturn {
   }, [saveToLocal]);
 
   const migrateToServer = useCallback(
-    async (addToServerWishlist: (productId: string) => Promise<void>) => {
+    async (
+      addToServerWishlist: (productId: string) => Promise<ServerResult<void>>,
+    ) => {
       const local = getLocalWishlist();
       if (local.length === 0) return;
 
@@ -110,8 +113,12 @@ export function useLocalWishlist(): UseLocalWishlistReturn {
       for (const product of local) {
         if (product._id) {
           try {
-            await addToServerWishlist(product._id);
-            migrated++;
+            const result = await addToServerWishlist(product._id);
+            if (result.success) {
+              migrated++;
+            } else {
+              failed++;
+            }
           } catch {
             failed++;
           }

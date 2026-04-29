@@ -59,8 +59,8 @@ export function useWishlist(): UseWishlistReturn {
 
         const local = getLocalWishlist();
         if (local.length > 0) {
-          await migrateToServer(async (productId) => {
-            await addToWishlist(productId);
+          await migrateToServer(async (productId: string) => {
+            return addToWishlist(productId);
           });
           const updatedProducts = await getWishlist();
           if (!cancelled) {
@@ -100,7 +100,14 @@ export function useWishlist(): UseWishlistReturn {
         });
 
         addToWishlist(product._id)
-          .then(() => {
+          .then((result) => {
+            if (!result.success) {
+              setServerFavorites((prev) =>
+                prev.filter((p) => p._id !== product._id),
+              );
+              toast.error(result.error);
+              return;
+            }
             toast.success("Produto adicionado aos favoritos!");
           })
           .catch(() => {
@@ -123,7 +130,14 @@ export function useWishlist(): UseWishlistReturn {
         setServerFavorites((prev) => prev.filter((p) => p._id !== productId));
 
         removeFromWishlist(productId)
-          .then(() => {
+          .then((result) => {
+            if (!result.success) {
+              if (product) {
+                setServerFavorites((prev) => [...prev, product]);
+              }
+              toast.error(result.error);
+              return;
+            }
             toast.success("Produto removido dos favoritos!");
           })
           .catch(() => {
@@ -145,7 +159,12 @@ export function useWishlist(): UseWishlistReturn {
       setServerFavorites([]);
 
       resetWishlist()
-        .then(() => {
+        .then((result) => {
+          if (!result.success) {
+            setServerFavorites(previousProducts);
+            toast.error(result.error);
+            return;
+          }
           toast.success("Lista de favoritos limpa!");
         })
         .catch(() => {
