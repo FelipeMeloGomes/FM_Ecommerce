@@ -70,13 +70,17 @@ export function ReviewForm({ productId, onSuccess }: ReviewFormProps) {
                 .filter((f): f is File => f !== undefined)
             : undefined;
 
-        await createReview({
+        const result = await createReview({
           productId,
           rating,
           title: title.trim(),
           comment: comment.trim(),
           images: files,
         });
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
         toast.success("Avaliação enviada!");
         setRating(0);
         setTitle("");

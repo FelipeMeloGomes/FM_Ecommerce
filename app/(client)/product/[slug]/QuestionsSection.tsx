@@ -71,7 +71,15 @@ export default function QuestionsSection({
       setLoading(true);
 
       try {
-        await sendProductQuestion(productId, productName, newQuestion.trim());
+        const result = await sendProductQuestion(
+          productId,
+          productName,
+          newQuestion.trim(),
+        );
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
         toast.success("Pergunta enviada com sucesso!");
         setNewQuestion("");
         setShowForm(false);

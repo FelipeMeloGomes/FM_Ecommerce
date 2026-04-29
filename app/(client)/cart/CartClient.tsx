@@ -79,15 +79,19 @@ const CartClient = ({ addresses }: CartClientProps) => {
 
     setLoading(true);
     try {
-      const checkoutUrl = await performCheckout(
+      const result = await performCheckout(
         groupedItems,
         user,
         selectedAddress,
         store.shipping,
         { createCheckoutSession },
       );
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      if (result.data) {
+        window.location.href = result.data;
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -115,7 +119,11 @@ const CartClient = ({ addresses }: CartClientProps) => {
       confirmToast({
         message: "Tem certeza que deseja excluir este endereço?",
         onConfirm: async () => {
-          await deleteAddress(id);
+          const result = await deleteAddress(id);
+          if (!result.success) {
+            toast.error(result.error);
+            return;
+          }
           router.refresh();
           toast.success("Endereço removido com sucesso!");
         },

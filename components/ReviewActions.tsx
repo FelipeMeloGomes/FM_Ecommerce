@@ -106,13 +106,17 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
                 .filter((f): f is File => f !== undefined)
             : undefined;
 
-        await updateReview(review._id, {
+        const result = await updateReview(review._id, {
           rating,
           title,
           comment,
           images: imageFiles,
           keepImageIds,
         });
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
         toast.success("Avaliação atualizada!");
         setIsEditing(false);
         setImages([]);
@@ -132,7 +136,11 @@ export function ReviewActions({ review, onSuccess }: ReviewActionsProps) {
   const handleDelete = useCallback(async () => {
     setLoading(true);
     try {
-      await deleteReview(review._id);
+      const result = await deleteReview(review._id);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
       toast.success("Avaliação removida!");
       onSuccess?.();
       router.refresh();

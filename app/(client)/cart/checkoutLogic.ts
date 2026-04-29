@@ -1,4 +1,5 @@
 import type { Metadata } from "@/actions/createCheckoutSession";
+import type { ServerResult } from "@/lib/server-result";
 import type { Address } from "@/sanity.types";
 import type { CartItem } from "@/store";
 
@@ -18,7 +19,7 @@ export interface CheckoutDeps {
   createCheckoutSession: (
     items: { product: CartItem["product"]; quantity: number }[],
     metadata: Metadata,
-  ) => Promise<string>;
+  ) => Promise<ServerResult<string>>;
 }
 
 export async function performCheckout(
@@ -27,12 +28,12 @@ export async function performCheckout(
   selectedAddress: Address | null | undefined,
   shipping: ShippingItem | null | undefined,
   deps: CheckoutDeps,
-) {
+): Promise<ServerResult<string>> {
   if (!selectedAddress) {
-    throw new Error("Selecione um endereço de entrega");
+    return { success: false, error: "Selecione um endereço de entrega" };
   }
   if (!shipping) {
-    throw new Error("Selecione uma opção de frete");
+    return { success: false, error: "Selecione uma opção de frete" };
   }
 
   const metadata: Metadata = {
@@ -47,7 +48,7 @@ export async function performCheckout(
     },
   };
 
-  const url = await deps.createCheckoutSession(items, metadata);
+  const result = await deps.createCheckoutSession(items, metadata);
 
-  return url;
+  return result;
 }

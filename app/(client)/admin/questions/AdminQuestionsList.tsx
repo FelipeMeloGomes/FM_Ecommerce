@@ -91,7 +91,11 @@ export default function AdminQuestionsList({
       setConfirmOverwrite(null);
 
       try {
-        await answerQuestion(questionId, answer);
+        const result = await answerQuestion(questionId, answer);
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
         toast.success("Resposta enviada com sucesso!");
         setAnswerText((prev) => {
           const next = { ...prev };

@@ -55,7 +55,15 @@ export function ProductQuestionDialog({
       setLoading(true);
 
       try {
-        await sendProductQuestion(product._id, product.name, question.trim());
+        const result = await sendProductQuestion(
+          product._id,
+          product.name,
+          question.trim(),
+        );
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
         toast.success("Pergunta enviada com sucesso!");
         setQuestion("");
         handleClose();

@@ -55,7 +55,11 @@ export function QuestionActions({ question, onSuccess }: QuestionActionsProps) {
       setLoading(true);
 
       try {
-        await updateQuestion(question._id, editQuestion);
+        const result = await updateQuestion(question._id, editQuestion);
+        if (!result.success) {
+          toast.error(result.error);
+          return;
+        }
         toast.success("Pergunta atualizada!");
         setIsEditing(false);
         onSuccess?.();
@@ -74,7 +78,11 @@ export function QuestionActions({ question, onSuccess }: QuestionActionsProps) {
   const handleDelete = useCallback(async () => {
     setLoading(true);
     try {
-      await deleteQuestion(question._id);
+      const result = await deleteQuestion(question._id);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
       toast.success("Pergunta removida!");
       onSuccess?.();
       router.refresh();

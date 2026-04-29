@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatCep } from "@/helpers/validateCep";
 import { type AddressInput, addressSchema } from "@/lib/schemas/addressSchema";
+import type { ServerResult } from "@/lib/server-result";
 import type { Address } from "@/sanity.types";
 
 interface AddressFormProps {
@@ -42,14 +43,19 @@ export default function AddressForm({ address }: AddressFormProps) {
     setLoading(true);
 
     try {
+      let result: ServerResult;
       if (address?._id) {
-        await updateAddress({ id: address._id, ...data });
-        toast.success("Endereço atualizado!");
+        result = await updateAddress({ id: address._id, ...data });
       } else {
-        await createAddress(data);
-        toast.success("Endereço criado!");
+        result = await createAddress(data);
       }
 
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success(address?._id ? "Endereço atualizado!" : "Endereço criado!");
       router.push("/cart");
       router.refresh();
     } catch (error) {
