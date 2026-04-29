@@ -43,11 +43,17 @@ beforeEach(() => {
 
 describe("questionActions", () => {
   describe("sendProductQuestion", () => {
-    it("lança erro quando não autenticado", async () => {
+    it("retorna erro quando não autenticado", async () => {
       mockAuth.mockResolvedValueOnce({ userId: null });
-      await expect(
-        sendProductQuestion("prod-1", "Produto", "Pergunta teste?"),
-      ).rejects.toThrow("Unauthorized");
+      const result = await sendProductQuestion(
+        "prod-1",
+        "Produto",
+        "Pergunta teste?",
+      );
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Unauthorized");
+      }
     });
 
     it("cria pergunta com sucesso quando autenticado", async () => {
@@ -64,7 +70,7 @@ describe("questionActions", () => {
         "Qual o prazo de entrega?",
       );
 
-      expect(result).toEqual({ success: true, id: "q-1" });
+      expect(result).toEqual({ success: true, data: { id: "q-1" } });
       expect(mockWriteClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           _type: "productQuestion",
@@ -93,29 +99,40 @@ describe("questionActions", () => {
   });
 
   describe("updateQuestion", () => {
-    it("lança erro quando não autenticado", async () => {
+    it("retorna erro quando não autenticado", async () => {
       mockAuth.mockResolvedValueOnce({ userId: null });
-      await expect(
-        updateQuestion("q-1", "Nova pergunta aqui?"),
-      ).rejects.toThrow("Unauthorized");
+      const result = await updateQuestion("q-1", "Nova pergunta aqui?");
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Unauthorized");
+      }
     });
 
-    it("lança erro quando pergunta tem menos de 10 caracteres", async () => {
+    it("retorna erro quando pergunta tem menos de 10 caracteres", async () => {
       mockAuth.mockResolvedValueOnce({ userId: "user-1" });
-      await expect(updateQuestion("q-1", "curta")).rejects.toThrow(
-        "Pergunta deve ter no mínimo 10 caracteres",
-      );
+      const result = await updateQuestion("q-1", "curta");
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Pergunta deve ter no mínimo 10 caracteres");
+      }
     });
 
-    it("lança erro quando pergunta não existe", async () => {
+    it("retorna erro quando pergunta não existe", async () => {
       mockAuth.mockResolvedValueOnce({ userId: "user-1" });
       mockClient.fetch.mockResolvedValueOnce(null);
-      await expect(
-        updateQuestion("q-1", "Pergunta válida com mais de 10 caracteres?"),
-      ).rejects.toThrow("Pergunta não encontrada ou você não tem permissão");
+      const result = await updateQuestion(
+        "q-1",
+        "Pergunta válida com mais de 10 caracteres?",
+      );
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe(
+          "Pergunta não encontrada ou você não tem permissão",
+        );
+      }
     });
 
-    it("lança erro quando pergunta tem mais de 7 dias", async () => {
+    it("retorna erro quando pergunta tem mais de 7 dias", async () => {
       mockAuth.mockResolvedValueOnce({ userId: "user-1" });
       const oldDate = new Date();
       oldDate.setDate(oldDate.getDate() - 10);
@@ -124,9 +141,16 @@ describe("questionActions", () => {
         userId: "user-1",
         createdAt: oldDate.toISOString(),
       });
-      await expect(
-        updateQuestion("q-1", "Pergunta válida com mais de 10 caracteres?"),
-      ).rejects.toThrow("Não é possível editar perguntas com mais de 7 dias");
+      const result = await updateQuestion(
+        "q-1",
+        "Pergunta válida com mais de 10 caracteres?",
+      );
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe(
+          "Não é possível editar perguntas com mais de 7 dias",
+        );
+      }
     });
 
     it("atualiza pergunta com sucesso", async () => {
@@ -154,17 +178,25 @@ describe("questionActions", () => {
   });
 
   describe("deleteQuestion", () => {
-    it("lança erro quando não autenticado", async () => {
+    it("retorna erro quando não autenticado", async () => {
       mockAuth.mockResolvedValueOnce({ userId: null });
-      await expect(deleteQuestion("q-1")).rejects.toThrow("Unauthorized");
+      const result = await deleteQuestion("q-1");
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Unauthorized");
+      }
     });
 
-    it("lança erro quando pergunta não existe", async () => {
+    it("retorna erro quando pergunta não existe", async () => {
       mockAuth.mockResolvedValueOnce({ userId: "user-1" });
       mockClient.fetch.mockResolvedValueOnce(null);
-      await expect(deleteQuestion("q-1")).rejects.toThrow(
-        "Pergunta não encontrada ou você não tem permissão",
-      );
+      const result = await deleteQuestion("q-1");
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe(
+          "Pergunta não encontrada ou você não tem permissão",
+        );
+      }
     });
 
     it("deleta pergunta com sucesso", async () => {
@@ -206,26 +238,38 @@ describe("questionActions", () => {
   });
 
   describe("answerQuestion", () => {
-    it("lança erro quando não autenticado", async () => {
+    it("retorna erro quando não autenticado", async () => {
       mockAuth.mockResolvedValueOnce({ userId: null });
-      await expect(
-        answerQuestion("q-1", "Resposta válida com mais de 10 caracteres."),
-      ).rejects.toThrow("Unauthorized");
-    });
-
-    it("lança erro quando resposta tem menos de 10 caracteres", async () => {
-      mockAuth.mockResolvedValueOnce({ userId: "user-1" });
-      await expect(answerQuestion("q-1", "curta")).rejects.toThrow(
-        "Resposta deve ter no mínimo 10 caracteres",
+      const result = await answerQuestion(
+        "q-1",
+        "Resposta válida com mais de 10 caracteres.",
       );
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Unauthorized");
+      }
     });
 
-    it("lança erro quando pergunta não existe", async () => {
+    it("retorna erro quando resposta tem menos de 10 caracteres", async () => {
+      mockAuth.mockResolvedValueOnce({ userId: "user-1" });
+      const result = await answerQuestion("q-1", "curta");
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Resposta deve ter no mínimo 10 caracteres");
+      }
+    });
+
+    it("retorna erro quando pergunta não existe", async () => {
       mockAuth.mockResolvedValueOnce({ userId: "user-1" });
       mockClient.fetch.mockResolvedValueOnce(null);
-      await expect(
-        answerQuestion("q-1", "Resposta válida com mais de 10 caracteres."),
-      ).rejects.toThrow("Pergunta não encontrada");
+      const result = await answerQuestion(
+        "q-1",
+        "Resposta válida com mais de 10 caracteres.",
+      );
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Pergunta não encontrada");
+      }
     });
 
     it("responde pergunta com sucesso", async () => {

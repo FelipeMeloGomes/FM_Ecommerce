@@ -35,17 +35,24 @@ vi.mock("@/components/ShippingCalculator", () => ({
 }));
 vi.mock("@/components/cart/OrderSummary", () => ({ default: () => null }));
 vi.mock("@/actions/createCheckoutSession", () => ({
-  createCheckoutSession: vi.fn().mockResolvedValue("https://checkout.url"),
+  createCheckoutSession: vi
+    .fn()
+    .mockResolvedValue({ success: true, data: "https://checkout.url" }),
 }));
-vi.mock("@/actions/deleteAddress", () => ({ deleteAddress: vi.fn() }));
+vi.mock("@/actions/deleteAddress", () => ({
+  deleteAddress: vi.fn().mockResolvedValue({ success: true }),
+}));
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
+
+import type { CheckoutDeps } from "@/app/(client)/cart/checkoutLogic";
+import type { ServerResult } from "@/lib/server-result";
 
 describe("performCheckout — validação de erros", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("lança erro quando endereço não selecionado", async () => {
+  it("retorna erro quando endereço não selecionado", async () => {
     const items = [
       { product: makeProduct({ _id: "p1", price: 80 }), quantity: 1 },
     ];
@@ -55,28 +62,44 @@ describe("performCheckout — validação de erros", () => {
       price: 20,
       deliveryDays: 5,
     };
-    const deps = {
-      createCheckoutSession: vi.fn(async () => "https://checkout.url"),
+    const deps: CheckoutDeps = {
+      createCheckoutSession: vi.fn(
+        async (): Promise<ServerResult<string>> => ({
+          success: true,
+          data: "https://checkout.url",
+        }),
+      ),
     };
 
-    await expect(
-      performCheckout(items, user, null, shipping, deps),
-    ).rejects.toThrow("Selecione um endereço de entrega");
+    const result = await performCheckout(items, user, null, shipping, deps);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("Selecione um endereço de entrega");
+    }
   });
 
-  it("lança erro quando frete não selecionado", async () => {
+  it("retorna erro quando frete não selecionado", async () => {
     const items = [
       { product: makeProduct({ _id: "p1", price: 80 }), quantity: 1 },
     ];
     const user: ClerkUser = { fullName: "John Tester", id: "user-1" };
     const address = makeAddress({ _id: "addr-1" });
-    const deps = {
-      createCheckoutSession: vi.fn(async () => "https://checkout.url"),
+    const deps: CheckoutDeps = {
+      createCheckoutSession: vi.fn(
+        async (): Promise<ServerResult<string>> => ({
+          success: true,
+          data: "https://checkout.url",
+        }),
+      ),
     };
 
-    await expect(
-      performCheckout(items, user, address, null, deps),
-    ).rejects.toThrow("Selecione uma opção de frete");
+    const result = await performCheckout(items, user, address, null, deps);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("Selecione uma opção de frete");
+    }
   });
 
   it("retorna URL quando dados válidos", async () => {
@@ -90,13 +113,21 @@ describe("performCheckout — validação de erros", () => {
       price: 20,
       deliveryDays: 5,
     };
-    const deps = {
-      createCheckoutSession: vi.fn(async () => "https://checkout.url"),
+    const deps: CheckoutDeps = {
+      createCheckoutSession: vi.fn(
+        async (): Promise<ServerResult<string>> => ({
+          success: true,
+          data: "https://checkout.url",
+        }),
+      ),
     };
 
-    const url = await performCheckout(items, user, address, shipping, deps);
+    const result = await performCheckout(items, user, address, shipping, deps);
 
-    expect(url).toBe("https://checkout.url");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toBe("https://checkout.url");
+    }
     expect(deps.createCheckoutSession).toHaveBeenCalledTimes(1);
   });
 
@@ -111,8 +142,13 @@ describe("performCheckout — validação de erros", () => {
       price: 20,
       deliveryDays: 5,
     };
-    const deps = {
-      createCheckoutSession: vi.fn(async () => "https://checkout.url"),
+    const deps: CheckoutDeps = {
+      createCheckoutSession: vi.fn(
+        async (): Promise<ServerResult<string>> => ({
+          success: true,
+          data: "https://checkout.url",
+        }),
+      ),
     };
 
     await performCheckout(items, user, address, shipping, deps);

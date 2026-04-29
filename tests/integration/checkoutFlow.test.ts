@@ -127,7 +127,10 @@ describe("Fluxo completo de checkout", () => {
       }),
     );
 
-    expect(result).toBe("https://checkout.stripe.com/session-url");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toBe("https://checkout.stripe.com/session-url");
+    }
   });
 
   it("createOrder persiste pedido com clerkUserId correto na transação", async () => {

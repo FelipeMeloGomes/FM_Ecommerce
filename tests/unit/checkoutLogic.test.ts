@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { ServerResult } from "@/lib/server-result";
 import {
   type CheckoutDeps,
   performCheckout,
@@ -18,23 +19,41 @@ const makeUser = (overrides = {}) => ({
 });
 
 const makeDeps = (url = "https://checkout.example/ok"): CheckoutDeps => ({
-  createCheckoutSession: vi.fn(async () => url),
+  createCheckoutSession: vi.fn(
+    async (): Promise<ServerResult<string>> => ({ success: true, data: url }),
+  ),
 });
 
 describe("checkoutLogic.performCheckout", () => {
-  it("lança erro quando endereço não selecionado", async () => {
+  it("retorna erro quando endereço não selecionado", async () => {
     const deps = makeDeps();
-    await expect(
-      performCheckout([makeCartItem()], makeUser(), null, makeShipping(), deps),
-    ).rejects.toThrow("Selecione um endereço de entrega");
+    const result = await performCheckout(
+      [makeCartItem()],
+      makeUser(),
+      null,
+      makeShipping(),
+      deps,
+    );
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("Selecione um endereço de entrega");
+    }
     expect(deps.createCheckoutSession).not.toHaveBeenCalled();
   });
 
-  it("lança erro quando frete não selecionado", async () => {
+  it("retorna erro quando frete não selecionado", async () => {
     const deps = makeDeps();
-    await expect(
-      performCheckout([makeCartItem()], makeUser(), makeAddress(), null, deps),
-    ).rejects.toThrow("Selecione uma opção de frete");
+    const result = await performCheckout(
+      [makeCartItem()],
+      makeUser(),
+      makeAddress(),
+      null,
+      deps,
+    );
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("Selecione uma opção de frete");
+    }
     expect(deps.createCheckoutSession).not.toHaveBeenCalled();
   });
 
@@ -47,7 +66,7 @@ describe("checkoutLogic.performCheckout", () => {
       deliveryDays: 2,
     });
 
-    const url = await performCheckout(
+    const result = await performCheckout(
       [makeCartItem({ product: makeProduct(), quantity: 2 })],
       makeUser(),
       address,
@@ -55,7 +74,10 @@ describe("checkoutLogic.performCheckout", () => {
       deps,
     );
 
-    expect(url).toBe("https://checkout.example/ok");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toBe("https://checkout.example/ok");
+    }
     expect(deps.createCheckoutSession).toHaveBeenCalledTimes(1);
 
     const [itemsArg, metadataArg] = vi.mocked(deps.createCheckoutSession).mock
@@ -87,21 +109,26 @@ describe("checkoutLogic.performCheckout", () => {
     expect(metadataArg.customerEmail).toBe("Unknown");
   });
 
-  it("propaga erro quando createCheckoutSession lança exceção", async () => {
+  it("retorna erro quando createCheckoutSession falha", async () => {
     const deps: CheckoutDeps = {
-      createCheckoutSession: vi.fn(async () => {
-        throw new Error("Falhou no gateway");
-      }),
-    };
-    await expect(
-      performCheckout(
-        [makeCartItem()],
-        makeUser(),
-        makeAddress(),
-        makeShipping(),
-        deps,
+      createCheckoutSession: vi.fn(
+        async (): Promise<ServerResult<string>> => ({
+          success: false,
+          error: "Falhou no gateway",
+        }),
       ),
-    ).rejects.toThrow("Falhou no gateway");
+    };
+    const result = await performCheckout(
+      [makeCartItem()],
+      makeUser(),
+      makeAddress(),
+      makeShipping(),
+      deps,
+    );
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("Falhou no gateway");
+    }
     expect(deps.createCheckoutSession).toHaveBeenCalledTimes(1);
   });
 });

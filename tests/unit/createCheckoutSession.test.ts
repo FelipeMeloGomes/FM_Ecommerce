@@ -56,28 +56,33 @@ describe("createCheckoutSession", () => {
       [{ product, quantity: 2 }],
       baseMetadata,
     );
-    const parsed = JSON.parse(result);
-
-    expect(parsed.items).toHaveLength(1);
-    expect(parsed.items[0]).toMatchObject({
-      productId: "prod-1",
-      name: "Produto X",
-      price: 100,
-      quantity: 2,
-    });
-    expect(parsed.metadata.clerkUserId).toBe("user_test_123");
+    expect(result.success).toBe(true);
+    if (result.success && result.data) {
+      const parsed = JSON.parse(result.data);
+      expect(parsed.items).toHaveLength(1);
+      expect(parsed.items[0]).toMatchObject({
+        productId: "prod-1",
+        name: "Produto X",
+        price: 100,
+        quantity: 2,
+      });
+      expect(parsed.metadata.clerkUserId).toBe("user_test_123");
+    }
   });
 
-  it("lança erro se usuário não autenticado", async () => {
+  it("retorna erro se usuário não autenticado", async () => {
     vi.mocked(auth).mockResolvedValueOnce({ userId: null } as never);
 
-    await expect(
-      createCheckoutSession([{ product, quantity: 1 }], {
-        ...baseMetadata,
-        orderNumber: "O1",
-        customerName: "X",
-        customerEmail: "x@x.com",
-      }),
-    ).rejects.toThrow("Usuário não autenticado.");
+    const result = await createCheckoutSession([{ product, quantity: 1 }], {
+      ...baseMetadata,
+      orderNumber: "O1",
+      customerName: "X",
+      customerEmail: "x@x.com",
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("Usuário não autenticado.");
+    }
   });
 });
