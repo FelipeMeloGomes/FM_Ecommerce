@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { err, ok, type ServerResult } from "@/lib/server-result";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { GET_OTHER_ADDRESSES_QUERY } from "@/sanity/queries/query";
 
@@ -15,15 +16,17 @@ export type UpdateAddressInput = {
   default?: boolean;
 };
 
-export async function updateAddress(data: UpdateAddressInput) {
+export async function updateAddress(
+  data: UpdateAddressInput,
+): Promise<ServerResult> {
   const { userId } = await auth();
 
-  if (!userId) throw new Error("Unauthorized");
+  if (!userId) return err("Unauthorized");
 
   const existing = await writeClient.getDocument(data.id);
 
-  if (!existing) throw new Error("Address not found");
-  if (existing.clerkUserId !== userId) throw new Error("Unauthorized action");
+  if (!existing) return err("Address not found");
+  if (existing.clerkUserId !== userId) return err("Unauthorized action");
 
   const updatePayload = {
     name: data.name,
@@ -50,4 +53,5 @@ export async function updateAddress(data: UpdateAddressInput) {
 
   revalidatePath("/account/addresses");
   revalidatePath("/cart");
+  return ok();
 }

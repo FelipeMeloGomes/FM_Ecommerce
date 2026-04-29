@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { checkoutGateway } from "@/config/checkoutGateway";
+import { err, ok, type ServerResult } from "@/lib/server-result";
 import { urlFor } from "@/sanity/lib/image";
 import type { Address } from "@/sanity.types";
 import { SanityProductRepository } from "@/services/products/SanityProductRepository";
@@ -29,10 +30,10 @@ export interface Metadata {
 export async function createCheckoutSession(
   items: GroupedCartItems[],
   metadata: Metadata,
-) {
+): Promise<ServerResult<string>> {
   const { userId } = await auth();
 
-  if (!userId) throw new Error("Usuário não autenticado.");
+  if (!userId) return err("Usuário não autenticado.");
 
   const productRepo = new SanityProductRepository();
 
@@ -40,37 +41,43 @@ export async function createCheckoutSession(
     const product = await productRepo.findById(item.product._id);
 
     if (!product) {
-      throw new Error(`Produto não encontrado: ${item.product.name}`);
+      return err(`Produto não encontrado: ${item.product.name}`);
     }
 
     if (product.stock < item.quantity) {
-      throw new Error(
+      return err(
         `Produto "${product.name}" possui apenas ${product.stock} unidades em estoque. Você solicitou ${item.quantity}.`,
       );
     }
   }
 
-  const mappedItems = items.map((item) => {
-    if (!item.product.name)
-      throw new Error(`Product name is missing for product`);
+  const mappedItems = items
+    .map((item) => {
+      if (!item.product.name) return null;
 
-    if (item.product.price == null)
-      throw new Error(`Product price is missing for product `);
+      if (item.product.price == null) return null;
 
-    return {
-      productId: item.product._id,
-      name: item.product.name,
-      description: item.product.description,
-      image: item.product.images?.length
-        ? urlFor(item.product.images[0]).url()
-        : undefined,
-      price: item.product.price,
-      quantity: item.quantity,
-    };
-  });
+      return {
+        productId: item.product._id,
+        name: item.product.name,
+        description: item.product.description,
+        image: item.product.images?.length
+          ? urlFor(item.product.images[0]).url()
+          : undefined,
+        price: item.product.price,
+        quantity: item.quantity,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 
-  return checkoutGateway.createSession(mappedItems, {
+  if (mappedItems.length === 0) {
+    return err("Nenhum produto válido no carrinho.");
+  }
+
+  const sessionUrl = await checkoutGateway.createSession(mappedItems, {
     ...metadata,
     clerkUserId: userId,
   });
+
+  return ok(sessionUrl);
 }

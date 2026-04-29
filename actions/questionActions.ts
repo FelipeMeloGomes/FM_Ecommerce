@@ -1,6 +1,7 @@
 "use server";
 
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { err, ok, type ServerResult } from "@/lib/server-result";
 import { client } from "@/sanity/lib/client";
 import { writeClient } from "@/sanity/lib/writeClient";
 
@@ -32,15 +33,15 @@ export async function sendProductQuestion(
   productId: string,
   productName: string,
   question: string,
-) {
+): Promise<ServerResult<{ id: string }>> {
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return err("Unauthorized");
   }
 
   if (!checkRateLimit(userId)) {
-    throw new Error(
+    return err(
       "Muitas tentativas. Aguarde um momento antes de enviar outra pergunta.",
     );
   }
@@ -64,22 +65,25 @@ export async function sendProductQuestion(
 
   try {
     const result = await writeClient.create(questionData);
-    return { success: true, id: result._id };
+    return ok({ id: result._id });
   } catch (error) {
     console.error("Error creating question:", error);
-    throw error;
+    return err("Erro ao criar pergunta. Tente novamente.");
   }
 }
 
-export async function updateQuestion(questionId: string, question: string) {
+export async function updateQuestion(
+  questionId: string,
+  question: string,
+): Promise<ServerResult> {
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return err("Unauthorized");
   }
 
   if (!question.trim() || question.trim().length < 10) {
-    throw new Error("Pergunta deve ter no mínimo 10 caracteres");
+    return err("Pergunta deve ter no mínimo 10 caracteres");
   }
 
   const existingQuestion = await client.fetch(
@@ -88,7 +92,7 @@ export async function updateQuestion(questionId: string, question: string) {
   );
 
   if (!existingQuestion) {
-    throw new Error("Pergunta não encontrada ou você não tem permissão");
+    return err("Pergunta não encontrada ou você não tem permissão");
   }
 
   const createdAt = new Date(existingQuestion.createdAt);
@@ -97,21 +101,23 @@ export async function updateQuestion(questionId: string, question: string) {
   );
 
   if (daysSinceCreation > 7) {
-    throw new Error("Não é possível editar perguntas com mais de 7 dias");
+    return err("Não é possível editar perguntas com mais de 7 dias");
   }
 
   await writeClient
     .patch(questionId)
     .set({ question: question.trim() })
     .commit();
-  return { success: true };
+  return ok();
 }
 
-export async function deleteQuestion(questionId: string) {
+export async function deleteQuestion(
+  questionId: string,
+): Promise<ServerResult> {
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return err("Unauthorized");
   }
 
   const existingQuestion = await client.fetch(
@@ -120,11 +126,11 @@ export async function deleteQuestion(questionId: string) {
   );
 
   if (!existingQuestion) {
-    throw new Error("Pergunta não encontrada ou você não tem permissão");
+    return err("Pergunta não encontrada ou você não tem permissão");
   }
 
   await writeClient.delete(questionId);
-  return { success: true };
+  return ok();
 }
 
 export async function getProductQuestions(productId: string) {
@@ -149,15 +155,18 @@ export async function getProductQuestions(productId: string) {
   }
 }
 
-export async function answerQuestion(questionId: string, answer: string) {
+export async function answerQuestion(
+  questionId: string,
+  answer: string,
+): Promise<ServerResult> {
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return err("Unauthorized");
   }
 
   if (!answer.trim() || answer.trim().length < 10) {
-    throw new Error("Resposta deve ter no mínimo 10 caracteres");
+    return err("Resposta deve ter no mínimo 10 caracteres");
   }
 
   const existingQuestion = await client.fetch(
@@ -166,12 +175,12 @@ export async function answerQuestion(questionId: string, answer: string) {
   );
 
   if (!existingQuestion) {
-    throw new Error("Pergunta não encontrada");
+    return err("Pergunta não encontrada");
   }
 
   await writeClient
     .patch(questionId)
     .set({ answer: answer.trim(), answered: true })
     .commit();
-  return { success: true };
+  return ok();
 }

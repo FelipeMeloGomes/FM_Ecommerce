@@ -2,6 +2,7 @@
 
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { err, ok, type ServerResult } from "@/lib/server-result";
 import { writeClient } from "@/sanity/lib/writeClient";
 
 export async function getWishlist() {
@@ -42,11 +43,11 @@ export async function getWishlist() {
   }
 }
 
-export async function addToWishlist(productId: string) {
+export async function addToWishlist(productId: string): Promise<ServerResult> {
   const user = await currentUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    return err("Unauthorized");
   }
 
   const clerkUserId = user.id;
@@ -96,18 +97,20 @@ export async function addToWishlist(productId: string) {
 
     revalidatePath("/wishlist");
     revalidatePath("/product");
-    return { success: true };
+    return ok();
   } catch (error) {
     console.error("Error adding to wishlist:", error);
-    throw new Error("Failed to add to wishlist");
+    return err("Failed to add to wishlist");
   }
 }
 
-export async function removeFromWishlist(productId: string) {
+export async function removeFromWishlist(
+  productId: string,
+): Promise<ServerResult> {
   const user = await currentUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    return err("Unauthorized");
   }
 
   const clerkUserId = user.id;
@@ -140,18 +143,18 @@ export async function removeFromWishlist(productId: string) {
 
     revalidatePath("/wishlist");
     revalidatePath("/product");
-    return { success: true };
+    return ok();
   } catch (error) {
     console.error("Error removing from wishlist:", error);
-    throw new Error("Failed to remove from wishlist");
+    return err("Failed to remove from wishlist");
   }
 }
 
-export async function resetWishlist() {
+export async function resetWishlist(): Promise<ServerResult> {
   const user = await currentUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    return err("Unauthorized");
   }
 
   const clerkUserId = user.id;
@@ -176,9 +179,9 @@ export async function resetWishlist() {
 
     revalidatePath("/wishlist");
     revalidatePath("/product");
-    return { success: true };
+    return ok();
   } catch (error) {
     console.error("Error resetting wishlist:", error);
-    throw new Error("Failed to reset wishlist");
+    return err("Failed to reset wishlist");
   }
 }

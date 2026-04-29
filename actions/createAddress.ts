@@ -7,15 +7,18 @@ import {
   type addressSchema,
   addressSchemaWithDefault,
 } from "@/lib/schemas/addressSchema";
+import { err, ok, type ServerResult } from "@/lib/server-result";
 import { writeClient } from "@/sanity/lib/writeClient";
 
 export type CreateAddressInput = z.input<typeof addressSchema>;
 
-export async function createAddress(data: CreateAddressInput) {
+export async function createAddress(
+  data: CreateAddressInput,
+): Promise<ServerResult> {
   const { userId } = await auth();
   const user = await currentUser();
 
-  if (!userId || !user) throw new Error("Unauthorized");
+  if (!userId || !user) return err("Unauthorized");
 
   const validated = addressSchemaWithDefault.parse(data);
 
@@ -38,4 +41,5 @@ export async function createAddress(data: CreateAddressInput) {
 
   revalidatePath("/account/addresses");
   revalidatePath("/cart");
+  return ok();
 }

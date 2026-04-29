@@ -2,6 +2,7 @@
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { err, ok, type ServerResult } from "@/lib/server-result";
 import { client } from "@/sanity/lib/client";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { uploadReviewImages } from "./uploadReviewImages";
@@ -82,21 +83,21 @@ function containsForbiddenWords(text: string): boolean {
   );
 }
 
-export async function createReview(input: ReviewInput) {
+export async function createReview(input: ReviewInput): Promise<ServerResult> {
   const { userId } = await auth();
   const user = await currentUser();
 
   if (!userId || !user) {
-    throw new Error("Unauthorized");
+    return err("Unauthorized");
   }
 
   const { canReview, reason } = await checkCanReview(userId, input.productId);
   if (!canReview) {
-    throw new Error(reason);
+    return err(reason ?? "Você não pode avaliar este produto");
   }
 
   if (input.title.length < 3 || input.title.length > CONFIG.MAX_TITLE_LENGTH) {
-    throw new Error(
+    return err(
       `Título deve ter entre 3 e ${CONFIG.MAX_TITLE_LENGTH} caracteres`,
     );
   }
@@ -105,7 +106,7 @@ export async function createReview(input: ReviewInput) {
     input.comment.length < CONFIG.MIN_COMMENT_LENGTH ||
     input.comment.length > CONFIG.MAX_COMMENT_LENGTH
   ) {
-    throw new Error(
+    return err(
       `Comentário deve ter entre ${CONFIG.MIN_COMMENT_LENGTH} e ${CONFIG.MAX_COMMENT_LENGTH} caracteres`,
     );
   }
@@ -114,12 +115,22 @@ export async function createReview(input: ReviewInput) {
     containsForbiddenWords(input.title) ||
     containsForbiddenWords(input.comment)
   ) {
-    throw new Error("Conteúdo impróprio detectado");
+    return err("Conteúdo impróprio detectado");
   }
 
-  const images = input.images
-    ? await uploadReviewImages(Array.from(input.images))
-    : [];
+  let images: Array<{
+    _key: string;
+    _type: "image";
+    asset: { _type: "reference"; _ref: string };
+  }> = [];
+
+  if (input.images && input.images.length > 0) {
+    const imagesResult = await uploadReviewImages(Array.from(input.images));
+    if (!imagesResult.success) {
+      return err(imagesResult.error);
+    }
+    images = imagesResult.data;
+  }
 
   await writeClient.create({
     _type: "review",
@@ -139,17 +150,17 @@ export async function createReview(input: ReviewInput) {
   });
 
   revalidatePath(`/product`);
-  return { success: true };
+  return ok();
 }
 
 export async function updateReview(
   reviewId: string,
   input: Partial<ReviewInput>,
-) {
+): Promise<ServerResult> {
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return err("Unauthorized");
   }
 
   const review = await client.fetch(
@@ -158,7 +169,7 @@ export async function updateReview(
   );
 
   if (!review) {
-    throw new Error("Avaliação não encontrada");
+    return err("Avaliação não encontrada");
   }
 
   const createdAt = new Date(review._createdAt);
@@ -167,7 +178,7 @@ export async function updateReview(
   );
 
   if (daysSinceCreation > CONFIG.EDIT_DAYS_LIMIT) {
-    throw new Error(
+    return err(
       `Você pode editar até ${CONFIG.EDIT_DAYS_LIMIT} dias após a avaliação`,
     );
   }
@@ -179,12 +190,12 @@ export async function updateReview(
       input.title.length < 3 ||
       input.title.length > CONFIG.MAX_TITLE_LENGTH
     ) {
-      throw new Error(
+      return err(
         `Título deve ter entre 3 e ${CONFIG.MAX_TITLE_LENGTH} caracteres`,
       );
     }
     if (containsForbiddenWords(input.title)) {
-      throw new Error("Conteúdo impróprio detectado");
+      return err("Conteúdo impróprio detectado");
     }
     updateData.title = input.title;
   }
@@ -194,19 +205,19 @@ export async function updateReview(
       input.comment.length < CONFIG.MIN_COMMENT_LENGTH ||
       input.comment.length > CONFIG.MAX_COMMENT_LENGTH
     ) {
-      throw new Error(
+      return err(
         `Comentário deve ter entre ${CONFIG.MIN_COMMENT_LENGTH} e ${CONFIG.MAX_COMMENT_LENGTH} caracteres`,
       );
     }
     if (containsForbiddenWords(input.comment)) {
-      throw new Error("Conteúdo impróprio detectado");
+      return err("Conteúdo impróprio detectado");
     }
     updateData.comment = input.comment;
   }
 
   if (input.rating !== undefined) {
     if (input.rating < 1 || input.rating > 5) {
-      throw new Error("Rating deve ser entre 1 e 5");
+      return err("Rating deve ser entre 1 e 5");
     }
     updateData.rating = input.rating;
   }
@@ -225,10 +236,21 @@ export async function updateReview(
         keepImageIds.includes(img.asset?._ref || ""),
     );
 
-    const newImages =
-      hasNewImages && input.images
-        ? await uploadReviewImages(Array.from(input.images))
-        : [];
+    let newImages: Array<{
+      _key: string;
+      _type: "image";
+      asset: { _type: "reference"; _ref: string };
+    }> = [];
+
+    if (hasNewImages && input.images) {
+      const newImagesResult = await uploadReviewImages(
+        Array.from(input.images),
+      );
+      if (!newImagesResult.success) {
+        return err(newImagesResult.error);
+      }
+      newImages = newImagesResult.data;
+    }
 
     updateData.images = [...imagesToKeep, ...newImages];
   }
@@ -236,14 +258,14 @@ export async function updateReview(
   await writeClient.patch(reviewId).set(updateData).commit();
 
   revalidatePath(`/product`);
-  return { success: true };
+  return ok();
 }
 
-export async function deleteReview(reviewId: string) {
+export async function deleteReview(reviewId: string): Promise<ServerResult> {
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    return err("Unauthorized");
   }
 
   const review = await client.fetch(
@@ -252,13 +274,13 @@ export async function deleteReview(reviewId: string) {
   );
 
   if (!review) {
-    throw new Error("Avaliação não encontrada ou você não tem permissão");
+    return err("Avaliação não encontrada ou você não tem permissão");
   }
 
   await writeClient.delete(reviewId);
 
   revalidatePath(`/product`);
-  return { success: true };
+  return ok();
 }
 
 export async function getUserReviewForProduct(
