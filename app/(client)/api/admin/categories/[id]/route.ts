@@ -38,14 +38,6 @@ export async function PUT(
       return errorResponse(result.error.issues[0].message, 400);
     }
 
-    console.log("[PUT /api/admin/categories/[id]]", {
-      categoryId: id,
-      hasImage: !!imageFile && imageFile.size > 0,
-      removeImage,
-      featured: featuredBoolean,
-      title: formData.get("title"),
-    });
-
     const useCase = new UpdateCategory(
       new SanityCategoryRepository(),
       new SlugService(),
@@ -56,8 +48,6 @@ export async function PUT(
       ...result.data,
       removeImage,
     });
-
-    console.log("[PUT /api/admin/categories/[id]] Sucesso:", { id });
 
     return successResponse();
   } catch (error: unknown) {
