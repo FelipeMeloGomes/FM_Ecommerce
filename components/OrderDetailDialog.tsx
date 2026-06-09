@@ -123,7 +123,7 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
                       src={urlFor(
                         item.product.images[0] as SanityImageSource,
                       ).url()}
-                      alt="productImage"
+                      alt={item?.product?.name || "Imagem do produto"}
                       width={50}
                       height={50}
                       className="rounded-md border object-cover"

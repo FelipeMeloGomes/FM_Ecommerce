@@ -137,7 +137,7 @@ export function ReviewImageUploader({
             >
               <Image
                 src={image.preview}
-                alt="Preview"
+                alt="Preview da imagem"
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-110"
               />
@@ -146,8 +146,9 @@ export function ReviewImageUploader({
                 type="button"
                 onClick={removeImageWrapper(image.id)}
                 className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 hover:bg-destructive text-white opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
+                aria-label="Remover imagem"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
               {image.file && (
                 <span className="absolute bottom-2 left-2 text-[10px] text-white/80 bg-black/40 px-1.5 py-0.5 rounded">

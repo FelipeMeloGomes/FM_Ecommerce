@@ -27,7 +27,7 @@ const HomeCategories = React.memo(
                 <div className="w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-border dark:border-neutral-700">
                   <Image
                     src={urlFor(category?.image).url()}
-                    alt="categoryImage"
+                    alt={category?.title || "Categoria"}
                     width={64}
                     height={64}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

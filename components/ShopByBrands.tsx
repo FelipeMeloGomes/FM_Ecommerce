@@ -44,7 +44,7 @@ const ShopByBrands = async () => {
               {brand?.image ? (
                 <Image
                   src={urlFor(brand?.image).url()}
-                  alt="brandImage"
+                  alt={brand?.title || "Marca"}
                   width={80}
                   height={80}
                   className="w-16 h-12 object-contain grayscale group-hover:grayscale-0 transition-all duration-300"

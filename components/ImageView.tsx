@@ -27,11 +27,12 @@ type ImageAsset = {
 interface Props {
   images?: ImageAsset[];
   isStock?: number;
+  name?: string;
 }
 
 const MotionDiv = motion.div;
 
-const ImageView = React.memo(({ images = [], isStock }: Props) => {
+const ImageView = React.memo(({ images = [], isStock, name }: Props) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isPending, startTransition] = useTransition();
@@ -143,7 +144,7 @@ const ImageView = React.memo(({ images = [], isStock }: Props) => {
         >
           <Image
             src={urlFor(active).url()}
-            alt="productImage"
+            alt={name || "productImage"}
             fill
             priority={activeIndex === 0}
             className="object-contain p-4"

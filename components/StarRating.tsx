@@ -14,6 +14,7 @@ const StarRating = React.memo(({ rating = 4 }: StarRatingProps) => {
           size={14}
           className={star <= rating ? "text-shop_orange" : "text-muted"}
           fill={star <= rating ? "#fb6c08" : "none"}
+          aria-hidden="true"
         />
       ))}
     </div>

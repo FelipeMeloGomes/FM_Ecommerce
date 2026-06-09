@@ -33,7 +33,10 @@ const FavoriteButton = React.memo(
     if (!showProduct) {
       return (
         <>
-          <Heart className="w-5 h-5 hover:text-shop_light_green hoverEffect" />
+          <Heart
+            className="w-5 h-5 hover:text-shop_light_green hoverEffect"
+            aria-hidden="true"
+          />
           <span className="absolute -top-1 -right-1 bg-shop_dark_green text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
             {favoriteCount > 0 ? favoriteCount : 0}
           </span>
@@ -46,15 +49,22 @@ const FavoriteButton = React.memo(
         type="button"
         onClick={handleFavorite}
         suppressHydrationWarning
+        aria-label={
+          existingProduct ? "Remover dos favoritos" : "Adicionar aos favoritos"
+        }
         className="group relative hover:text-shop_light_green hoverEffect border border-shop_light_green/80 hover:border-shop_light_green p-1.5 rounded-sm"
       >
         {existingProduct ? (
           <Heart
             fill="#3b9c3c"
+            aria-hidden="true"
             className="text-shop_light_green/80 group-hover:text-shop_light_green hoverEffect mt-.5 w-5 h-5"
           />
         ) : (
-          <Heart className="text-shop_light_green/80 group-hover:text-shop_light_green hoverEffect mt-.5 w-5 h-5" />
+          <Heart
+            aria-hidden="true"
+            className="text-shop_light_green/80 group-hover:text-shop_light_green hoverEffect mt-.5 w-5 h-5"
+          />
         )}
       </button>
     );

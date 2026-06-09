@@ -26,8 +26,9 @@ const MobileMenu = ({ user, isAdmin, ordersCount = 0 }: MobileMenuProps) => {
         type="button"
         onClick={toggleSidebar}
         className="p-2 hover:bg-muted rounded-lg transition-colors"
+        aria-label="Abrir menu"
       >
-        <AlignLeft className="w-6 h-6" />
+        <AlignLeft className="w-6 h-6" aria-hidden="true" />
       </button>
       <SideMenu
         isOpen={isSidebarOpen}

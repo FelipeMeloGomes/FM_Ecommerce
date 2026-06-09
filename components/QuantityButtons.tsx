@@ -49,8 +49,9 @@ const QuantityButtons = React.memo(({ product, className }: Props) => {
         size="icon"
         disabled={itemCount === 0 || isOutOfStock}
         className="w-8 h-8 border-border hover:border-shop_dark_green hover:bg-shop_dark_green/5"
+        aria-label="Diminuir quantidade"
       >
-        <Minus className="w-4 h-4" />
+        <Minus className="w-4 h-4" aria-hidden="true" />
       </Button>
       <span className="font-semibold text-sm w-8 text-center text-foreground">
         {itemCount}
@@ -61,8 +62,9 @@ const QuantityButtons = React.memo(({ product, className }: Props) => {
         size="icon"
         disabled={isOutOfStock}
         className="w-8 h-8 border-border hover:border-shop_dark_green hover:bg-shop_dark_green/5"
+        aria-label="Aumentar quantidade"
       >
-        <Plus className="w-4 h-4" />
+        <Plus className="w-4 h-4" aria-hidden="true" />
       </Button>
     </div>
   );

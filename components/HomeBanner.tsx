@@ -101,7 +101,7 @@ const HomeBanner = () => {
             <div className="absolute -inset-4 bg-gradient-to-br from-shop_orange/10 to-transparent rounded-3xl" />
             <Image
               src={banner_1}
-              alt="banner_1"
+              alt="Banner promocional 50% OFF em fones selecionados"
               width={420}
               height={420}
               className="relative w-56 sm:w-72 lg:w-96 h-56 sm:h-72 lg:h-96 object-contain drop-shadow-2xl animate-float"

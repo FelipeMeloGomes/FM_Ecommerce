@@ -142,8 +142,9 @@ const SideMenu = ({
               size="icon"
               onClick={onClose}
               className="h-9 w-9"
+              aria-label="Fechar menu"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" aria-hidden="true" />
             </Button>
           </div>
 

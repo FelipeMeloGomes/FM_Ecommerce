@@ -36,6 +36,9 @@ const ProductSideMenu = React.memo(
           onClick={handleFavorite}
           disabled={isLoading}
           aria-pressed={isFavorite}
+          aria-label={
+            isFavorite ? "Remover dos favoritos" : "Adicionar aos favoritos"
+          }
           suppressHydrationWarning
           className={cn(
             "p-2.5 rounded-full transition-all",
@@ -44,7 +47,11 @@ const ProductSideMenu = React.memo(
               : "bg-background/80 text-muted-foreground hover:bg-shop_dark_green hover:text-white border border-border",
           )}
         >
-          <Heart size={16} fill={isFavorite ? "currentColor" : "none"} />
+          <Heart
+            size={16}
+            fill={isFavorite ? "currentColor" : "none"}
+            aria-hidden="true"
+          />
         </button>
       </div>
     );

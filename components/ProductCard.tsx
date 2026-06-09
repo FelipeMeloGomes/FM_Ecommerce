@@ -57,7 +57,7 @@ const ProductCard = React.memo(
             <Link href={`/product/${product?.slug?.current}`}>
               <Image
                 src={urlFor(product.images[0]).url()}
-                alt="productImage"
+                alt={product?.name || "Imagem do produto"}
                 width={500}
                 height={500}
                 priority

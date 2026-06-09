@@ -82,7 +82,7 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                 >
                   <Image
                     src={urlFor(product?.images[0]).url()}
-                    alt="productImage"
+                    alt={product?.name || "Imagem do produto"}
                     width={120}
                     height={120}
                     loading="lazy"
@@ -116,8 +116,10 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                           type="button"
                           className="mt-1"
                           onClick={handleAddToFavoriteWrapper(product)}
+                          aria-label="Adicionar aos favoritos"
                         >
                           <Heart
+                            aria-hidden="true"
                             className={cn(
                               "w-5 h-5 transition-colors",
                               isFavorite
@@ -138,8 +140,12 @@ const CartItemsList = React.memo(({ items }: CartItemsListProps) => {
                           type="button"
                           className="mt-1"
                           onClick={handleRemoveProductWrapper(product?._id)}
+                          aria-label="Remover produto"
                         >
-                          <Trash className="w-5 h-5 text-muted-foreground hover:text-destructive transition-colors" />
+                          <Trash
+                            aria-hidden="true"
+                            className="w-5 h-5 text-muted-foreground hover:text-destructive transition-colors"
+                          />
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
