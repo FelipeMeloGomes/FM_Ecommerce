@@ -30,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks";
+import { useWishlist } from "@/hooks/useWishlist";
 import Logo from "./Logo";
 
 interface SideMenuProps {
@@ -50,7 +51,8 @@ const SideMenu = ({
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const { itemCount: cartItemsCount, favoriteProduct } = useCart();
+  const { itemCount: cartItemsCount } = useCart();
+  const { favoriteProduct } = useWishlist();
 
   useEffect(() => {
     setMounted(true);
