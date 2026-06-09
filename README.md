@@ -64,6 +64,7 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 | ------------------ | ------------------------------ |
 | **Biome**          | Linting e formatação de código |
 | **Vitest**         | Testes unitários               |
+| **zod-to-openapi**  | Geração de spec OpenAPI 3.1    |
 | **GitHub Actions** | CI/CD automatizado             |
 | **Vercel**         | Deploy e preview deployments   |
 
@@ -184,6 +185,121 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 - Lint e typecheck em Pull Requests
 - Deploy automático para Vercel (branch main)
 - Preview deployments para PRs
+
+---
+
+## 📖 Documentação da API (Swagger/OpenAPI)
+
+O projeto possui documentação interativa dos endpoints REST via Swagger UI:
+
+- **URL:** `http://localhost:3000/api-docs`
+- **Spec JSON:** `http://localhost:3000/api-docs/json`
+
+### Endpoints Documentados
+
+| Método | Path | Grupo |
+|---|---|---|
+| POST | `/api/webhook` | Webhook |
+| POST / PUT / DELETE | `/api/admin/products{/id}` | Admin - Products |
+| POST / PUT / DELETE | `/api/admin/categories{/id}` | Admin - Categories |
+| POST / PUT / DELETE | `/api/admin/brands{/id}` | Admin - Brands |
+| DELETE | `/api/admin/orders{/id}` + `bulk-delete` | Admin - Orders |
+
+### Arquitetura
+
+A documentação é gerada automaticamente a partir dos **Zod schemas** existentes usando `@asteasolutions/zod-to-openapi`, mantendo schemas e docs sempre em sincronia.
+
+```
+lib/openapi/
+├── registry.ts          → OpenAPIRegistry + schemas compartilhados
+└── paths/
+    ├── webhook.ts
+    ├── admin-products.ts
+    ├── admin-categories.ts
+    ├── admin-brands.ts
+    └── admin-orders.ts
+
+app/(client)/api-docs/
+├── route.ts             → Swagger UI (HTML via CDN)
+└── json/route.ts        → OpenAPI 3.1 JSON dinâmico
+```
+
+> O middleware (`proxy.ts`) exclui rotas `/api-docs*` do processamento do Clerk e rate-limit para garantir acesso livre à documentação.
+
+---
+
+## 🔐 Sistema de Administração
+
+### Flag de Admin via Clerk
+
+O acesso administrativo é controlado pelo campo `publicMetadata.role` no Clerk:
+
+```
+user.publicMetadata.role === "admin"  →  é admin
+```
+
+### Como definir um usuário como admin
+
+1. Acesse o [Clerk Dashboard](https://dashboard.clerk.com)
+2. Selecione o usuário desejado → **Edit** → **Public metadata**
+3. Adicione o JSON: `{ "role": "admin" }`
+4. Salve — o usuário passa a ter acesso às rotas administrativas na próxima requisição
+
+### Guard em Server Components
+
+O `lib/requireAdmin.ts` é usado para proteger páginas admin no servidor:
+
+```ts
+import { requireAdmin } from "@/lib/requireAdmin";
+
+export default async function AdminPage() {
+  const user = await requireAdmin(); // throw "Unauthorized" ou "Forbidden" se não for admin
+  // ...
+}
+```
+
+### Rotas de Página (protegidas pelo layout)
+
+Todas as páginas dentro de `app/(client)/admin/` herdam a proteção do **layout guard** (`layout.tsx`), que chama `requireAdmin()` e redireciona para `/` se falhar.
+
+| Rota | Descrição |
+|------|-----------|
+| `/admin/products` | Listagem de produtos |
+| `/admin/categories` | Listagem de categorias |
+| `/admin/brands` | Listagem de marcas |
+| `/admin/questions` | Perguntas de clientes |
+| `/admin/add` | Criar produto |
+| `/admin/add/categories` | Criar categoria |
+| `/admin/add/brands` | Criar marca |
+| `/admin/edit/{id}` | Editar produto |
+| `/admin/edit/categories/{id}` | Editar categoria |
+| `/admin/edit/brands/{id}` | Editar marca |
+
+### Rotas de API (protegidas por `requireAdmin()`)
+
+Cada handler de API route chama `await requireAdmin()` como primeira ação.
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `POST` | `/api/admin/products` | Criar produto |
+| `PUT` | `/api/admin/products/{id}` | Atualizar produto |
+| `DELETE` | `/api/admin/products/{id}` | Excluir produto |
+| `POST` | `/api/admin/categories` | Criar categoria |
+| `PUT` | `/api/admin/categories/{id}` | Atualizar categoria |
+| `DELETE` | `/api/admin/categories/{id}` | Excluir categoria |
+| `POST` | `/api/admin/brands` | Criar marca |
+| `PUT` | `/api/admin/brands/{id}` | Atualizar marca |
+| `DELETE` | `/api/admin/brands/{id}` | Excluir marca |
+
+### Proteção em Camadas
+
+1. **Middleware global** (`proxy.ts`) — Clerk auth + rate-limit em toda `/api/:path*`. Admin routes são excluídas do CSRF por já serem protegidas pelo `requireAdmin()`.
+2. **Guard in-line** (`lib/requireAdmin.ts`) — Cada handler de API route chama `await requireAdmin()` como primeira ação, retornando 401/403 se falhar.
+3. **Layout guard** (`app/(client)/admin/layout.tsx`) — Protege todas as 10 páginas admin; redireciona para `/` se `requireAdmin()` lançar erro.
+
+### Badge Visual
+
+Usuários logados com flag de admin veem um badge **"Admin"** (ícone `ShieldCheck` + texto âmbar) ao lado do `UserButton` no header. Isso dá feedback visual imediato de que a conta tem privilégios administrativos.
 
 ---
 
@@ -698,6 +814,7 @@ fm-ecommerce/
 ├── app/                   # Next.js App Router
 │   ├── (client)/         # Páginas públicas
 │   │   ├── admin/       # Dashboard administrativo
+│   │   ├── api-docs/    # Swagger UI + OpenAPI JSON
 │   │   ├── cart/        # Carrinho
 │   │   ├── product/     # Página de produto
 │   │   ├── category/    # Página de categoria
@@ -712,6 +829,7 @@ fm-ecommerce/
 ├── core/                # Interfaces e tipos (Domain Driven Design)
 │   └── types/         # Tipos compartilhados (Pagination, etc.)
 ├── lib/                  # Utilitários e configurações
+│   ├── openapi/         # Geração de spec OpenAPI (Zod → Swagger)
 │   ├── sanity/          # Cliente e queries Sanity
 │   └── ...
 ├── sanity/               # Schema do CMS
