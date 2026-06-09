@@ -10,6 +10,11 @@ export async function deleteAddress(id: string): Promise<ServerResult> {
 
   if (!userId) return err("Unauthorized");
 
+  const existing = await writeClient.getDocument(id);
+
+  if (!existing) return err("Address not found");
+  if (existing.clerkUserId !== userId) return err("Unauthorized action");
+
   await writeClient.delete(id);
 
   revalidatePath("/account/addresses");
