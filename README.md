@@ -62,6 +62,7 @@ FMShop é um e-commerce completo desenvolvido para demonstrar habilidades avanç
 
 | Ferramenta         | Funcionalidade                 |
 | ------------------ | ------------------------------ |
+| **Bun**            | Runtime, package manager e build (CI/CD) |
 | **Biome**          | Linting e formatação de código |
 | **Vitest**         | Testes unitários               |
 | **zod-to-openapi**  | Geração de spec OpenAPI 3.1    |
