@@ -21,10 +21,6 @@ export const DEFAULT_RATE_LIMITS: Record<string, RateLimitConfig> = {
     limit: 20,
     windowMs: 15 * 60 * 1000,
   },
-  "/api/admin/orders": {
-    limit: 30,
-    windowMs: 15 * 60 * 1000,
-  },
   "/api/webhook": {
     limit: 50,
     windowMs: 15 * 60 * 1000,
