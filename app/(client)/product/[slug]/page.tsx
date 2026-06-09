@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { getProductQuestions } from "@/actions/questionActions";
 import {
@@ -10,7 +11,6 @@ import {
 import AddToCartButton from "@/components/AddToCartButton";
 import Container from "@/components/Container";
 import FavoriteButton from "@/components/FavoriteButton";
-import ImageView from "@/components/ImageView";
 import PriceView from "@/components/PriceView";
 import { ProductActions } from "@/components/ProductActions";
 import ProductCharacteristics from "@/components/ProductCharacteristics";
@@ -19,9 +19,30 @@ import { ShippingInfoCard } from "@/components/ShippingInfoCard";
 import StarRating from "@/components/StarRating";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getProductBySlug } from "@/sanity/queries";
-import QuestionsSection from "./QuestionsSection";
-import ReviewSection from "./ReviewSection";
+
+const ImageView = dynamic(() => import("@/components/ImageView"), {
+  loading: () => <Skeleton className="h-96 w-full rounded-lg" />,
+});
+
+const ReviewSection = dynamic(() => import("./ReviewSection"), {
+  loading: () => (
+    <div className="my-8">
+      <Skeleton className="h-8 w-48 mb-4" />
+      <Skeleton className="h-32 w-full rounded-lg" />
+    </div>
+  ),
+});
+
+const QuestionsSection = dynamic(() => import("./QuestionsSection"), {
+  loading: () => (
+    <div className="my-8">
+      <Skeleton className="h-8 w-48 mb-4" />
+      <Skeleton className="h-32 w-full rounded-lg" />
+    </div>
+  ),
+});
 
 export const revalidate = 30;
 
@@ -51,8 +72,10 @@ const SingleProductPage = async ({
   params: Promise<{ slug: string }>;
 }) => {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
-  const { userId } = await auth();
+  const [product, { userId }] = await Promise.all([
+    getProductBySlug(slug),
+    auth(),
+  ]);
 
   if (!product) {
     return notFound();
@@ -86,7 +109,11 @@ const SingleProductPage = async ({
       <Container>
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 py-8 lg:py-12">
           {product?.images && (
-            <ImageView images={product?.images} isStock={product?.stock} />
+            <ImageView
+              images={product?.images}
+              isStock={product?.stock}
+              name={product?.name}
+            />
           )}
           <div className="w-full lg:w-1/2 flex flex-col gap-6 lg:gap-8">
             <div className="space-y-4">
