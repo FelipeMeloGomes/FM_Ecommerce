@@ -14,6 +14,7 @@
     "test:watch": "vitest --environment jsdom"
   },
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@clerk/localizations": "^4.3.0",
     "@clerk/nextjs": "^6.36.10",
     "@csrf-armor/nextjs": "^1.4.2",
