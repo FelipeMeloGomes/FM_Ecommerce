@@ -1,18 +1,17 @@
-import Stripe from "stripe";
+import type Stripe from "stripe";
 import { getEnv } from "@/config/env";
+import { stripe } from "@/config/stripe";
 import type { PaymentGateway } from "@/core/payments/PaymentGateway";
 import type { PaymentSession } from "@/core/payments/PaymentSession";
 
 export class StripeGateway implements PaymentGateway {
-  private stripe = new Stripe(getEnv("STRIPE_SECRET_KEY"));
-
   async verifyWebhook(
     body: string,
     signature: string,
   ): Promise<PaymentSession | null> {
     const secret = getEnv("STRIPE_WEBHOOK_SECRET");
 
-    const event = this.stripe.webhooks.constructEvent(body, signature, secret);
+    const event = stripe.webhooks.constructEvent(body, signature, secret);
 
     if (event.type !== "checkout.session.completed") return null;
 
@@ -23,13 +22,12 @@ export class StripeGateway implements PaymentGateway {
     }
 
     const invoice = session.invoice
-      ? await this.stripe.invoices.retrieve(session.invoice as string)
+      ? await stripe.invoices.retrieve(session.invoice as string)
       : null;
 
-    const items = await this.stripe.checkout.sessions.listLineItems(
-      session.id,
-      { expand: ["data.price.product"] },
-    );
+    const items = await stripe.checkout.sessions.listLineItems(session.id, {
+      expand: ["data.price.product"],
+    });
 
     const raw = session.metadata as Record<string, string>;
 
@@ -51,11 +49,8 @@ export class StripeGateway implements PaymentGateway {
       products: items.data
         .filter((i) => {
           const product = i.price?.product;
-          const name =
-            typeof product === "object" && product !== null && "name" in product
-              ? (product as Stripe.Product).name
-              : (i.description ?? "");
-          return !name.startsWith("Frete -");
+          if (typeof product !== "object" || product === null) return true;
+          return (product as Stripe.Product).metadata?.type !== "shipping";
         })
         .map((i) => ({
           productId: (i.price?.product as Stripe.Product).metadata?.id,

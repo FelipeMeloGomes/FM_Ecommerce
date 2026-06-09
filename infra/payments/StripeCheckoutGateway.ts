@@ -1,5 +1,5 @@
-import Stripe from "stripe";
 import { getEnv } from "@/config/env";
+import { stripe } from "@/config/stripe";
 import type {
   CheckoutGateway,
   CheckoutItem,
@@ -7,15 +7,13 @@ import type {
 } from "@/core/payments/CheckoutGateway";
 
 export class StripeCheckoutGateway implements CheckoutGateway {
-  private stripe = new Stripe(getEnv("STRIPE_SECRET_KEY"));
-
   async createSession(
     items: CheckoutItem[],
     metadata: CheckoutMetadata,
   ): Promise<string> {
     const baseUrl = getEnv("NEXT_PUBLIC_BASE_URL");
 
-    const customers = await this.stripe.customers.list({
+    const customers = await stripe.customers.list({
       email: metadata.customerEmail,
       limit: 1,
     });
@@ -28,7 +26,7 @@ export class StripeCheckoutGateway implements CheckoutGateway {
       shipping: JSON.stringify(metadata.shipping),
     };
 
-    const session = await this.stripe.checkout.sessions.create({
+    const session = await stripe.checkout.sessions.create({
       metadata: metadataToSend,
       mode: "payment",
       allow_promotion_codes: true,
@@ -36,8 +34,6 @@ export class StripeCheckoutGateway implements CheckoutGateway {
 
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}&orderNumber=${metadata.orderNumber}`,
       cancel_url: `${baseUrl}/cart`,
-
-      payment_method_types: ["card", "boleto"],
 
       payment_method_options: {
         boleto: {
@@ -53,7 +49,7 @@ export class StripeCheckoutGateway implements CheckoutGateway {
             product_data: {
               name: item.name,
               description: item.description,
-              metadata: { id: item.productId },
+              metadata: { id: item.productId, type: "product" },
               images: item.image ? [item.image] : undefined,
             },
           },
@@ -67,10 +63,11 @@ export class StripeCheckoutGateway implements CheckoutGateway {
                   currency: "brl",
                   unit_amount: Math.round(metadata.shipping.price * 100),
                   product_data: {
-                    name: `Frete - ${metadata.shipping.method ?? "Entrega"}`,
+                    name: metadata.shipping.method ?? "Entrega",
                     description: metadata.shipping.estimatedDays
                       ? `Prazo estimado: ${metadata.shipping.estimatedDays} dias úteis`
                       : undefined,
+                    metadata: { type: "shipping" },
                   },
                 },
                 quantity: 1,

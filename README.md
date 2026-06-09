@@ -617,12 +617,12 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
 
 # Stripe (Pagamentos)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=sua_chave_publica
-STRIPE_SECRET_KEY=sua_chave_secreta
+STRIPE_RESTRICTED_KEY=sua_chave_restrita
 STRIPE_WEBHOOK_SECRET=seu_webhook_secret
 
 # Stripe (Sandbox/Produção)
-STRIPE_SECRET_KEY=sk_test_...  # Modo teste
-STRIPE_SECRET_KEY=sk_live_...  # Modo produção
+STRIPE_RESTRICTED_KEY=rk_test_...  # Modo teste
+STRIPE_RESTRICTED_KEY=rk_live_...  # Modo produção
 
 # App
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
@@ -728,11 +728,11 @@ ngrok http 3000
 1. **Troque as chaves:**
    ```env
    # De:
-   STRIPE_SECRET_KEY=sk_test_...
+   STRIPE_RESTRICTED_KEY=rk_test_...
    STRIPE_WEBHOOK_SECRET=whsec_...
    
    # Para:
-   STRIPE_SECRET_KEY=sk_live_...
+   STRIPE_RESTRICTED_KEY=rk_live_...
    STRIPE_WEBHOOK_SECRET=whsec_...
    ```
 
