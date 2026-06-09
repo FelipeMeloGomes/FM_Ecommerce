@@ -156,6 +156,10 @@ const addSecurityHeaders = (response: NextResponse): void => {
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-XSS-Protection", "1; mode=block");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains",
+  );
 };
 
 const buildRateLimitResponse = (
@@ -209,7 +213,10 @@ export default clerkMiddleware(async (_auth, request: NextRequest) => {
       !isAdminRoute(path) &&
       !isWebhookRoute(path)
     ) {
-      const csrfResult = await _csrfMiddleware(request, response);
+      const csrfResult = await _csrfMiddleware(
+        request as unknown as Parameters<typeof _csrfMiddleware>[0],
+        response as unknown as Parameters<typeof _csrfMiddleware>[1],
+      );
       if (!csrfResult.success) {
         const csrfErrorResponse = new NextResponse(
           JSON.stringify({ error: "Invalid CSRF token" }),
