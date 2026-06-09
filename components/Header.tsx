@@ -1,4 +1,4 @@
-import { ClerkLoaded, SignedIn, UserButton } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { ShieldCheck } from "lucide-react";
 import { getMyOrders } from "@/sanity/queries";
@@ -40,12 +40,7 @@ const Header = async () => {
               Admin
             </span>
           )}
-          <ClerkLoaded>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-            {!user && <SignIn />}
-          </ClerkLoaded>
+          {userId ? <UserButton /> : <SignIn />}
         </div>
       </Container>
     </header>

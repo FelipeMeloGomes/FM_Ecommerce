@@ -1,6 +1,5 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import * as Popover from "@radix-ui/react-popover";
 import { LogIn, User, UserPlus } from "lucide-react";
 import Link from "next/link";
@@ -9,28 +8,11 @@ import { memo, useCallback, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const SignIn = memo(() => {
-  const { isLoaded, user } = useUser();
   const [open, setOpen] = useState(false);
 
   const handleOpenChange = useCallback((isOpen: boolean) => {
     setOpen(isOpen);
   }, []);
-
-  if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center">
-        <Avatar>
-          <AvatarFallback>
-            <User className="h-4 w-4" />
-          </AvatarFallback>
-        </Avatar>
-      </div>
-    );
-  }
-
-  if (user) {
-    return null;
-  }
 
   return (
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
