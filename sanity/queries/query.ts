@@ -27,7 +27,7 @@ const MY_ORDERS_QUERY = defineQuery(`
 {
   "orders": *[
     _type == "order" &&
-    ($isAdmin == true || clerkUserId == $userId)
+    clerkUserId == $userId
   ] | order(orderDate desc) [$start...$end]{
     ...,
     products[]{
@@ -38,7 +38,7 @@ const MY_ORDERS_QUERY = defineQuery(`
 
   "total": count(*[
     _type == "order" &&
-    ($isAdmin == true || clerkUserId == $userId)
+    clerkUserId == $userId
   ])
 }
 `);

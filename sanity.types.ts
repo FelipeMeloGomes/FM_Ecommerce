@@ -542,7 +542,7 @@ export type PRODUCTS_BY_BRAND_QUERYResult = Array<{
   isFeatured?: boolean;
 }>;
 // Variable: MY_ORDERS_QUERY
-// Query: {  "orders": *[    _type == "order" &&    ($isAdmin == true || clerkUserId == $userId)  ] | order(orderDate desc) [$start...$end]{    ...,    products[]{      ...,      product->    }  },  "total": count(*[    _type == "order" &&    ($isAdmin == true || clerkUserId == $userId)  ])}
+// Query: {  "orders": *[    _type == "order" &&    clerkUserId == $userId  ] | order(orderDate desc) [$start...$end]{    ...,    products[]{      ...,      product->    }  },  "total": count(*[    _type == "order" &&    clerkUserId == $userId  ])}
 export type MY_ORDERS_QUERYResult = {
   orders: Array<{
     _id: string;
@@ -672,7 +672,7 @@ declare module "@sanity/client" {
     '*[_type == "product" && slug.current == $slug] | order(name asc) [0]': PRODUCT_BY_SLUG_QUERYResult;
     '*[_type == "product" && slug.current == $slug]{\n  "brandName": brand->title\n  }': BRAND_QUERYResult;
     '*[_type == "product" && brand->slug.current == $brandSlug] | order(name asc){\n    ...,\n    "categories": categories[]->{_id, title, slug}\n  }': PRODUCTS_BY_BRAND_QUERYResult;
-    '\n{\n  "orders": *[\n    _type == "order" &&\n    ($isAdmin == true || clerkUserId == $userId)\n  ] | order(orderDate desc) [$start...$end]{\n    ...,\n    products[]{\n      ...,\n      product->\n    }\n  },\n\n  "total": count(*[\n    _type == "order" &&\n    ($isAdmin == true || clerkUserId == $userId)\n  ])\n}\n': MY_ORDERS_QUERYResult;
+    '\n{\n  "orders": *[\n    _type == "order" &&\n    clerkUserId == $userId\n  ] | order(orderDate desc) [$start...$end]{\n    ...,\n    products[]{\n      ...,\n      product->\n    }\n  },\n\n  "total": count(*[\n    _type == "order" &&\n    clerkUserId == $userId\n  ])\n}\n': MY_ORDERS_QUERYResult;
     '\n  *[_type == "address" && clerkUserId == $userId]\n  | order(createdAt desc)\n': GET_ADDRESSES_QUERYResult;
   }
 }

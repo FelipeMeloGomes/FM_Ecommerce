@@ -101,17 +101,11 @@ const getProductsByBrand = async (brandSlug: string) => {
   }
 };
 
-const getMyOrders = async (
-  userId: string,
-  isAdmin: boolean,
-  start = 0,
-  end = 10,
-) => {
-  const safeIsAdmin = isAdmin === true;
+const getMyOrders = async (userId: string, start = 0, end = 10) => {
   try {
     const result = await sanityFetch({
       query: MY_ORDERS_QUERY,
-      params: { userId, isAdmin: safeIsAdmin, start, end },
+      params: { userId, start, end },
     });
 
     return {

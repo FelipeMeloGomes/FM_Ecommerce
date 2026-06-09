@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { ChevronLeft, ChevronRight, FileX } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -18,18 +18,16 @@ import { getMyOrders } from "@/sanity/queries";
 
 async function OrdersList({
   userId,
-  isAdmin,
   currentPage,
 }: {
   userId: string;
-  isAdmin: boolean;
   currentPage: number;
 }) {
   const LIMIT = 10;
   const start = (currentPage - 1) * LIMIT;
   const end = start + LIMIT;
 
-  const orderData = await getMyOrders(userId, isAdmin, start, end);
+  const orderData = await getMyOrders(userId, start, end);
   const totalPages = Math.ceil(orderData.total / LIMIT);
 
   if (!orderData.orders?.length) {
@@ -77,14 +75,9 @@ async function OrdersList({
                 <TableHead className="hidden sm:table-cell font-medium">
                   ID Stripe
                 </TableHead>
-                {isAdmin && (
-                  <TableHead className="text-center font-medium">
-                    Ação
-                  </TableHead>
-                )}
               </TableRow>
             </TableHeader>
-            <OrdersComponent orders={orderData.orders} isAdmin={isAdmin} />
+            <OrdersComponent orders={orderData.orders} />
           </Table>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
@@ -132,10 +125,8 @@ const OrdersPage = async ({
 }: {
   searchParams: Promise<{ page?: string }>;
 }) => {
-  const [{ userId }, user] = await Promise.all([auth(), currentUser()]);
+  const { userId } = await auth();
   if (!userId) return redirect("/");
-
-  const isAdmin = user?.publicMetadata?.role === "admin";
 
   const params = await searchParams;
   const currentPage = Number(params?.page ?? "1");
@@ -145,11 +136,7 @@ const OrdersPage = async ({
       <Container className="py-8">
         <Title className="text-2xl mb-6">Meus Pedidos</Title>
         <Suspense fallback={<OrdersTableSkeleton />}>
-          <OrdersList
-            userId={userId}
-            isAdmin={isAdmin}
-            currentPage={currentPage}
-          />
+          <OrdersList userId={userId} currentPage={currentPage} />
         </Suspense>
       </Container>
     </div>
