@@ -1,3 +1,4 @@
+import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Bricolage_Grotesque, DM_Sans } from "next/font/google";
 import { ClerkThemeProvider } from "@/components/ClerkThemeProvider";
