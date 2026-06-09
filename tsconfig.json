@@ -32,7 +32,6 @@
   ],
   "exclude": [
     "node_modules",
-    "scripts",
     "types/sanity.ts",
     "services/orders/updateStock.ts"
   ]
