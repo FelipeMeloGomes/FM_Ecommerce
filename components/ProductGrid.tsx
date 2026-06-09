@@ -4,8 +4,6 @@ import { Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useCallback, useEffect, useState, useTransition } from "react";
 import { productType } from "@/constants/data";
-import { client } from "@/sanity/lib/client";
-import { PRODUCTS_BY_VARIANT_QUERY } from "@/sanity/queries/query";
 import type { Product } from "@/sanity.types";
 import Container from "./Container";
 import HomeTabBar from "./HomeTabBar";
@@ -27,11 +25,12 @@ export const ProductGrid = React.memo(
     const fetchProducts = useCallback(async (variant: string) => {
       setLoading(true);
       try {
-        const response = await client.fetch(PRODUCTS_BY_VARIANT_QUERY, {
-          variant: variant.toLowerCase(),
-          limit: 100,
-        });
-        setProducts(response);
+        const response = await fetch(
+          `/api/products?variant=${encodeURIComponent(variant.toLowerCase())}&limit=100`,
+        );
+        if (!response.ok) throw new Error("Failed to fetch products");
+        const data = await response.json();
+        setProducts(data);
       } catch (error) {
         console.error("Product fetching Error", error);
         setProducts([]);
