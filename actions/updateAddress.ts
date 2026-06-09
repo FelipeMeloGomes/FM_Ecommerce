@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { addressSchemaWithDefault } from "@/lib/schemas/addressSchema";
 import { err, ok, type ServerResult } from "@/lib/server-result";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { GET_OTHER_ADDRESSES_QUERY } from "@/sanity/queries/query";
@@ -28,13 +29,18 @@ export async function updateAddress(
   if (!existing) return err("Address not found");
   if (existing.clerkUserId !== userId) return err("Unauthorized action");
 
+  const validated = addressSchemaWithDefault.safeParse(data);
+  if (!validated.success) {
+    return err(validated.error.issues[0].message);
+  }
+
   const updatePayload = {
-    name: data.name,
-    address: data.address,
-    city: data.city,
-    state: data.state,
-    zip: data.zip,
-    default: data.default ?? false,
+    name: validated.data.name,
+    address: validated.data.address,
+    city: validated.data.city,
+    state: validated.data.state,
+    zip: validated.data.zip,
+    default: validated.data.default ?? false,
   };
 
   await Promise.all([

@@ -2,6 +2,7 @@ import { CreateBrand } from "@/core/brands";
 import { errorResponse, successResponse } from "@/lib/api/apiResponse";
 import { toHttpStatus } from "@/lib/httpError";
 import { requireAdmin } from "@/lib/requireAdmin";
+import { brandSchema } from "@/lib/schemas/brandSchema";
 import {
   SanityBrandImageGateway,
   SanityBrandRepository,
@@ -21,8 +22,9 @@ export async function POST(request: Request) {
       imageFile: imageFile && imageFile.size > 0 ? imageFile : undefined,
     };
 
-    if (!data.title) {
-      return errorResponse("Título é obrigatório", 400);
+    const result = brandSchema.safeParse(data);
+    if (!result.success) {
+      return errorResponse(result.error.issues[0].message, 400);
     }
 
     const useCase = new CreateBrand(

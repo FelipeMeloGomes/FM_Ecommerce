@@ -2,6 +2,7 @@ import { DeleteBrand, UpdateBrand } from "@/core/brands";
 import { errorResponse, successResponse } from "@/lib/api/apiResponse";
 import { toHttpStatus } from "@/lib/httpError";
 import { requireAdmin } from "@/lib/requireAdmin";
+import { brandSchema } from "@/lib/schemas/brandSchema";
 import {
   SanityBrandImageGateway,
   SanityBrandRepository,
@@ -26,16 +27,10 @@ export async function PUT(
       imageFile: imageFile && imageFile.size > 0 ? imageFile : undefined,
     };
 
-    if (!data.title) {
-      return errorResponse("Título é obrigatório", 400);
+    const result = brandSchema.safeParse(data);
+    if (!result.success) {
+      return errorResponse(result.error.issues[0].message, 400);
     }
-
-    console.log("[PUT /api/admin/brands/[id]]", {
-      brandId: id,
-      hasImage: !!imageFile && imageFile.size > 0,
-      removeImage,
-      title: formData.get("title"),
-    });
 
     const useCase = new UpdateBrand(
       new SanityBrandRepository(),
@@ -44,11 +39,9 @@ export async function PUT(
     );
 
     await useCase.execute(id, {
-      ...data,
+      ...result.data,
       removeImage,
     });
-
-    console.log("[PUT /api/admin/brands/[id]] Sucesso:", { id });
 
     return successResponse();
   } catch (error: unknown) {

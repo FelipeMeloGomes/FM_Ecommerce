@@ -2,8 +2,11 @@
 
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { err, ok, type ServerResult } from "@/lib/server-result";
 import { writeClient } from "@/sanity/lib/writeClient";
+
+const productIdSchema = z.string().min(1, "productId é obrigatório");
 
 export async function getWishlist() {
   const user = await currentUser();
@@ -44,6 +47,11 @@ export async function getWishlist() {
 }
 
 export async function addToWishlist(productId: string): Promise<ServerResult> {
+  const validated = productIdSchema.safeParse(productId);
+  if (!validated.success) {
+    return err(validated.error.issues[0].message);
+  }
+
   const user = await currentUser();
 
   if (!user) {
@@ -107,6 +115,11 @@ export async function addToWishlist(productId: string): Promise<ServerResult> {
 export async function removeFromWishlist(
   productId: string,
 ): Promise<ServerResult> {
+  const validated = productIdSchema.safeParse(productId);
+  if (!validated.success) {
+    return err(validated.error.issues[0].message);
+  }
+
   const user = await currentUser();
 
   if (!user) {

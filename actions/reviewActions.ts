@@ -2,28 +2,17 @@
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { type ReviewInput, reviewSchema } from "@/lib/schemas/reviewSchema";
 import { err, ok, type ServerResult } from "@/lib/server-result";
 import { client } from "@/sanity/lib/client";
 import { writeClient } from "@/sanity/lib/writeClient";
 import { uploadReviewImages } from "./uploadReviewImages";
 
 const CONFIG = {
-  MIN_COMMENT_LENGTH: 20,
-  MAX_TITLE_LENGTH: 100,
-  MAX_COMMENT_LENGTH: 1000,
   MIN_DAYS_AFTER_PURCHASE: 0,
   EDIT_DAYS_LIMIT: 7,
   FORBIDDEN_WORDS: ["palavrao1", "palavrao2", "spam"],
 };
-
-export interface ReviewInput {
-  productId: string;
-  rating: number;
-  title: string;
-  comment: string;
-  images?: File[];
-  keepImageIds?: string[];
-}
 
 export async function verifyPurchase(
   userId: string,
@@ -91,29 +80,22 @@ export async function createReview(input: ReviewInput): Promise<ServerResult> {
     return err("Unauthorized");
   }
 
-  const { canReview, reason } = await checkCanReview(userId, input.productId);
+  const validated = reviewSchema.safeParse(input);
+  if (!validated.success) {
+    return err(validated.error.issues[0].message);
+  }
+
+  const { canReview, reason } = await checkCanReview(
+    userId,
+    validated.data.productId,
+  );
   if (!canReview) {
     return err(reason ?? "Você não pode avaliar este produto");
   }
 
-  if (input.title.length < 3 || input.title.length > CONFIG.MAX_TITLE_LENGTH) {
-    return err(
-      `Título deve ter entre 3 e ${CONFIG.MAX_TITLE_LENGTH} caracteres`,
-    );
-  }
-
   if (
-    input.comment.length < CONFIG.MIN_COMMENT_LENGTH ||
-    input.comment.length > CONFIG.MAX_COMMENT_LENGTH
-  ) {
-    return err(
-      `Comentário deve ter entre ${CONFIG.MIN_COMMENT_LENGTH} e ${CONFIG.MAX_COMMENT_LENGTH} caracteres`,
-    );
-  }
-
-  if (
-    containsForbiddenWords(input.title) ||
-    containsForbiddenWords(input.comment)
+    containsForbiddenWords(validated.data.title) ||
+    containsForbiddenWords(validated.data.comment)
   ) {
     return err("Conteúdo impróprio detectado");
   }
@@ -124,8 +106,10 @@ export async function createReview(input: ReviewInput): Promise<ServerResult> {
     asset: { _type: "reference"; _ref: string };
   }> = [];
 
-  if (input.images && input.images.length > 0) {
-    const imagesResult = await uploadReviewImages(Array.from(input.images));
+  const v = validated.data;
+
+  if (v.images && v.images.length > 0) {
+    const imagesResult = await uploadReviewImages(Array.from(v.images));
     if (!imagesResult.success) {
       return err(imagesResult.error);
     }
@@ -136,14 +120,14 @@ export async function createReview(input: ReviewInput): Promise<ServerResult> {
     _type: "review",
     product: {
       _type: "reference",
-      _ref: input.productId,
+      _ref: v.productId,
     },
     clerkUserId: userId,
     customerName: user.fullName || user.username || "Cliente",
     customerImage: user.imageUrl || null,
-    rating: input.rating,
-    title: input.title,
-    comment: input.comment,
+    rating: v.rating,
+    title: v.title,
+    comment: v.comment,
     verifiedPurchase: true,
     status: "approved",
     ...(images.length > 0 && { images }),
@@ -183,53 +167,44 @@ export async function updateReview(
     );
   }
 
+  const partialSchema = reviewSchema.partial();
+  const validated = partialSchema.safeParse(input);
+  if (!validated.success) {
+    return err(validated.error.issues[0].message);
+  }
+
   const updateData: Record<string, unknown> = {};
 
-  if (input.title !== undefined) {
-    if (
-      input.title.length < 3 ||
-      input.title.length > CONFIG.MAX_TITLE_LENGTH
-    ) {
-      return err(
-        `Título deve ter entre 3 e ${CONFIG.MAX_TITLE_LENGTH} caracteres`,
-      );
-    }
-    if (containsForbiddenWords(input.title)) {
+  if (validated.data.title !== undefined) {
+    if (containsForbiddenWords(validated.data.title)) {
       return err("Conteúdo impróprio detectado");
     }
-    updateData.title = input.title;
+    updateData.title = validated.data.title;
   }
 
-  if (input.comment !== undefined) {
-    if (
-      input.comment.length < CONFIG.MIN_COMMENT_LENGTH ||
-      input.comment.length > CONFIG.MAX_COMMENT_LENGTH
-    ) {
-      return err(
-        `Comentário deve ter entre ${CONFIG.MIN_COMMENT_LENGTH} e ${CONFIG.MAX_COMMENT_LENGTH} caracteres`,
-      );
-    }
-    if (containsForbiddenWords(input.comment)) {
+  if (validated.data.comment !== undefined) {
+    if (containsForbiddenWords(validated.data.comment)) {
       return err("Conteúdo impróprio detectado");
     }
-    updateData.comment = input.comment;
+    updateData.comment = validated.data.comment;
   }
 
-  if (input.rating !== undefined) {
-    if (input.rating < 1 || input.rating > 5) {
-      return err("Rating deve ser entre 1 e 5");
-    }
-    updateData.rating = input.rating;
+  if (validated.data.rating !== undefined) {
+    updateData.rating = validated.data.rating;
   }
 
-  if (input.images !== undefined || input.keepImageIds !== undefined) {
+  if (
+    validated.data.images !== undefined ||
+    validated.data.keepImageIds !== undefined
+  ) {
     const existingReview = await client.fetch(
       `*[_type == "review" && _id == $reviewId][0]{ images }`,
       { reviewId },
     );
 
-    const keepImageIds = input.keepImageIds || [];
-    const hasNewImages = input.images && input.images.length > 0;
+    const keepImageIds = validated.data.keepImageIds || [];
+    const hasNewImages =
+      validated.data.images && validated.data.images.length > 0;
 
     const imagesToKeep = (existingReview?.images || []).filter(
       (img: { asset?: { _ref: string } }) =>
@@ -242,9 +217,9 @@ export async function updateReview(
       asset: { _type: "reference"; _ref: string };
     }> = [];
 
-    if (hasNewImages && input.images) {
+    if (hasNewImages && validated.data.images) {
       const newImagesResult = await uploadReviewImages(
-        Array.from(input.images),
+        Array.from(validated.data.images),
       );
       if (!newImagesResult.success) {
         return err(newImagesResult.error);

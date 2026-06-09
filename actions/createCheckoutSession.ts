@@ -1,12 +1,43 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
+import { z } from "zod";
 import { checkoutGateway } from "@/config/checkoutGateway";
 import { err, ok, type ServerResult } from "@/lib/server-result";
 import { urlFor } from "@/sanity/lib/image";
 import type { Address } from "@/sanity.types";
 import { SanityProductRepository } from "@/services/products/SanityProductRepository";
 import type { CartItem } from "@/store";
+
+const checkoutSessionSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        product: z.object({
+          _id: z.string().min(1),
+          name: z.string().optional(),
+          price: z.number().optional(),
+          description: z.string().optional(),
+          images: z.array(z.unknown()).optional(),
+          stock: z.number().optional(),
+        }),
+        quantity: z.number().int().positive("Quantidade deve ser positiva"),
+      }),
+      { message: "items deve ser um array não vazio" },
+    )
+    .min(1, "Pelo menos um item é obrigatório"),
+  metadata: z.object({
+    orderNumber: z.string().min(1, "orderNumber é obrigatório"),
+    customerName: z.string().min(1, "customerName é obrigatório"),
+    customerEmail: z.string().email("email inválido"),
+    address: z.unknown(),
+    shipping: z.object({
+      method: z.string().min(1, "Método de envio é obrigatório"),
+      price: z.number().positive("Preço do frete deve ser positivo"),
+      estimatedDays: z.number().optional(),
+    }),
+  }),
+});
 
 export interface GroupedCartItems {
   product: CartItem["product"];
@@ -31,6 +62,11 @@ export async function createCheckoutSession(
   items: GroupedCartItems[],
   metadata: Metadata,
 ): Promise<ServerResult<string>> {
+  const validated = checkoutSessionSchema.safeParse({ items, metadata });
+  if (!validated.success) {
+    return err(validated.error.issues[0].message);
+  }
+
   const { userId } = await auth();
 
   if (!userId) return err("Usuário não autenticado.");
