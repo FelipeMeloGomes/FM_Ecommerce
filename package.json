@@ -59,10 +59,10 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.4",
-    "@next/bundle-analyzer": "^16.2.3",
+    "@biomejs/biome": "2.6.3",
+    "@next/bundle-analyzer": "^16.4.3",
     "@sanity/types": "^5.8.1",
-    "@tailwindcss/postcss": "^4.2.2",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^25.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
