@@ -15,38 +15,58 @@ permissions:
 
 env:
   CI: true
-  NEXT_TELEMETRY_DISABLED: 1
+  NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
   lint:
     name: Lint Code
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.3.11"
-      - run: bun install --frozen-lockfile
-      - run: bun run lint
+          bun-version: "1.4.4"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run lint
+        run: bun run lint
 
   test:
     name: Run Tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.3.11"
-      - run: bun install --frozen-lockfile
-      - run: bun run test
+          bun-version: "1.4.4"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: TypeScript check
+        run: bunx --no-install tsc --noEmit
+
+      - name: Run Vitest tests
+        run: bun run test
 
   build:
     name: Build Application
     runs-on: ubuntu-latest
     needs: [lint, test]
     timeout-minutes: 15
+
     env:
       STRIPE_RESTRICTED_KEY: ${{ secrets.STRIPE_RESTRICTED_KEY }}
       NEXT_PUBLIC_SANITY_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_DATASET }}
@@ -54,34 +74,54 @@ jobs:
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
       SANITY_TOKEN_ADM: ${{ secrets.SANITY_TOKEN_ADM }}
       CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.3.11"
-      - run: bun install --frozen-lockfile
-      - run: bun run build
+          bun-version: "1.4.4"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build application
+        run: bun run build
 
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: build
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
+
+    if: >-
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' ||
+       github.ref == 'refs/heads/beta')
+
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.3.11"
-      - run: bun install --frozen-lockfile
+          bun-version: "1.4.4"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Deploy Main
         if: github.ref == 'refs/heads/main'
-        run: bunx vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel deploy --prod --yes --token="$VERCEL_TOKEN"
 
       - name: Deploy Beta
         if: github.ref == 'refs/heads/beta'
-        run: bunx vercel --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel deploy --yes --token="$VERCEL_TOKEN"

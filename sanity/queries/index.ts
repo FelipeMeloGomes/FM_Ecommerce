@@ -7,7 +7,9 @@ import { sanityFetch, sanityFetchStatic } from "../lib/live";
 import {
   BRAND_QUERY,
   BRANDS_QUERY,
+  CATEGORIES_QUERY,
   DEAL_PRODUCTS,
+  LIMITED_CATEGORIES_QUERY,
   MY_ORDERS_QUERY,
   PRODUCT_BY_SLUG_QUERY,
   PRODUCTS_BY_BRAND_QUERY,
@@ -18,22 +20,21 @@ import {
 
 const getCategories = async (quantity?: number) => {
   try {
-    const query = quantity
-      ? `*[_type == 'category'] | order(name asc) [0...$quantity] {
-          ...,
-          "productCount": count(*[_type == "product" && references(^._id)])
-        }`
-      : `*[_type == 'category'] | order(name asc) {
-          ...,
-          "productCount": count(*[_type == "product" && references(^._id)])
-        }`;
+    if (quantity !== undefined) {
+      const { data } = await sanityFetch({
+        query: LIMITED_CATEGORIES_QUERY,
+        params: { quantity },
+      });
+      return data ?? [];
+    }
+
     const { data } = await sanityFetch({
-      query,
-      params: quantity ? { quantity } : {},
+      query: CATEGORIES_QUERY,
     });
-    return data;
+
+    return data ?? [];
   } catch (error) {
-    console.log("Error fetching categories", error);
+    console.error("Error fetching categories:", error);
     return [];
   }
 };
@@ -50,7 +51,7 @@ const getAllBrands = async () => {
 
 const getDealProducts = async () => {
   try {
-    const { data } = await sanityFetch({ query: DEAL_PRODUCTS });
+    const { data } = await sanityFetch({ query: DEAL_PRODUCTS, stega: false });
     return data ?? [];
   } catch (error) {
     console.log("Error fetching deal Products:", error);
@@ -65,6 +66,7 @@ const getProductBySlug = async (slug: string) => {
       params: {
         slug,
       },
+      stega: false,
     });
     return product?.data || null;
   } catch (error) {
@@ -106,6 +108,7 @@ const getMyOrders = async (userId: string, start = 0, end = 10) => {
     const result = await sanityFetch({
       query: MY_ORDERS_QUERY,
       params: { userId, start, end },
+      stega: false,
     });
 
     return {

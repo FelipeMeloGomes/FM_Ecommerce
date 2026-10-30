@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
-import type { MY_ORDERS_QUERYResult } from "@/sanity.types";
+import type { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
 import OrderDetailDialog from "./OrderDetailDialog";
 import PriceFormatter from "./PriceFormatter";
 import { TableBody, TableCell } from "./ui/table";
@@ -17,12 +17,12 @@ import {
 const OrdersComponent = ({
   orders,
 }: {
-  orders: MY_ORDERS_QUERYResult["orders"];
+  orders: MY_ORDERS_QUERY_RESULT["orders"];
 }) => {
   const [localOrders, setLocalOrders] =
-    useState<MY_ORDERS_QUERYResult["orders"]>(orders);
+    useState<MY_ORDERS_QUERY_RESULT["orders"]>(orders);
   const [selectedOrder, setSelectedOrder] = useState<
-    MY_ORDERS_QUERYResult["orders"][number] | null
+    MY_ORDERS_QUERY_RESULT["orders"][number] | null
   >(null);
 
   useEffect(() => {
@@ -30,14 +30,14 @@ const OrdersComponent = ({
   }, [orders]);
 
   const handleSelectOrder = useCallback(
-    (order: MY_ORDERS_QUERYResult["orders"][number]) => {
+    (order: MY_ORDERS_QUERY_RESULT["orders"][number]) => {
       setSelectedOrder(order);
     },
     [],
   );
 
   const handleSelectOrderWrapper = useCallback(
-    (order: MY_ORDERS_QUERYResult["orders"][number]) => () =>
+    (order: MY_ORDERS_QUERY_RESULT["orders"][number]) => () =>
       handleSelectOrder(order),
     [handleSelectOrder],
   );
@@ -52,7 +52,7 @@ const OrdersComponent = ({
         <TooltipProvider>
           <AnimatePresence mode="popLayout">
             {localOrders.map(
-              (order: MY_ORDERS_QUERYResult["orders"][number]) => (
+              (order: MY_ORDERS_QUERY_RESULT["orders"][number]) => (
                 <Tooltip key={order?._id}>
                   <TooltipTrigger asChild>
                     <motion.tr

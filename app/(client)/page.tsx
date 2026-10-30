@@ -14,7 +14,7 @@ const HOME_PRODUCTS_LIMIT = 20;
 
 async function getProducts(variant: string) {
   return client.fetch(PRODUCTS_BY_VARIANT_QUERY, {
-    variant,
+    productVariant: variant,
     limit: HOME_PRODUCTS_LIMIT,
   });
 }

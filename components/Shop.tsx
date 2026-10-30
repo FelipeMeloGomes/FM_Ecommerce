@@ -14,7 +14,7 @@ import {
 
 import { client } from "@/sanity/lib/client";
 import { SHOP_PRODUCTS_QUERY } from "@/sanity/queries/query";
-import type { BRANDS_QUERYResult, Category, Product } from "@/sanity.types";
+import type { BRANDS_QUERY_RESULT, Category, Product } from "@/sanity.types";
 
 import Container from "./Container";
 import { FilterRadioGroup } from "./FilterRadioGroup";
@@ -34,7 +34,7 @@ const priceArray = [
 
 interface Props {
   categories: Category[];
-  brands: BRANDS_QUERYResult;
+  brands: BRANDS_QUERY_RESULT;
   initialBrand?: string | null;
   initialCategory?: string | null;
 }

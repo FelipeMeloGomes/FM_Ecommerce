@@ -1,5 +1,17 @@
 import { defineQuery } from "next-sanity";
 
+const CATEGORIES_QUERY = defineQuery(`
+  *[_type == "category"] | order(name asc) {
+    ...
+  }
+`);
+
+const LIMITED_CATEGORIES_QUERY = defineQuery(`
+  *[_type == "category"] | order(name asc) [0...$quantity] {
+    ...
+  }
+`);
+
 const BRANDS_QUERY = defineQuery(`*[_type=='brand'] | order(name asc) `);
 
 const DEAL_PRODUCTS = defineQuery(
@@ -84,15 +96,15 @@ const PRODUCTS_BY_CATEGORY_QUERY = `
   }
 `;
 
-const PRODUCTS_BY_VARIANT_QUERY = `
-  *[_type == "product" && variant == $variant] 
-  | order(name asc) [0...$limit]{
+const PRODUCTS_BY_VARIANT_QUERY = defineQuery(`
+  *[_type == "product" && variant == $productVariant]
+  | order(name asc) [0...$limit] {
     ...,
-    "categories": categories[]->title,
+    "categoryTitles": categories[]->title,
     "rating": *[_type == "review" && product._ref == ^._id].rating,
     "reviewCount": count(*[_type == "review" && product._ref == ^._id])
   }
-`;
+`);
 
 const SIMILAR_PRODUCTS_QUERY = `
   *[_type == "product" && _id != $currentProductId && references($categoryId)]
@@ -139,6 +151,8 @@ const SITEMAP_BRANDS_QUERY = defineQuery(`
 `);
 
 export {
+  CATEGORIES_QUERY,
+  LIMITED_CATEGORIES_QUERY,
   BRANDS_QUERY,
   DEAL_PRODUCTS,
   PRODUCT_BY_SLUG_QUERY,

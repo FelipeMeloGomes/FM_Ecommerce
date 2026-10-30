@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
   try {
     const products = await client.fetch(PRODUCTS_BY_VARIANT_QUERY, {
-      variant: variant.toLowerCase(),
+      productVariant: variant.toLowerCase(),
       limit,
     });
 

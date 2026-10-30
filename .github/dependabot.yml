@@ -1,7 +1,7 @@
 version: 2
 
 updates:
-  # Dependências npm (pnpm). O GitHub usa o ecossistema "npm" para pnpm.
+  # Dependências npm (Bun). O GitHub usa o ecossistema "npm" para bun.lock.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:

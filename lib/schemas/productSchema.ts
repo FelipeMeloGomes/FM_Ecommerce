@@ -1,14 +1,11 @@
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
 
-const sanitizeString = (val: unknown) => {
-  if (typeof val === "string") {
-    return sanitizeHtml(val, {
-      allowedTags: sanitizeHtml.defaults.allowedTags,
-      allowedAttributes: sanitizeHtml.defaults.allowedAttributes,
-    }) as string;
-  }
-  return val;
+const sanitizeString = (val: string): string => {
+  return sanitizeHtml(val, {
+    allowedTags: sanitizeHtml.defaults.allowedTags,
+    allowedAttributes: sanitizeHtml.defaults.allowedAttributes,
+  }) as string;
 };
 
 export const productSchema = z.object({

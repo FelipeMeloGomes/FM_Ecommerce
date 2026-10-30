@@ -2,11 +2,10 @@ import { createClient } from "@sanity/client";
 import slugify from "slugify";
 
 const client = createClient({
-  projectId: "8vdm88f4",
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
-  apiVersion: "2026-02-13",
-  token:
-    "skJW8Jp9j9TLbvc34yaScYEUQlpEDmN5bxzBrE5ix4hUGpZoEyUjRhz1rAvcpy5tT9a2IaZBeUVvIZ4w4i6mNnF2Z0wZUyHZQa49pSbMKLWNu2EfOI01EpvSQF8yc5k8Av4n9HwjpL3o6QruSvtniMLGd271vfdovGfjQ9sFYB3lJt78eSAy",
+  apiVersion: process.env.SANITY_API_VERSION,
+  token: process.env.SANITY_TOKEN_ADM,
   useCdn: false,
 });
 
@@ -189,30 +188,54 @@ const brandDescriptions: Record<string, string> = {
 };
 
 async function updateDescriptions() {
-  for (const title of Object.keys(brandDescriptions)) {
-    const slug = slugify(title, { lower: true, strict: true });
+  for (const [title, description] of Object.entries(brandDescriptions)) {
+    const slug = slugify(title, {
+      lower: true,
+      strict: true,
+    });
 
-    const brand = await client.fetch(
-      `*[_type == "brand" && slug.current == $slug][0]`,
-      { slug },
-    );
+    try {
+      const brand = await client.fetch<{
+        _id: string;
+        description?: string;
+      } | null>(
+        `*[_type == "brand" && slug.current == $slug][0]{
+          _id,
+          description
+        }`,
+        { slug },
+      );
 
-    if (brand) {
-      if (!brand.description) {
-        await client
-          .patch(brand._id)
-          .set({ description: brandDescriptions[title] })
-          .commit();
-        console.log(`Descrição adicionada para: ${title}`);
-      } else {
-        console.log(`Descrição já existe para: ${title}`);
+      if (!brand) {
+        await client.create({
+          _type: "brand",
+          title,
+          slug: {
+            _type: "slug",
+            current: slug,
+          },
+          description,
+        });
+
+        console.log(`Marca criada: ${title}`);
+        continue;
       }
-    } else {
-      console.log(`Marca não encontrada: ${title}`);
+
+      if (!brand.description?.trim()) {
+        await client.patch(brand._id).set({ description }).commit();
+
+        console.log(`Descrição adicionada para: ${title}`);
+        continue;
+      }
+
+      console.log(`Marca já cadastrada: ${title}`);
+    } catch (error) {
+      console.error(`Erro ao processar marca ${title}:`, error);
+      throw error;
     }
   }
 
-  console.log("Atualização de descrições concluída!");
+  console.log("Processamento de marcas concluído!");
 }
 
 updateDescriptions().catch(console.error);
