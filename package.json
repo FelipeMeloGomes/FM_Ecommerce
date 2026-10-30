@@ -11,6 +11,7 @@
     "lint:fix": "biome check . --write",
     "analyze": "cross-env ANALYZE=true bun run build --webpack",
     "typegen": "sanity schema extract && sanity typegen generate",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run --environment jsdom",
     "test:watch": "vitest --environment jsdom"
   },

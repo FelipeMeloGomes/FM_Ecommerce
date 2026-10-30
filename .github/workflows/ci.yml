@@ -56,7 +56,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: TypeScript check
-        run: bunx --no-install tsc --noEmit
+        run: bun run typecheck
 
       - name: Run Vitest tests
         run: bun run test
